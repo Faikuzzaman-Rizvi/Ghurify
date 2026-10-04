@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.Build.Sql/2.3.0">
+  <PropertyGroup>
+    <Name>Ghurify.Database</Name>
+    <RootNamespace>Ghurify.Database</RootNamespace>
+    <!-- Sql160 = SQL Server 2022, the version production and the test containers run.
+         (Sql170 is SQL Server 2025 and will not publish to a 2022 instance.) -->
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
+    <!-- Model collation is left at the provider default. All user text is NVARCHAR,
+         so Bangla and English are stored correctly regardless of collation. -->
+    <TreatTSqlWarningsAsErrors>True</TreatTSqlWarningsAsErrors>
+    <!-- Files are listed one by one on purpose, and DatabaseProjectFileTests fails the build
+         if a .sql file on disk is missing here, listed twice, or listed but deleted.
+         Globbing would hide exactly those mistakes. -->
+    <EnableDefaultSqlItems>False</EnableDefaultSqlItems>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <ProjectGuid>{70f6b75a-3206-413f-be82-7901b8abe2e7}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup Label="Security">
+    <Build Include="Security\Main.sql" />
+    <Build Include="Security\Pay.sql" />
+    <Build Include="Security\Social.sql" />
+    <Build Include="Security\Safety.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Main">
+    <Build Include="Main\User Defined Types\IdList.sql" />
+    <Build Include="Main\Tables\User.sql" />
+    <Build Include="Main\Tables\UserHistory.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Deployment scripts">
+    <PostDeploy Include="Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Security\" />
+    <Folder Include="Main\" />
+    <Folder Include="Main\User Defined Types\" />
+    <Folder Include="Main\Tables\" />
+  </ItemGroup>
+</Project>

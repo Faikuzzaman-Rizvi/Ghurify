@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Use cases, DTOs, validators and repository INTERFACES.
+       Application must never reference Ghurify.Infrastructure. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ghurify.Domain\Ghurify.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+
+</Project>

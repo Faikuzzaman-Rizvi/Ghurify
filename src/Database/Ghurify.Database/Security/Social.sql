@@ -1,0 +1,1 @@
+CREATE SCHEMA [Social] AUTHORIZATION [dbo];

@@ -1,0 +1,24 @@
+{
+  "app": {
+    "name": "Ghurify",
+    "tagline": "Travel together, safely"
+  },
+  "language": {
+    "label": "Language",
+    "bangla": "Bangla",
+    "english": "English"
+  },
+  "health": {
+    "title": "System status",
+    "checking": "Checking the API...",
+    "healthy": "API healthy",
+    "unhealthy": "API not reachable",
+    "retry": "Try again",
+    "databaseLabel": "Database"
+  },
+  "common": {
+    "loading": "Loading...",
+    "empty": "Nothing to show yet",
+    "error": "Something went wrong"
+  }
+}

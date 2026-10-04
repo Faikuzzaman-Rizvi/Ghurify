@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+/*
+  Design tokens from the implementation plan. Use the generated utilities
+  (bg-hill, text-turmeric, ...) rather than raw hex values anywhere in the app.
+*/
+@theme {
+  --color-hill: #245c43;
+  --color-deep: #173f2e;
+  --color-turmeric: #d99a12;
+  --color-jamdani: #a3305c;
+  --color-mist: #f1f5f2;
+
+  /* Bangla-first: Hind Siliguri carries both scripts, so Bangla and English
+     sit on the same baseline instead of falling back to a system font. */
+  --font-sans:
+    'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+}
+
+html {
+  /* Bangla glyphs are taller than Latin ones; a little extra leading keeps
+     mixed-script paragraphs readable. */
+  line-height: 1.6;
+}
+
+body {
+  @apply bg-mist text-deep antialiased;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Visible focus everywhere: keyboard users must always see where they are. */
+:focus-visible {
+  outline: 2px solid var(--color-turmeric);
+  outline-offset: 2px;
+}

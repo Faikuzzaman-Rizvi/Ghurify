@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  CI: true
+
+jobs:
+  backend:
+    name: Backend (build, unit tests, dacpac)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Ghurify.sln
+
+      - name: Build (includes the dacpac)
+        run: dotnet build Ghurify.sln --configuration Release --no-restore
+
+      # The .csproj path is explicit on purpose: passing the directory makes the SDK
+      # resolve a different target and report "Zero tests ran".
+      - name: Unit tests
+        run: >-
+          dotnet test tests/Ghurify.UnitTests/Ghurify.UnitTests.csproj
+          --configuration Release --no-build
+          -- --report-trx --report-trx-filename unit.trx
+
+      - name: Publish the DbUp console
+        run: >-
+          dotnet publish src/Ghurify.DatabaseUpdate
+          --configuration Release
+          --output artifacts/dbup
+
+      - name: Upload the dacpac
+        uses: actions/upload-artifact@v4
+        with:
+          name: dacpac
+          path: src/Database/Ghurify.Database/bin/Release/Ghurify.Database.dacpac
+          if-no-files-found: error
+
+      - name: Upload the DbUp console
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbup-console
+          path: artifacts/dbup
+          if-no-files-found: error
+
+  integration:
+    name: Integration tests (SQL Server via Testcontainers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: dotnet build Ghurify.sln --configuration Release
+
+      # Testcontainers starts SQL Server itself; Docker is already available on the runner.
+      # Microsoft.Testing.Platform already exits with code 5 when zero tests run, so a suite
+      # that quietly matches nothing fails this step rather than passing.
+      - name: Integration tests
+        run: >-
+          dotnet test tests/Ghurify.IntegrationTests/Ghurify.IntegrationTests.csproj
+          --configuration Release
+          --no-build
+          -- --report-trx --report-trx-filename integration.trx
+
+      # Belt and braces: assert the recorded count directly, so this stays true even if the
+      # runner's zero-test exit code ever changes.
+      - name: Fail if no integration test executed
+        shell: bash
+        run: |
+          trx=$(find . -name 'integration.trx' -print -quit)
+          if [ -z "$trx" ]; then
+            echo "::error::No TRX report was produced; the integration suite did not run."
+            exit 1
+          fi
+          executed=$(grep -o 'executed="[0-9]*"' "$trx" | head -1 | grep -o '[0-9]*')
+          echo "Integration tests executed: ${executed:-0}"
+          if [ -z "$executed" ] || [ "$executed" -eq 0 ]; then
+            echo "::error::The integration suite executed 0 tests."
+            exit 1
+          fi
+
+      - name: Upload the test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-report
+          path: '**/integration.trx'
+          if-no-files-found: warn
+
+  frontend:
+    name: Frontend (lint, test, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/ghurify-web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/ghurify-web/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build

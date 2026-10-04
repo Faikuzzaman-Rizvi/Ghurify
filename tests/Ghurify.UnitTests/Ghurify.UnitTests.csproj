@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- No database. Domain rules, handlers with hand-made fakes, validators,
+       and DatabaseProjectFileTests which only reads files from disk. -->
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- xunit.v3 runs on Microsoft.Testing.Platform; the .NET 10 SDK requires this opt-in
+         for `dotnet test` to drive it instead of the retired VSTest path. -->
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Ghurify.Domain\Ghurify.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Ghurify.Application\Ghurify.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <!-- Produces the TRX report CI uploads and inspects. -->
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

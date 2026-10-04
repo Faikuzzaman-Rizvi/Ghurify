@@ -1,0 +1,41 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.dacpac
+*.user
+*.suo
+
+# IDE
+.vs/
+.idea/
+*.swp
+
+# Node
+node_modules/
+dist/
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# Secrets / local config
+appsettings.*.local.json
+.env
+.env.local
+*.pfx
+
+# Logs
+logs/
+*.log
+
+# Test output
+TestResults/
+*.trx
+
+# SSDT local cache
+*.jfm
+
+# Empty solution file Visual Studio recreates alongside Ghurify.sln
+Ghurify.slnx

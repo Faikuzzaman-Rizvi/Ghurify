@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Domain references nothing. Entities, enums and rules only: no framework types,
+       no packages, no project references. Keep it that way. -->
+
+</Project>
