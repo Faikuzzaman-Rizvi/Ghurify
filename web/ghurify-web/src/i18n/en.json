@@ -19,6 +19,268 @@
   "common": {
     "loading": "Loading...",
     "empty": "Nothing to show yet",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "retry": "Try again"
+  },
+  "nav": {
+    "home": "Ghurify home",
+    "explore": "Explore trips",
+    "destinations": "Destinations",
+    "safety": "Safety",
+    "tour": "Take the tour",
+    "main": "Main"
+  },
+  "home": {
+    "eyebrow": "Group trips across Bangladesh",
+    "title": "Find your people. Explore Bangladesh.",
+    "subtitle": "Join small-group trips hosted by verified locals, see exactly where your money goes, and travel with safety built in.",
+    "searchTitle": "Where to next?",
+    "destinationLabel": "Destination",
+    "anyDestination": "Anywhere",
+    "dateLabel": "Leaving from",
+    "groupLabel": "Travel with",
+    "anyGroup": "Anyone",
+    "search": "Search trips",
+    "promise": {
+      "verified": "Verified hosts",
+      "escrow": "Escrow-protected payments",
+      "sos": "SOS on every trip",
+      "women": "Women-only trips"
+    },
+    "destinationsTitle": "Where Bangladesh takes you",
+    "destinationsSubtitle": "From cloud-wrapped hills to the longest beach on earth. Every destination shows its live safety status.",
+    "tripsTitle": "Trips leaving soon",
+    "tripsSubtitle": "Small groups, transparent costs, real hosts.",
+    "seeAll": "See all trips",
+    "howTitle": "How Ghurify works",
+    "steps": {
+      "find": {
+        "title": "Find a trip",
+        "body": "Filter by destination, date, budget and the kind of group you want to travel with."
+      },
+      "request": {
+        "title": "Request to join",
+        "body": "Hosts see who is coming before they accept, so every group is one you can trust."
+      },
+      "pay": {
+        "title": "Pay into escrow",
+        "body": "Your money is held safely and released to the host in stages, never all at once."
+      },
+      "travel": {
+        "title": "Travel and review",
+        "body": "Chat with your group, check in on the road, and review the trip when you are home."
+      }
+    },
+    "safetyTitle": "Safety is the promise",
+    "safetySubtitle": "Everything on Ghurify is built around getting you there and back safely.",
+    "safety": {
+      "verified": {
+        "title": "Verified hosts",
+        "body": "Hosts verify their national ID before they can publish a trip."
+      },
+      "escrow": {
+        "title": "Escrow payments",
+        "body": "Refunds are automatic if a trip is cancelled or a destination closes."
+      },
+      "sos": {
+        "title": "SOS and check-ins",
+        "body": "One tap shares your live location with the safety desk and your contacts."
+      },
+      "women": {
+        "title": "Women-only trips",
+        "body": "Led by verified women hosts, with women-only rooms."
+      },
+      "alerts": {
+        "title": "Closure alerts",
+        "body": "Weather and closure warnings reach every traveller on an affected trip."
+      }
+    },
+    "ctaTitle": "Got a trip in mind?",
+    "ctaBody": "Hosting opens soon for verified locals. Sign in today and be first in line.",
+    "ctaButton": "Sign in with email"
+  },
+  "trips": {
+    "exploreTitle": "Explore trips",
+    "exploreSubtitle": "Every live trip across Bangladesh, with the full cost breakdown up front.",
+    "results_one": "{{n}} trip",
+    "results_other": "{{n}} trips",
+    "filtersLabel": "Filter trips",
+    "maxPriceLabel": "Budget per person",
+    "anyPrice": "Any budget",
+    "upTo": "Up to {{price}}",
+    "sortLabel": "Sort by",
+    "sort": {
+      "Soonest": "Leaving soonest",
+      "PriceLowToHigh": "Price: low to high",
+      "PriceHighToLow": "Price: high to low"
+    },
+    "empty": "No trips match these filters yet.",
+    "emptyHint": "Try another destination, or clear the filters to see everything.",
+    "clearFilters": "Clear filters",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "pagination": "Pages",
+    "perPerson": "per person",
+    "seatsLeft_one": "{{n}} seat left",
+    "seatsLeft_other": "{{n}} seats left",
+    "full": "Full",
+    "days_one": "{{n}} day",
+    "days_other": "{{n}} days",
+    "hostedBy": "Hosted by {{name}}",
+    "aHost": "a Ghurify host",
+    "loadError": "We could not load trips. Check your connection and try again."
+  },
+  "trip": {
+    "back": "All trips",
+    "overview": "About this trip",
+    "itinerary": "Day by day",
+    "day": "Day {{day}}",
+    "costs": "Where your money goes",
+    "costsHint": "The price is exactly the sum of these lines. No hidden fees.",
+    "total": "Total per person",
+    "meetingPoint": "Meeting point",
+    "dates": "Dates",
+    "group": "Group",
+    "seats": "Seats",
+    "seatsOf": "{{left}} of {{total}} left",
+    "host": "Your host",
+    "memberSince": "On Ghurify since {{date}}",
+    "request": "Request to join",
+    "signInToJoin": "Sign in to join",
+    "joinSoon": "Join requests and escrow payments open with the bookings release.",
+    "escrowNote": "Your payment is held in escrow and released to the host in stages.",
+    "notFound": "This trip does not exist or is no longer available.",
+    "caution": "Safety notice for {{place}}",
+    "safetyTitle": "Safety on this trip",
+    "safety": {
+      "verified": "Host identity checked before publishing",
+      "sos": "SOS and daily check-ins during the trip",
+      "escrow": "Money held in escrow until the trip runs"
+    }
+  },
+  "destination": {
+    "upcoming_one": "{{n}} upcoming trip",
+    "upcoming_other": "{{n}} upcoming trips",
+    "noTrips": "No trips planned here yet.",
+    "from": "from {{price}}",
+    "viewTrips": "See trips",
+    "tripsHere": "Trips to {{place}}",
+    "map": "Map of {{place}}",
+    "notFound": "We could not find that destination.",
+    "about": "About {{place}}",
+    "division": "{{division}} division",
+    "status": {
+      "Open": "Open",
+      "Caution": "Caution",
+      "Closed": "Closed"
+    }
+  },
+  "groupType": {
+    "Open": "Open group",
+    "WomenOnly": "Women only",
+    "Students": "Students",
+    "Families": "Families"
+  },
+  "kind": {
+    "Hills": "Hills",
+    "Beach": "Beach",
+    "Island": "Island",
+    "Forest": "Forest",
+    "Wetland": "Wetland",
+    "TeaGarden": "Tea gardens",
+    "Lake": "Lake",
+    "River": "Rivers"
+  },
+  "cost": {
+    "Transport": "Transport",
+    "Stay": "Stay",
+    "Food": "Food",
+    "Fees": "Fees and permits",
+    "Guide": "Guide",
+    "Buffer": "Safety buffer"
+  },
+  "difficulty": {
+    "Easy": "Easy",
+    "Moderate": "Moderate",
+    "Challenging": "Challenging"
+  },
+  "tour": {
+    "label": "Guided tour",
+    "step": "Step {{current}} of {{total}}",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip tour",
+    "finish": "Start exploring",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Ghurify",
+        "body": "Ghurify connects travellers with trusted hosts for small-group trips across Bangladesh. This one-minute tour shows you around."
+      },
+      "search": {
+        "title": "Search for a trip",
+        "body": "Pick a destination, a date and the kind of group you want to travel with."
+      },
+      "destinations": {
+        "title": "Explore destinations",
+        "body": "Each destination shows its live safety status. Caution and closure notices come straight from the safety desk."
+      },
+      "trips": {
+        "title": "Join a group trip",
+        "body": "Every trip shows seats left, the day-by-day plan and exactly where your money goes, before you commit."
+      },
+      "safety": {
+        "title": "Safety comes first",
+        "body": "Verified hosts, escrow payments, SOS check-ins and women-only trips."
+      },
+      "language": {
+        "title": "Bangla or English",
+        "body": "Switch the language at any time. Your choice is remembered."
+      },
+      "account": {
+        "title": "Sign in with your email",
+        "body": "No password to remember: we email you a six-digit code."
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Small-group trips across Bangladesh, with safety built in.",
+    "rights": "© {{year}} Ghurify. Made for travellers in Bangladesh.",
+    "explore": "Explore"
+  },
+  "notFound": {
+    "title": "Lost on the trail?",
+    "body": "This page does not exist, but plenty of trips do.",
+    "home": "Back to home"
+  },
+  "auth": {
+    "title": "Sign in to Ghurify",
+    "subtitle": "We will email you a six-digit code. No password needed.",
+    "emailLabel": "Email address",
+    "emailHint": "We will send your sign-in code here",
+    "emailInvalid": "Enter a valid email address, for example rizvi@example.com.",
+    "sendCode": "Send code",
+    "codeLabel": "Six-digit code",
+    "codeSentTo": "We sent a code to {{email}}.",
+    "codeInvalid": "Enter the six-digit code.",
+    "codeRejected": "That code is not valid. Request a new one and try again.",
+    "verify": "Verify and sign in",
+    "resend": "Send a new code",
+    "resendIn": "Send a new code in {{seconds}}s",
+    "changeEmail": "Use a different address",
+    "tooManyRequests": "Too many codes requested. Please wait a few minutes.",
+    "accountUnavailable": "This account cannot sign in. Contact support.",
+    "checkInbox": "If you cannot find it, check your spam folder.",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as {{email}}",
+    "signIn": "Sign in",
+    "sideTitle": "Your next trip starts here",
+    "sideBody": "Sign in to request seats, chat with your group and get safety alerts for your trips."
+  },
+  "account": {
+    "title": "Your account",
+    "emailLabel": "Email address",
+    "nameLabel": "Name",
+    "noName": "Not set yet"
   }
 }

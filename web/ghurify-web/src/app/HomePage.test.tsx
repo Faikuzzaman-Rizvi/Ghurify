@@ -1,38 +1,22 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ReactElement } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen } from '@testing-library/react';
 
 import { HomePage } from './HomePage';
 import i18n from '@/i18n';
+import { renderScreen } from '@/test/render';
+import {
+  requestedUrls,
+  samplePage,
+  sampleDestinations,
+  sampleTrip,
+  stubApi,
+} from '@/test/fetchStub';
 
-/** Each test gets its own cache so one test's result cannot leak into the next. */
-function renderWithQueryClient(ui: ReactElement) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
-}
-
-interface FetchStub {
-  ok: boolean;
-  status: number;
-  statusText: string;
-  json: () => Promise<unknown>;
-}
-
-/** Replaces fetch for one render. Defaults to a healthy API; pass overrides for failures. */
-function mockFetchOnce(overrides: Partial<FetchStub> = {}) {
-  const stub: FetchStub = {
-    ok: true,
-    status: 200,
-    statusText: 'OK',
-    json: () => Promise.resolve({ status: 'Healthy', databaseStatus: 'Healthy' }),
-    ...overrides,
-  };
-
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(stub));
+function stubHomeApi() {
+  return stubApi([
+    [/\/api\/v1\/destinations$/, sampleDestinations],
+    [/\/api\/v1\/trips/, samplePage([sampleTrip])],
+  ]);
 }
 
 describe('HomePage', () => {
@@ -44,35 +28,61 @@ describe('HomePage', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows the healthy state once the API answers', async () => {
-    mockFetchOnce({});
+  it('leads with the search and the headline', () => {
+    stubHomeApi();
 
-    renderWithQueryClient(<HomePage />);
+    renderScreen(<HomePage />);
 
-    expect(await screen.findByText('API healthy')).toBeInTheDocument();
-    expect(screen.getByText(/Database/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Find your people. Explore Bangladesh.' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Search trips' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Destination')).toBeInTheDocument();
   });
 
-  it('shows a retry button when the API cannot be reached', async () => {
-    mockFetchOnce({
-      ok: false,
-      status: 503,
-      statusText: 'Service Unavailable',
-      json: () => Promise.resolve({ title: 'Service unavailable', status: 503 }),
-    });
+  it('shows destinations with their safety status and the trips leaving soon', async () => {
+    stubHomeApi();
 
-    renderWithQueryClient(<HomePage />);
+    renderScreen(<HomePage />);
 
-    expect(await screen.findByText('API not reachable')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Sajek Valley' })).toBeInTheDocument();
+    expect(screen.getByText('Caution')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Sajek sunrise weekend' })).toBeInTheDocument();
+    expect(screen.getByText('Tk 6,800', { selector: 'span' })).toBeInTheDocument();
   });
 
-  it('renders Bangla text when the language is Bangla', async () => {
-    mockFetchOnce({});
+  it('asks only for the six soonest trips', async () => {
+    const fetchMock = stubHomeApi();
+
+    renderScreen(<HomePage />);
+    await screen.findByRole('link', { name: 'Sajek sunrise weekend' });
+
+    expect(requestedUrls(fetchMock)).toContain('/api/v1/trips?pageSize=6');
+  });
+
+  it('shows a retry when trips cannot be loaded', async () => {
+    stubApi([
+      [/\/api\/v1\/destinations$/, sampleDestinations],
+      [/\/api\/v1\/trips/, { title: 'Service unavailable' }, 503],
+    ]);
+
+    renderScreen(<HomePage />);
+
+    expect(
+      await screen.findByText('We could not load trips. Check your connection and try again.'),
+    ).toBeInTheDocument();
+  });
+
+  it('renders Bangla text and Bangla prices when the language is Bangla', async () => {
+    stubHomeApi();
     await i18n.changeLanguage('bn');
 
-    renderWithQueryClient(<HomePage />);
+    renderScreen(<HomePage />);
 
-    expect(await screen.findByText('এপিআই সচল')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'সঙ্গী খুঁজুন। ঘুরে দেখুন বাংলাদেশ।' }),
+    ).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'সাজেক ভ্যালি' })).toBeInTheDocument();
+    expect(await screen.findByText('৳৬,৮০০', { selector: 'span' })).toBeInTheDocument();
   });
 });

@@ -20,8 +20,12 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <!-- CA1848 (LoggerMessage delegates) and CA1515 (internal public types) are noise
-         for an application codebase; everything else stays an error. -->
-    <NoWarn>$(NoWarn);CA1848;CA1515</NoWarn>
+         for an application codebase.
+         CA1873 flags method calls in log arguments as possibly expensive; ours are trivial
+         (masking a phone number, reading an enum) and the analyzer cannot tell. Anything
+         genuinely costly in a log argument must still be guarded with logger.IsEnabled.
+         Everything else stays an error. -->
+    <NoWarn>$(NoWarn);CA1848;CA1515;CA1873</NoWarn>
   </PropertyGroup>
 
 </Project>

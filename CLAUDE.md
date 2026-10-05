@@ -13,11 +13,12 @@ Sprint prompts: docs/PROMPTS.md
 - Backend: ASP.NET Core Web API, .NET 10, C# latest, nullable enabled, warnings as errors
 - Data access: **Dapper + stored procedures**. No EF Core, no ORM, no EF migrations.
 - Database: SQL Server 2022. **Schema in SSDT (dacpac). Data changes in DbUp.** See .claude/rules/database.md
-- Auth: custom phone-OTP sign-in, JWT (15 min) + rotating refresh tokens. No ASP.NET Core Identity
-  (its default store needs EF Core).
+- Auth: custom email-OTP sign-in (a six-digit code emailed over SMTP), JWT (15 min) + rotating
+  refresh tokens. No ASP.NET Core Identity (its default store needs EF Core). Email is the
+  sign-in identity; phone is optional on the profile, for SOS, chat masking and payouts.
 - Real-time: SignalR. Background work: Hangfire (SQL Server storage, own `HangFire` schema).
 - Validation: FluentValidation. Logging: Serilog. API docs: built-in OpenAPI.
-- Cache: Redis. Files: Azure Blob Storage (Azurite locally).
+- Cache: Redis. Files: Azure Blob Storage (Azurite locally). Email: SMTP via MailKit.
 - Frontend: React 19 + TypeScript (strict) + Vite, React Router, TanStack Query, Zustand,
   Tailwind CSS, React Hook Form + Zod, i18next (bn + en), SignalR client, Leaflet.
 - Tests: xUnit (backend), Testcontainers SQL Server for integration, Vitest + Testing Library,
@@ -53,6 +54,8 @@ dotnet build Ghurify.sln                               # builds the dacpac too
 dotnet run --project src/Ghurify.DatabaseUpdate -- pre # DbUp pre-schema scripts
 sqlpackage /Action:Publish /SourceFile:src/Database/Ghurify.Database/bin/Debug/Ghurify.Database.dacpac /TargetConnectionString:"$GHURIFY_DB" /p:BlockOnPossibleDataLoss=true
 dotnet run --project src/Ghurify.DatabaseUpdate        # DbUp data scripts
+dotnet run --project src/Ghurify.DatabaseUpdate -- demo # sample hosts/trips (never in a release)
+.\Publish-Database.ps1 [-Demo]                         # all of the above, in order, target from .env
 dotnet run --project src/Ghurify.Api
 dotnet test tests/Ghurify.UnitTests
 dotnet test tests/Ghurify.IntegrationTests             # needs Docker
@@ -82,9 +85,9 @@ Database deploy order is always: **DbUp pre -> dacpac publish -> DbUp data -> ap
   by the owner id in SQL.
 - Money is `DECIMAL(18,2)` BDT in SQL and `decimal` in C#. Never `float`/`double`.
 - Store all times as UTC (`DATETIME2`); display in `Asia/Dhaka`.
-- Phone numbers stored in E.164 (`+8801XXXXXXXXX`).
+- Email addresses stored lower-cased and trimmed; phone numbers in E.164 (`+8801XXXXXXXXX`).
 - Queue/job payloads carry ids only; the job reloads everything else.
-- Secrets never in the repo. `appsettings.json` holds non-secret defaults only; use user-secrets
+- Secrets never in the repo. `appsettings.json` holds non-secret defaults only; use the gitignored `.env` (template: `.env.example`)
   locally and Key Vault / App Service settings when deployed.
 - Fail fast at startup on missing required config; degrade (and log) on optional config.
 - User-facing text: sentence case, Bangla and English keys in i18n files, never hardcoded.

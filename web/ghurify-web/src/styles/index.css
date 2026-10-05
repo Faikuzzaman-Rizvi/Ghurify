@@ -1,8 +1,9 @@
 @import 'tailwindcss';
 
 /*
-  Design tokens from the implementation plan. Use the generated utilities
-  (bg-hill, text-turmeric, ...) rather than raw hex values anywhere in the app.
+  Design tokens from the implementation plan, plus a few travel tones for scenery.
+  Use the generated utilities (bg-hill, text-turmeric, font-display, ...) rather than raw hex
+  values anywhere in the app.
 */
 @theme {
   --color-hill: #245c43;
@@ -11,27 +12,92 @@
   --color-jamdani: #a3305c;
   --color-mist: #f1f5f2;
 
+  /* Scenery: river, sky and sand. */
+  --color-river: #1f6f8b;
+  --color-sky: #dcefee;
+  --color-sand: #fbf3e1;
+  --color-dusk: #f2c46d;
+
   /* Bangla-first: Hind Siliguri carries both scripts, so Bangla and English
      sit on the same baseline instead of falling back to a system font. */
   --font-sans:
     'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, sans-serif;
+
+  /* Headings: rounded and warm, and it also has a full Bangla set. */
+  --font-display: 'Baloo Da 2', 'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, sans-serif;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-drift: drift 40s linear infinite;
+  --animate-rise: rise 0.5s ease-out both;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes drift {
+    from {
+      transform: translateX(-10%);
+    }
+    to {
+      transform: translateX(110%);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 html {
   /* Bangla glyphs are taller than Latin ones; a little extra leading keeps
      mixed-script paragraphs readable. */
   line-height: 1.6;
+  scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-mist text-deep antialiased;
+  @apply bg-sand text-deep antialiased;
   margin: 0;
   min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-display;
+  line-height: 1.2;
 }
 
 /* Visible focus everywhere: keyboard users must always see where they are. */
 :focus-visible {
   outline: 2px solid var(--color-turmeric);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

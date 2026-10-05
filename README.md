@@ -11,8 +11,19 @@ React + ASP.NET Core + SQL Server. See [CLAUDE.md](CLAUDE.md) for the working ru
 
 ## What is here today
 
-Sprint 1 (bootstrap) only: a skeleton that builds, tests and runs end to end. No product features
-yet. The home page calls `/api/v1/health`, which queries SQL Server and reports back.
+| Sprint | Feature | State |
+| --- | --- | --- |
+| 1 | Bootstrap: solution, SSDT + DbUp, CI, health check | done |
+| 2 | Email-OTP sign-in, JWT + rotating refresh cookie | done |
+| 4–5 (read side) | Destinations (10 seeded, with safety status), trip search, trip page with cost breakdown and itinerary | done |
+| 4 (write side) | Trip wizard: create, edit, publish | next, needs Sprint 3 host verification |
+
+The web app has a travel-style landing page, an explore page with filters, trip and destination
+pages (with a map), Bangla and English throughout, and a guided tour (**Take the tour** in the
+header; it also starts on a first visit).
+
+For a showcase, load the sample hosts and trips with `.\Publish-Database.ps1 -Demo`; see
+[docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md).
 
 ## Prerequisites
 
@@ -49,13 +60,28 @@ dotnet run --project src/Ghurify.Api
 cd web/ghurify-web && npm install && npm run dev
 ```
 
-Open <http://localhost:5173>. The status card should read **API healthy** / **এপিআই সচল**.
+Open <http://localhost:5173>. The footer's system status should read **API healthy** / **এপিআই সচল**.
+
+### Pointing at another database (shared server, your own instance)
+
+Never edit a connection string into a committed file. Put local settings in `.env` at the
+repository root (gitignored); the API (in Development), the DbUp console and
+`Publish-Database.ps1` all read it. Restart the API after changing it.
+
+```powershell
+Copy-Item .env.example .env      # then fill in Database__ConnectionString and the Email__ lines
+.\Publish-Database.ps1 -Demo     # DbUp pre -> dacpac -> DbUp data -> demo trips, in order
+```
+
+`Publish-Database.ps1` takes the target from `-ConnectionString`, then `GHURIFY_DB`, then
+.env, then user-secrets, then the docker container, and prints only the server and database name.
+`-DryRun` writes the deployment script without touching the database.
 
 The dev server proxies `/api` and `/hubs` to the API on port 5199, so the browser only ever talks
 to its own origin and local development needs no CORS exception.
 
 > The local SQL Server password above is a throwaway for the docker-compose container. Real
-> connection strings come from user-secrets locally and Key Vault / App Service settings when
+> connection strings come from `.env` locally and Key Vault / App Service settings when
 > deployed. `appsettings*.json` is never published (`CopyToPublishDirectory=Never`).
 
 ## Deploy order

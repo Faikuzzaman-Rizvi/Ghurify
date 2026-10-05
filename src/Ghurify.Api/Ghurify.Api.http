@@ -1,0 +1,140 @@
+#  Ghurify API - manual checks
+#
+#  Open this file in Visual Studio (or VS Code with the REST Client extension) and click
+#  "Send Request" above any request below.
+#
+#  Start the API first:   dotnet run --project src/Ghurify.Api
+#
+#  The one-time code is NOT returned by the API. With Email:UserName and Email:Password set
+#  it is emailed for real. Without them, Development writes it to the API console as:
+#      DEVELOPMENT EMAIL: the sign-in code for r****i@example.com is 123456.
+#  That only happens in Development with no mail account; no other environment logs the code.
+
+@host = http://localhost:5199
+@email = rizvi@example.com
+
+# Paste the six digits from the API console here before sending "2. Verify".
+@code = 000000
+
+
+### 1. Health - should be 200 with both statuses "Healthy"
+GET {{host}}/api/v1/health
+Accept: application/json
+
+
+### 2. Request a one-time code - should be 202 Accepted
+# Response gives expiresInSeconds (300) and resendAfterSeconds (60).
+# Now look at the API console for the code, and put it in @code above.
+POST {{host}}/api/v1/auth/otp
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}
+
+
+### 3. Verify the code - should be 200
+# Look at the response headers: Set-Cookie carries ghurify_rt with HttpOnly and
+# path=/api/v1/auth. The refresh token is NOT in the body, only the access token.
+# Copy the accessToken value into @token below to use request 5.
+POST {{host}}/api/v1/auth/verify
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "code": "{{code}}"
+}
+
+
+### Paste the accessToken from request 3 here.
+@token = paste-access-token-here
+
+
+### 4. Who am I, WITHOUT a token - should be 401
+GET {{host}}/api/v1/auth/whoami
+Accept: application/json
+
+
+### 5. Who am I, WITH the token - should be 200 and a masked email address
+GET {{host}}/api/v1/auth/whoami
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 6. Who am I, with a forged token - should be 401
+GET {{host}}/api/v1/auth/whoami
+Accept: application/json
+Authorization: Bearer not.a.real.jwt
+
+
+### ------------------------------------------------------------------------------------
+### Things that SHOULD fail. Each one proves a rule is being enforced.
+### ------------------------------------------------------------------------------------
+
+
+### 7. An address that is not an email - should be 400 with a validation problem
+POST {{host}}/api/v1/auth/otp
+Content-Type: application/json
+
+{
+  "email": "not-an-email"
+}
+
+
+### 8. A wrong code - should be 401, and the message must not say WHY it failed
+# Send this five times: the code locks, and after that even the correct code is refused.
+POST {{host}}/api/v1/auth/verify
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "code": "000001"
+}
+
+
+### 9. A code for an address that never requested one - should be 401, identical to request 8
+# Identical responses are deliberate: a different answer would reveal which addresses are
+# registered on the platform.
+POST {{host}}/api/v1/auth/verify
+Content-Type: application/json
+
+{
+  "email": "never-used@example.com",
+  "code": "123456"
+}
+
+
+### 10. Rate limit - send this FOUR times in a row for one address.
+# The first three are 202. The fourth is 429: three codes per address per ten minutes,
+# counted in the database so the limit survives restarts and extra API instances.
+POST {{host}}/api/v1/auth/otp
+Content-Type: application/json
+
+{
+  "email": "ratelimit@example.com"
+}
+
+
+### ------------------------------------------------------------------------------------
+### Session lifetime. Requests 11-13 use the cookie the browser/VS stored from request 3.
+### ------------------------------------------------------------------------------------
+
+
+### 11. Refresh - should be 200 and set a NEW ghurify_rt cookie
+POST {{host}}/api/v1/auth/refresh
+
+
+### 12. Refresh again straight away - should be 200 again (the new cookie rotates too)
+POST {{host}}/api/v1/auth/refresh
+
+
+### 13. Sign out - should be 204, and revokes the whole token family
+POST {{host}}/api/v1/auth/logout
+
+
+### 14. Refresh after signing out - should be 401
+POST {{host}}/api/v1/auth/refresh
+
+
+### 15. The OpenAPI document the React client is generated from
+GET {{host}}/openapi/v1.json

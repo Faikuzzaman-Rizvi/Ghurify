@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Publish profile for local development against your own SQL Server instance.
+
+  In Visual Studio: right-click Ghurify.Database, choose Publish, then Load Profile.
+  From the command line: pass this file to sqlpackage with the /Profile switch.
+
+  The two settings that matter are BlockOnPossibleDataLoss and DropObjectsNotInSource.
+  Leave both as they are; the comments on each say why.
+
+  Publishing applies the SCHEMA ONLY. The full release order is:
+      1. DbUp pre          (the DbUp console, with the "pre" argument)
+      2. dacpac publish    (this file)
+      3. DbUp data         (the DbUp console, with no argument)
+      4. deploy the apps
+  So if a change also needs a data backfill, run the DbUp console around the publish.
+
+  Credentials: the target below is the docker-compose container, whose password is a
+  local-only throwaway. Never put a real server's credentials in this file. To publish to
+  another server, run Publish-Database.ps1 at the repository root: it reads the target from
+  -ConnectionString, the GHURIFY_DB environment variable, or the API's user-secrets, and
+  overrides the connection string below.
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetDatabaseName>Ghurify</TargetDatabaseName>
+
+    <TargetConnectionString>Data Source=localhost,1433;Initial Catalog=Ghurify;User Id=sa;Password=Ghurify_Local_Dev_1;TrustServerCertificate=True;Encrypt=False;Pooling=False;</TargetConnectionString>
+
+    <!-- Refuse any deployment that would discard rows. If a change genuinely must drop
+         data, that belongs in a reviewed DbUp Scripts/Pre script, not a silent publish. -->
+    <BlockOnPossibleDataLoss>True</BlockOnPossibleDataLoss>
+
+    <!-- Hangfire and DbUp create their own tables outside the SSDT project. Set to True,
+         a publish would delete them, because they are not in the dacpac. -->
+    <DropObjectsNotInSource>False</DropObjectsNotInSource>
+
+    <!-- Keep the database online and leave server-level settings alone. -->
+    <CreateNewDatabase>False</CreateNewDatabase>
+    <ScriptDatabaseOptions>False</ScriptDatabaseOptions>
+    <AllowIncompatiblePlatform>False</AllowIncompatiblePlatform>
+    <VerifyDeployment>True</VerifyDeployment>
+
+    <DeployScriptFileName>Ghurify.Database.sql</DeployScriptFileName>
+    <ProfileVersionNumber>1</ProfileVersionNumber>
+  </PropertyGroup>
+</Project>

@@ -14,7 +14,7 @@ export const healthQueryKey = ['health'] as const;
 export function useHealth() {
   return useQuery({
     queryKey: healthQueryKey,
-    queryFn: ({ signal }) => apiGet<HealthResponse>('/api/v1/health', signal),
+    queryFn: ({ signal }) => apiGet<HealthResponse>('/api/v1/health', { signal }),
     retry: false,
     staleTime: 10_000,
   });

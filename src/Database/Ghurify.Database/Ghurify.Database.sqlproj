@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.Build.Sql/2.3.0">
+<Project Sdk="Microsoft.Build.Sql/2.2.0">
   <PropertyGroup>
     <Name>Ghurify.Database</Name>
     <RootNamespace>Ghurify.Database</RootNamespace>
@@ -13,9 +13,19 @@
          Globbing would hide exactly those mistakes. -->
     <EnableDefaultSqlItems>False</EnableDefaultSqlItems>
     <TargetDatabaseSet>True</TargetDatabaseSet>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <!-- VS 18's bundled legacy SSDT extension forcefully imports Microsoft.CSharp.targets
+         and demands NuGet assets for net472. This property tells the .NET SDK pipeline
+         to skip resolving NuGet assets entirely for this SQL project, preventing NETSDK1005. -->
+    <SkipResolvePackageAssets>true</SkipResolvePackageAssets>
     <ProjectGuid>{70f6b75a-3206-413f-be82-7901b8abe2e7}</ProjectGuid>
+    <!-- Pinned to 2.2.0 (not 2.3.0) because 2.3.0 added PreplanItem to SqlScriptDependenciesTask,
+         which VS 18's bundled SSDT DLL (v1.7.0.0) does not support — causing MSB4063/MSB4064.
+         2.2.0 is the highest version confirmed to have no PreplanItem in its targets.
+         Upgrade to 2.3.0+ only after VS ships an SSDT update with matching DACFX. -->
+    <!-- Skip the "newer version available" advisory that 2.2.0 emits at build time: the pin
+         above is deliberate, and the advisory is a warning that breaks "zero warnings".
+         (A NoWarn code does not reach it; the SDK only honours this property.) -->
+    <SkipCheckForNewSDKVersion>true</SkipCheckForNewSDKVersion>
   </PropertyGroup>
   <ItemGroup Label="Security">
     <Build Include="Security\Main.sql" />
@@ -27,8 +37,26 @@
     <Build Include="Main\User Defined Types\IdList.sql" />
     <Build Include="Main\Tables\User.sql" />
     <Build Include="Main\Tables\UserHistory.sql" />
+    <Build Include="Main\Tables\OtpCode.sql" />
+    <Build Include="Main\Tables\RefreshToken.sql" />
+    <Build Include="Main\Stored Procedures\AddOtpCode.sql" />
+    <Build Include="Main\Stored Procedures\SetOtpCodeAttempted.sql" />
+    <Build Include="Main\Stored Procedures\GetOrAddUserByEmail.sql" />
+    <Build Include="Main\Stored Procedures\SetRefreshTokenRotated.sql" />
+    <Build Include="Main\Stored Procedures\SetRefreshTokenFamilyRevoked.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Main - Trips">
+    <Build Include="Main\Tables\Destination.sql" />
+    <Build Include="Main\Tables\Trip.sql" />
+    <Build Include="Main\Tables\TripHistory.sql" />
+    <Build Include="Main\Tables\TripCostItem.sql" />
+    <Build Include="Main\Tables\ItineraryDay.sql" />
+    <Build Include="Main\Stored Procedures\QueryDestinations.sql" />
+    <Build Include="Main\Stored Procedures\QueryTrips.sql" />
+    <Build Include="Main\Stored Procedures\GetTrip.sql" />
   </ItemGroup>
   <ItemGroup Label="Deployment scripts">
+    <PreDeploy Include="Script.PreDeployment.sql" />
     <PostDeploy Include="Script.PostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -36,5 +64,6 @@
     <Folder Include="Main\" />
     <Folder Include="Main\User Defined Types\" />
     <Folder Include="Main\Tables\" />
+    <Folder Include="Main\Stored Procedures\" />
   </ItemGroup>
 </Project>

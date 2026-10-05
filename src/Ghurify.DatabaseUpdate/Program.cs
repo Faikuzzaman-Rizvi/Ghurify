@@ -1,4 +1,5 @@
 using System.Globalization;
+using Ghurify.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
 namespace Ghurify.DatabaseUpdate;
@@ -6,24 +7,46 @@ namespace Ghurify.DatabaseUpdate;
 /// <summary>
 /// Entry point for the data-only migration console.
 ///
-/// Two modes, matching the fixed deploy order
+/// Two release modes, matching the fixed deploy order
 /// (DbUp pre -> dacpac publish -> DbUp data -> apps):
 ///
 ///   dotnet run -- pre   runs Scripts/Pre/*  against the OLD schema, before the dacpac.
 ///                       Only for intentional data loss that BlockOnPossibleDataLoss blocks.
 ///   dotnet run          runs Scripts/{Year}/* against the NEW schema, after the dacpac.
 ///
+/// And one that is never part of a release:
+///
+///   dotnet run -- demo  runs Scripts/Demo/* : sample hosts and trips for showcases and
+///                       local development. Run it after the data scripts.
+///
 /// This console never creates, alters or drops schema objects. That is the dacpac's job.
 /// </summary>
 internal static class Program
 {
+    /// <summary>
+    /// The API's user-secrets store. Sharing it means one
+    /// <c>dotnet user-secrets set "Database:ConnectionString" ...</c> points both the API and
+    /// this console at the same database, and the credential never lands in the repository.
+    /// </summary>
+    private const string UserSecretsId = "170067e9-9eba-4275-bfc6-b0290584fd37";
+
     private static int Main(string[] args)
     {
-        var stage = args.Length > 0 && string.Equals(args[0], "pre", StringComparison.OrdinalIgnoreCase)
-            ? Migrator.Stage.Pre
-            : Migrator.Stage.Data;
+        var argument = args.Length > 0 ? args[0] : string.Empty;
 
-        var stageName = stage == Migrator.Stage.Pre ? "pre-schema" : "data";
+        var stage = argument.ToUpperInvariant() switch
+        {
+            "PRE" => Migrator.Stage.Pre,
+            "DEMO" => Migrator.Stage.Demo,
+            _ => Migrator.Stage.Data,
+        };
+
+        var stageName = stage switch
+        {
+            Migrator.Stage.Pre => "pre-schema",
+            Migrator.Stage.Demo => "demo",
+            _ => "data",
+        };
         Console.WriteLine(string.Create(
             CultureInfo.InvariantCulture,
             $"Ghurify DbUp: running {stageName} scripts."));
@@ -74,6 +97,9 @@ internal static class Program
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: true)
+            .AddUserSecrets(UserSecretsId)
+            // The gitignored .env at the repository root, shared with the API.
+            .AddInMemoryCollection(DotEnvFile.Load(Directory.GetCurrentDirectory(), AppContext.BaseDirectory))
             .AddEnvironmentVariables()
             .Build();
 

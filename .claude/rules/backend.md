@@ -34,7 +34,13 @@ paths:
   Use policies (`VerifiedHost`, `AdminOnly`) rather than role strings in endpoints.
 - Ownership check in the handler **and** owner filter in SQL.
 - Built-in rate limiter on auth, join-request and payment endpoints.
-- Never log OTPs, tokens, NID numbers or full phone numbers.
+- Never log OTPs, tokens, NID numbers, email addresses or full phone numbers. Log identifiers
+  masked: `EmailAddress.ToMasked()`, `PhoneNumber.ToMasked()`.
+  - **One scoped exception:** `DevelopmentOtpSender` writes the one-time code to the console so
+    the sign-in flow is usable with no mail account configured. It is registered **only** when
+    the environment is Development AND no SMTP credentials are present; everywhere else
+    `IOtpSender` resolves to real SMTP, or to a sender that throws.
+    `OtpSenderRegistrationTests` fails the build if that ever changes.
 
 ## Payments and money (high-risk area: plan first, test hard)
 

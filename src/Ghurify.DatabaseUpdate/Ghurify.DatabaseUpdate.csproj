@@ -13,11 +13,27 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The .env reader, shared with the API by linking the one source file. A project
+         reference would drag Dapper, MailKit and the rest of Infrastructure into a console
+         that only needs a connection string. -->
+    <Compile Include="..\Ghurify.Infrastructure\Configuration\DotEnvFile.cs" Link="Configuration\DotEnvFile.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Scripts ship inside the assembly so the console is a single self-contained deploy step. -->
     <EmbeddedResource Include="Scripts\**\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- appsettings.json supplies Database:ConnectionString for local runs.
+         Pipelines use the GHURIFY_DB environment variable instead. -->
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

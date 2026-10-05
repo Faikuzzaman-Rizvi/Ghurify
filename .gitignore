@@ -34,8 +34,9 @@ logs/
 TestResults/
 *.trx
 
-# SSDT local cache
+# SSDT local cache (the .dbmdl is Visual Studio's multi-megabyte model cache)
 *.jfm
+*.dbmdl
 
 # Empty solution file Visual Studio recreates alongside Ghurify.sln
 Ghurify.slnx

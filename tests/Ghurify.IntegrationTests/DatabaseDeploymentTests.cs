@@ -70,6 +70,7 @@ public sealed class DatabaseDeploymentTests(SqlServerFixture database)
 
         // Every table carries these; repositories and audit tooling rely on them.
         Assert.Contains("Id", actual);
+        Assert.Contains("Email", actual);
         Assert.Contains("Archived", actual);
         Assert.Contains("Created", actual);
         Assert.Contains("UpdatedOn", actual);
@@ -77,17 +78,17 @@ public sealed class DatabaseDeploymentTests(SqlServerFixture database)
     }
 
     [Fact]
-    public async Task MainUser_RejectsASecondAccountOnTheSamePhoneNumber()
+    public async Task MainUser_RejectsASecondAccountOnTheSameEmail()
     {
         await using var connection = await OpenAsync();
-        const string Phone = "+8801711111111";
+        const string Email = "duplicate@ghurify.test";
 
         try
         {
-            await InsertUserAsync(connection, Phone, "First account");
+            await InsertUserAsync(connection, Email, "First account");
 
             var duplicate = await Assert.ThrowsAsync<SqlException>(
-                () => InsertUserAsync(connection, Phone, "Second account"));
+                () => InsertUserAsync(connection, Email, "Second account"));
 
             // 2601/2627 are the unique index / unique constraint violations.
             Assert.Contains(duplicate.Number, UniqueViolationErrorNumbers);
@@ -97,22 +98,54 @@ public sealed class DatabaseDeploymentTests(SqlServerFixture database)
             // Temporal tables reject DELETE on the history table, so clearing the current
             // row is all this test can and should undo.
             await connection.ExecuteAsync(new CommandDefinition(
-                "DELETE FROM [Main].[User] WHERE [Phone] = @Phone;",
-                new { Phone },
+                "DELETE FROM [Main].[User] WHERE [Email] = @Email;",
+                new { Email },
                 cancellationToken: TestContext.Current.CancellationToken));
         }
     }
 
-    [Fact]
-    public async Task MainUser_RejectsAPhoneNumberThatIsNotE164()
+    [Theory]
+    [InlineData("not-an-email")]
+    [InlineData("@ghurify.test")]
+    [InlineData("MixedCase@Ghurify.test")]   // must be stored lower-cased
+    public async Task MainUser_RejectsAnEmailTheApplicationWouldNeverProduce(string email)
     {
         await using var connection = await OpenAsync();
 
+        // The CHECK constraint is the last line of defence: even a bad migration script or a
+        // hand-written INSERT cannot put an unusable address in the identity column.
         var violation = await Assert.ThrowsAsync<SqlException>(
-            () => InsertUserAsync(connection, "01711111111", "Missing country code"));
+            () => InsertUserAsync(connection, email, "Should not be stored"));
 
         // 547 is a CHECK constraint violation.
         Assert.Equal(547, violation.Number);
+    }
+
+    [Fact]
+    public async Task MainUser_AcceptsAnAccountWithNoPhoneNumber()
+    {
+        await using var connection = await OpenAsync();
+        const string Email = "nophone@ghurify.test";
+
+        try
+        {
+            // Phone is collected later on the profile, so sign-up must work without one.
+            await InsertUserAsync(connection, Email, "No phone yet");
+
+            var phone = await connection.ExecuteScalarAsync<string?>(new CommandDefinition(
+                "SELECT [Phone] FROM [Main].[User] WHERE [Email] = @Email;",
+                new { Email },
+                cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.Null(phone);
+        }
+        finally
+        {
+            await connection.ExecuteAsync(new CommandDefinition(
+                "DELETE FROM [Main].[User] WHERE [Email] = @Email;",
+                new { Email },
+                cancellationToken: TestContext.Current.CancellationToken));
+        }
     }
 
     [Fact]
@@ -164,13 +197,83 @@ public sealed class DatabaseDeploymentTests(SqlServerFixture database)
         Assert.Empty(dataScripts.Intersect(preScripts, StringComparer.Ordinal));
     }
 
-    private static Task<int> InsertUserAsync(SqlConnection connection, string phone, string displayName) =>
+    [Fact]
+    public void Migrator_KeepsDemoScriptsOutOfEveryReleaseRun()
+    {
+        var demoScripts = Migrator.ScriptNames(Migrator.Stage.Demo);
+        var releaseScripts = Migrator.ScriptNames(Migrator.Stage.Data)
+            .Concat(Migrator.ScriptNames(Migrator.Stage.Pre));
+
+        // Demo hosts and trips are made up; they must never reach production through a release.
+        Assert.NotEmpty(demoScripts);
+        Assert.All(demoScripts, name => Assert.Contains(".Scripts.Demo.", name, StringComparison.Ordinal));
+        Assert.All(releaseScripts, name => Assert.DoesNotContain(".Scripts.Demo.", name, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task MainTrip_IsSystemVersioned_WithItsHistoryTable()
+    {
+        await using var connection = await OpenAsync();
+
+        var historyTable = await connection.ExecuteScalarAsync<string>(new CommandDefinition(
+            """
+            SELECT   SCHEMA_NAME(history.schema_id) + '.' + history.name
+            FROM     sys.tables AS versioned
+            JOIN     sys.tables AS history ON versioned.history_table_id = history.object_id
+            WHERE    versioned.name = 'Trip'
+              AND    SCHEMA_NAME(versioned.schema_id) = 'Main'
+              AND    versioned.temporal_type = 2;
+            """,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("Main.TripHistory", historyTable);
+    }
+
+    [Fact]
+    public async Task DemoStage_LoadsTripsWhoseCostsAddUpAndRunsOnlyOnce()
+    {
+        var first = Migrator.Run(database.ConnectionString, Migrator.Stage.Demo);
+        Assert.True(first.Successful, first.Error?.Message);
+
+        // A second run must change nothing: the journal records the script as applied.
+        var second = Migrator.Run(database.ConnectionString, Migrator.Stage.Demo);
+        Assert.True(second.Successful, second.Error?.Message);
+        Assert.Empty(second.Scripts);
+
+        await using var connection = await OpenAsync();
+
+        var unbalanced = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            """
+            SELECT COUNT(1)
+            FROM   [Main].[Trip] AS t
+            JOIN   [Main].[User] AS u ON u.[Id] = t.[HostId]
+            WHERE  u.[Email] LIKE '%@demo.ghurify.app'
+              AND  t.[PricePerPerson] <> (SELECT ISNULL(SUM(c.[Amount]), 0)
+                                          FROM   [Main].[TripCostItem] AS c
+                                          WHERE  c.[TripId] = t.[Id]);
+            """,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        var demoTrips = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            """
+            SELECT COUNT(1)
+            FROM   [Main].[Trip] AS t
+            JOIN   [Main].[User] AS u ON u.[Id] = t.[HostId]
+            WHERE  u.[Email] LIKE '%@demo.ghurify.app';
+            """,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(12, demoTrips);
+        Assert.Equal(0, unbalanced);
+    }
+
+    private static Task<int> InsertUserAsync(SqlConnection connection, string email, string displayName) =>
         connection.ExecuteAsync(new CommandDefinition(
             """
-            INSERT INTO [Main].[User] ([Phone], [DisplayName], [Status])
-            VALUES (@phone, @displayName, 1);
+            INSERT INTO [Main].[User] ([Email], [DisplayName], [Status])
+            VALUES (@email, @displayName, 1);
             """,
-            new { phone, displayName },
+            new { email, displayName },
             cancellationToken: TestContext.Current.CancellationToken));
 
     private async Task<SqlConnection> OpenAsync()

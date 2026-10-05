@@ -3,8 +3,10 @@
 CREATE TABLE [Main].[UserHistory]
 (
     [Id]            BIGINT         NOT NULL,
-    [Phone]         NVARCHAR (20)  NOT NULL,
+    [Email]         NVARCHAR (256) NOT NULL,
+    [Phone]         NVARCHAR (20)  NULL,
     [DisplayName]   NVARCHAR (100) NULL,
+    [Gender]        TINYINT        NULL,
     [Status]        TINYINT        NOT NULL,
 
     [Archived]      BIT            NOT NULL,

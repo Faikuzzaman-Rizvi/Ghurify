@@ -3,11 +3,36 @@
  *
  * The typed client in `src/api/schema.d.ts` is generated from the backend OpenAPI document
  * (`npm run gen:api`). Request and response types are never hand-written; this file only
- * handles transport concerns: base URL, JSON, and turning a failure into a useful error.
+ * handles transport concerns: base URL, JSON, the bearer token, and turning a failure into a
+ * useful error.
  */
 
 /** Relative by default so the Vite dev proxy and the deployed origin both just work. */
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+
+/**
+ * The access token lives here, in a module variable, and never in localStorage or a cookie
+ * readable by scripts. It is deliberately lost on reload: the httpOnly refresh cookie is what
+ * restores the session, and that one cannot be read by any page script.
+ */
+let accessToken: string | null = null;
+
+export function setAccessToken(token: string | null): void {
+  accessToken = token;
+}
+
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
+/**
+ * The generated types widen integers to `number | string`, because a 64-bit id can exceed
+ * what JSON numbers hold exactly and may arrive as a string. Everything we read fits in a
+ * JavaScript number, so narrow it once, here, rather than at every call site.
+ */
+export function asNumber(value: number | string): number {
+  return typeof value === 'number' ? value : Number(value);
+}
 
 /** An error carrying what the API reported, so screens can show something specific. */
 export class ApiError extends Error {
@@ -26,12 +51,50 @@ interface ProblemDetails {
   title?: string;
   detail?: string;
   status?: number;
+  errors?: Record<string, string[]>;
 }
 
-export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
+interface RequestOptions {
+  signal?: AbortSignal;
+  /** Send the bearer token. Off for the sign-in endpoints, which have no token yet. */
+  authenticated?: boolean;
+}
+
+export async function apiGet<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return request<T>('GET', path, undefined, options);
+}
+
+export async function apiPost<T>(
+  path: string,
+  body?: unknown,
+  options: RequestOptions = {},
+): Promise<T> {
+  return request<T>('POST', path, body, options);
+}
+
+async function request<T>(
+  method: string,
+  path: string,
+  body: unknown,
+  { signal, authenticated = true }: RequestOptions,
+): Promise<T> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (authenticated && accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
   const response = await fetch(`${baseUrl}${path}`, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
+    method,
+    headers,
+    // Carries the httpOnly refresh cookie, including when the web app and the API are served
+    // from different origins.
+    credentials: 'include',
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     ...(signal ? { signal } : {}),
   });
 
@@ -39,17 +102,27 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
     throw await toApiError(response);
   }
 
-  return (await response.json()) as T;
+  // 204 and 202-with-no-body have nothing to parse.
+  if (response.status === 204 || response.headers.get('Content-Length') === '0') {
+    return undefined as T;
+  }
+
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 async function toApiError(response: Response): Promise<ApiError> {
   // The API reports expected failures as ProblemDetails; anything else may not be JSON.
   try {
     const problem = (await response.json()) as ProblemDetails;
+
+    // Validation problems carry the useful text one level down.
+    const firstFieldError = problem.errors ? Object.values(problem.errors).flat()[0] : undefined;
+
     return new ApiError(
       problem.title ?? response.statusText,
       response.status,
-      problem.detail ?? '',
+      firstFieldError ?? problem.detail ?? '',
     );
   } catch {
     return new ApiError(response.statusText || 'Request failed', response.status);

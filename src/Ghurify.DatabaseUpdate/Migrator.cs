@@ -12,6 +12,7 @@ namespace Ghurify.DatabaseUpdate;
 public static class Migrator
 {
     private const string PreFolderMarker = ".Scripts.Pre.";
+    private const string DemoFolderMarker = ".Scripts.Demo.";
     private const string ScriptsPrefix = "Ghurify.DatabaseUpdate.Scripts.";
 
     /// <summary>Which set of scripts a run applies.</summary>
@@ -22,6 +23,12 @@ public static class Migrator
 
         /// <summary>Scripts/{Year}, run after the dacpac against the new schema.</summary>
         Data,
+
+        /// <summary>
+        /// Scripts/Demo: sample hosts and trips for showcases and local development. Only ever
+        /// run on request (the "demo" argument), never as part of a release.
+        /// </summary>
+        Demo,
     }
 
     /// <summary>
@@ -33,7 +40,12 @@ public static class Migrator
 
         // Each stage keeps its own journal table so pre-scripts and data scripts are
         // tracked independently and never re-run each other.
-        var journalTable = stage == Stage.Pre ? "SchemaVersionsPre" : "SchemaVersions";
+        var journalTable = stage switch
+        {
+            Stage.Pre => "SchemaVersionsPre",
+            Stage.Demo => "SchemaVersionsDemo",
+            _ => "SchemaVersions",
+        };
 
         var upgrader = DeployChanges.To
             .SqlDatabase(connectionString)
@@ -51,7 +63,8 @@ public static class Migrator
     }
 
     /// <summary>
-    /// Selects Pre scripts or yearly data scripts, never both in one run.
+    /// Selects Pre, yearly data, or demo scripts, never more than one set in a run. Demo data
+    /// in particular must never leak into a release's data run.
     /// </summary>
     internal static bool ShouldRun(string scriptName, Stage stage)
     {
@@ -61,7 +74,14 @@ public static class Migrator
         }
 
         var isPreScript = scriptName.Contains(PreFolderMarker, StringComparison.Ordinal);
-        return stage == Stage.Pre ? isPreScript : !isPreScript;
+        var isDemoScript = scriptName.Contains(DemoFolderMarker, StringComparison.Ordinal);
+
+        return stage switch
+        {
+            Stage.Pre => isPreScript,
+            Stage.Demo => isDemoScript,
+            _ => !isPreScript && !isDemoScript,
+        };
     }
 
     /// <summary>

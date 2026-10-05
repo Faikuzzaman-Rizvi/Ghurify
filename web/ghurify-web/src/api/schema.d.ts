@@ -21,13 +21,208 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Emails a one-time sign-in code. */
+        post: operations["RequestOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Exchanges a one-time code for a session. */
+        post: operations["VerifyOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rotates the refresh cookie and returns a new access token. */
+        post: operations["RefreshSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ends the session and revokes its whole token family. */
+        post: operations["Logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/whoami": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Returns the signed-in user for the presented access token. */
+        get: operations["WhoAmI"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Searches live trips, soonest first unless another sort is asked for. */
+        get: operations["SearchTrips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A live trip with its cost breakdown and day-by-day plan. */
+        get: operations["GetTrip"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/destinations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every destination with its safety status and upcoming trips. */
+        get: operations["ListDestinations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/destinations/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One destination by its slug. */
+        get: operations["GetDestination"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {unknown} */
+        CostCategory: "Transport" | "Stay" | "Food" | "Fees" | "Guide" | "Buffer";
+        /** @enum {unknown} */
+        DestinationKind: "Hills" | "Beach" | "Island" | "Forest" | "Wetland" | "TeaGarden" | "Lake" | "River";
+        /** @enum {unknown} */
+        DestinationStatus: "Open" | "Caution" | "Closed";
+        DestinationSummary: {
+            slug: string;
+            name: string;
+            nameBn: string;
+            division: string;
+            divisionBn: string;
+            summary: string;
+            summaryBn: string;
+            kind: components["schemas"]["DestinationKind"];
+            status: components["schemas"]["DestinationStatus"];
+            statusNote: null | string;
+            statusNoteBn: null | string;
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+            /** Format: int32 */
+            upcomingTrips: number | string;
+            /** Format: double */
+            fromPrice: null | number | string;
+        };
+        /** @enum {unknown} */
+        Difficulty: "Easy" | "Moderate" | "Challenging";
+        /** @enum {unknown} */
+        GroupType: "Open" | "WomenOnly" | "Students" | "Families";
         HealthResponse: {
             status: string;
             databaseStatus: string;
+        };
+        HttpValidationProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+            errors?: {
+                [key: string]: string[];
+            };
         };
         ProblemDetails: {
             type?: null | string;
@@ -36,6 +231,121 @@ export interface components {
             status?: null | number | string;
             detail?: null | string;
             instance?: null | string;
+        };
+        RequestOtpRequest: {
+            email: string;
+        };
+        RequestOtpResponse: {
+            /** Format: int32 */
+            expiresInSeconds: number | string;
+            /** Format: int32 */
+            resendAfterSeconds: number | string;
+        };
+        SessionResponse: {
+            accessToken: string;
+            /** Format: int32 */
+            expiresInSeconds: number | string;
+            user: components["schemas"]["SignedInUserResponse"];
+        };
+        SignedInUserResponse: {
+            /** Format: int64 */
+            id: number | string;
+            maskedEmail: string;
+            displayName: null | string;
+        };
+        TripCostLine: {
+            category: components["schemas"]["CostCategory"];
+            description: null | string;
+            /** Format: double */
+            amount: number | string;
+        };
+        TripDestination: {
+            slug: string;
+            name: string;
+            nameBn: string;
+            kind: components["schemas"]["DestinationKind"];
+            status: components["schemas"]["DestinationStatus"];
+            statusNote?: null | string;
+            statusNoteBn?: null | string;
+        };
+        TripDetail: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            summary: string;
+            destination: components["schemas"]["TripDestination"];
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            meetingPoint: string;
+            /** Format: int32 */
+            seats: number | string;
+            /** Format: int32 */
+            seatsLeft: number | string;
+            /** Format: double */
+            pricePerPerson: number | string;
+            groupType: components["schemas"]["GroupType"];
+            status: components["schemas"]["TripStatus"];
+            host: components["schemas"]["TripHost"];
+            costItems: components["schemas"]["TripCostLine"][];
+            itinerary: components["schemas"]["TripItineraryDay"][];
+        };
+        TripHost: {
+            /** Format: int64 */
+            id: number | string;
+            displayName: null | string;
+            /** Format: date */
+            memberSince: string;
+        };
+        TripItineraryDay: {
+            /** Format: int32 */
+            dayNo: number | string;
+            title: string;
+            details: string;
+            difficulty: components["schemas"]["Difficulty"];
+        };
+        TripPage: {
+            items: components["schemas"]["TripSummary"][];
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        /** @enum {unknown} */
+        TripSort: "Soonest" | "PriceLowToHigh" | "PriceHighToLow" | null;
+        /** @enum {unknown} */
+        TripStatus: "Draft" | "Published" | "Full" | "Cancelled" | "Completed";
+        TripSummary: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            destination: components["schemas"]["TripDestination"];
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** Format: int32 */
+            seats: number | string;
+            /** Format: int32 */
+            seatsLeft: number | string;
+            /** Format: double */
+            pricePerPerson: number | string;
+            groupType: components["schemas"]["GroupType"];
+            status: components["schemas"]["TripStatus"];
+            hostName: null | string;
+        };
+        VerifyOtpRequest: {
+            email: string;
+            code: string;
+        };
+        WhoAmIResponse: {
+            /** Format: int64 */
+            userId: number | string;
+            maskedEmail: string;
+            displayName: null | string;
         };
     };
     responses: never;
@@ -66,6 +376,287 @@ export interface operations {
             };
             /** @description Service Unavailable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RequestOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestOtpRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestOtpResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    VerifyOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyOtpRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RefreshSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    Logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhoAmI: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WhoAmIResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SearchTrips: {
+        parameters: {
+            query?: {
+                Destination?: string;
+                From?: string;
+                To?: string;
+                MaxPrice?: number | string;
+                GroupType?: components["schemas"]["GroupType"];
+                MinSeats?: number | string;
+                Sort?: components["schemas"]["TripSort"];
+                Page?: number | string;
+                PageSize?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripPage"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListDestinations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DestinationSummary"][];
+                };
+            };
+        };
+    };
+    GetDestination: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DestinationSummary"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

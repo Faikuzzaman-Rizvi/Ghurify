@@ -15,10 +15,15 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ghurify.Domain\Ghurify.Domain.csproj" />
     <ProjectReference Include="..\..\src\Ghurify.Application\Ghurify.Application.csproj" />
+    <!-- For the composition guard below: the development email sender logs the one-time code,
+         so a test must prove it cannot be resolved outside Development. -->
+    <ProjectReference Include="..\..\src\Ghurify.Infrastructure\Ghurify.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
     <!-- Produces the TRX report CI uploads and inspects. -->
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
   </ItemGroup>
