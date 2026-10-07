@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,13 @@ import {
 } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
-import { cardClass, primaryButtonClass, SelectField, TextField } from '@/components/Field';
+import {
+  cardClass,
+  DateField,
+  primaryButtonClass,
+  SelectField,
+  TextField,
+} from '@/components/Field';
 import { PageBanner } from '@/components/ui/PageBanner';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { errorText } from '@/lib/errors';
@@ -231,13 +237,21 @@ export function VerificationPage() {
                 error={errors.idNumber ? t(`verification.numberInvalid.${idType}`) : undefined}
                 {...register('idNumber')}
               />
-              <TextField
-                id="dateOfBirth"
-                type="date"
-                max={todayInDhaka()}
-                label={t('verification.dob')}
-                error={errors.dateOfBirth ? t('verification.dobInvalid') : undefined}
-                {...register('dateOfBirth')}
+              <Controller
+                control={control}
+                name="dateOfBirth"
+                render={({ field }) => (
+                  <DateField
+                    id="dateOfBirth"
+                    max={todayInDhaka()}
+                    placeholder={t('datePicker.dobPlaceholder')}
+                    label={t('verification.dob')}
+                    error={errors.dateOfBirth ? t('verification.dobInvalid') : undefined}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
             </div>
 

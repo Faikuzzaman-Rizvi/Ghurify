@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { CalendarDays, MapPin, Search, Users } from 'lucide-react';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { todayInDhaka, toLanguage } from '@/lib/format';
 import { groupTypes } from './tripsApi';
@@ -36,7 +37,7 @@ export function TripSearchForm() {
   const navigate = useNavigate();
   const { data: destinations } = useDestinations();
 
-  const { register, handleSubmit, control } = useForm<SearchForm>({
+  const { handleSubmit, control } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { destination: '', from: '', groupType: '' },
   });
@@ -97,12 +98,20 @@ export function TripSearchForm() {
           <CalendarDays aria-hidden="true" className="h-4 w-4 text-ochre" />
           {t('home.dateLabel')}
         </label>
-        <input
-          id="search-from"
-          type="date"
-          min={todayInDhaka()}
-          className={`w-full cursor-pointer bg-transparent outline-none ${valueClass}`}
-          {...register('from')}
+        <Controller
+          control={control}
+          name="from"
+          render={({ field }) => (
+            <DatePicker
+              id="search-from"
+              min={todayInDhaka()}
+              placeholder={t('datePicker.anyDate')}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              inputClassName={`bg-transparent outline-none placeholder:text-deep ${valueClass}`}
+            />
+          )}
         />
       </div>
 

@@ -56,6 +56,7 @@ export function RegisterPage() {
 
   return email === null ? (
     <AuthShell
+      photo="saint-martins"
       icon={<UserPlus aria-hidden="true" className="h-6 w-6" />}
       title={t('auth.register.title')}
       subtitle={t('auth.register.subtitle')}
@@ -80,6 +81,7 @@ export function RegisterPage() {
     </AuthShell>
   ) : (
     <AuthShell
+      photo="saint-martins"
       icon={<MailCheck aria-hidden="true" className="h-6 w-6" />}
       title={t('auth.confirm.title')}
       subtitle={t('auth.codeSentTo', { email })}

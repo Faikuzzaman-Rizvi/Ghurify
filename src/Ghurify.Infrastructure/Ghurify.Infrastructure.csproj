@@ -28,4 +28,10 @@
     <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The logo and banner travel inside every account email (cid: links), so they ship in the
+         assembly instead of being fetched from a server when the email is opened. -->
+    <EmbeddedResource Include="Email/Assets/*.png;Email/Assets/*.jpg" />
+  </ItemGroup>
+
 </Project>

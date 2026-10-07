@@ -8,6 +8,7 @@ import { HomePage } from './HomePage';
 import { NotFoundPage } from './NotFoundPage';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { SiteBackdrop } from '@/components/ui/SiteBackdrop';
 import { PageLoading } from '@/components/States';
 import { GuidedTour } from '@/components/tour/GuidedTour';
 import { useIsOverHero } from '@/components/ui/headerStore';
@@ -78,7 +79,8 @@ function SiteShell() {
   const overHero = useIsOverHero();
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative isolate flex min-h-screen flex-col">
+      <SiteBackdrop />
       <SiteHeader />
       <main className={`flex-1 ${overHero ? '' : 'pb-20'}`}>
         <Outlet />

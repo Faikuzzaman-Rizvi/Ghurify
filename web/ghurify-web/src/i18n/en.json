@@ -746,7 +746,30 @@
       "cautionDestinations": "Destinations on caution",
       "liveTrips": "Live trips",
       "bookingsConfirmed": "Bookings confirmed today",
-      "lead": "What needs a person right now. Refreshes every minute."
+      "lead": "What needs a person right now. Refreshes every minute.",
+      "greeting": {
+        "morning": "Good morning, {{name}}",
+        "afternoon": "Good afternoon, {{name}}",
+        "evening": "Good evening, {{name}}"
+      },
+      "waiting_one": "{{n}} item is waiting for a person right now.",
+      "waiting_other": "{{n}} items are waiting for a person right now.",
+      "allClear": "Nothing is waiting. Every queue is clear right now.",
+      "calm": "All calm",
+      "chip": {
+        "liveTrips": "trips live now",
+        "bookingsConfirmed": "bookings today"
+      },
+      "sections": {
+        "attention": "Needs attention now",
+        "queues": "Queues",
+        "platform": "Across the platform"
+      },
+      "sectionLead": {
+        "attention": "Emergencies on the road. These come first.",
+        "queues": "Decisions waiting for a person.",
+        "platform": "How Ghurify is running today."
+      }
     },
     "reports": {
       "title": "Reports",
@@ -1651,5 +1674,15 @@
     "emptyHint": "When a traveller pays for a seat on one of your trips, it appears here.",
     "traveller": "Traveller",
     "refunded": "{{amount}} refunded"
+  },
+  "datePicker": {
+    "placeholder": "Pick a date",
+    "dobPlaceholder": "Day / month / year",
+    "anyDate": "Any date",
+    "label": "Choose a date",
+    "previous": "Previous",
+    "next": "Next",
+    "today": "Today",
+    "clear": "Clear"
   }
 }

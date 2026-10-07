@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Controller,
   useFieldArray,
   useForm,
   useWatch,
@@ -33,6 +34,7 @@ import {
   inputClass,
   primaryButtonClass,
   secondaryButtonClass,
+  DateField,
   SelectField,
   TextAreaField,
   TextField,
@@ -392,7 +394,9 @@ function TripWizard({
               <p className="mt-1 text-sm text-deep/70">{t(`wizard.stepLead.${step}`)}</p>
             </header>
 
-            {step === 'basics' && <BasicsStep register={register} errors={errors} />}
+            {step === 'basics' && (
+              <BasicsStep register={register} control={control} errors={errors} />
+            )}
             {step === 'costs' && (
               <CostsStep register={register} control={control} errors={errors} total={total} />
             )}
@@ -555,7 +559,9 @@ function useFieldError() {
     message ? t(`wizard.invalid.${message}`, { defaultValue: t('errors.invalid') }) : undefined;
 }
 
-function BasicsStep({ register, errors }: StepProps) {
+function BasicsStep({ register, control, errors }: StepProps & { control: Control<TripForm> }) {
+  // Each date picker shades the trip from the other date to its own.
+  const [rangeStart, rangeEnd] = useWatch({ control, name: ['startDate', 'endDate'] });
   const { t, i18n } = useTranslation();
   const language = toLanguage(i18n.language);
   const { data: destinations } = useDestinations();
@@ -611,21 +617,37 @@ function BasicsStep({ register, errors }: StepProps) {
           {...register('summary')}
         />
       </div>
-      <TextField
-        id="startDate"
-        type="date"
-        min={todayInDhaka()}
-        label={t('wizard.startDate')}
-        error={fieldError(errors.startDate?.message)}
-        {...register('startDate')}
+      <Controller
+        control={control}
+        name="startDate"
+        render={({ field }) => (
+          <DateField
+            id="startDate"
+            min={todayInDhaka()}
+            label={t('wizard.startDate')}
+            error={fieldError(errors.startDate?.message)}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            rangeWith={rangeEnd}
+          />
+        )}
       />
-      <TextField
-        id="endDate"
-        type="date"
-        min={todayInDhaka()}
-        label={t('wizard.endDate')}
-        error={fieldError(errors.endDate?.message)}
-        {...register('endDate')}
+      <Controller
+        control={control}
+        name="endDate"
+        render={({ field }) => (
+          <DateField
+            id="endDate"
+            min={todayInDhaka()}
+            label={t('wizard.endDate')}
+            error={fieldError(errors.endDate?.message)}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            rangeWith={rangeStart}
+          />
+        )}
       />
       <TextField
         id="meetingPoint"

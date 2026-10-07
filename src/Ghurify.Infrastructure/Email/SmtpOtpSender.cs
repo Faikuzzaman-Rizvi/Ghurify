@@ -5,13 +5,13 @@ using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using MimeKit.Text;
 
 namespace Ghurify.Infrastructure.Email;
 
 /// <summary>
 /// Sends the account emails over SMTP: the sign-up and password-reset codes, and the notices
-/// ("you already have an account", "your password was changed").
+/// ("you already have an account", "your password was changed"), in the design of
+/// <see cref="AccountEmailTemplate"/>.
 ///
 /// A new connection per message: account emails are infrequent, and a pooled SMTP connection
 /// left open for hours is dropped by the server anyway, which turns into failures that only show
@@ -20,50 +20,40 @@ namespace Ghurify.Infrastructure.Email;
 public sealed class SmtpOtpSender(
     IOptions<EmailOptions> options,
     IOptions<IdentityOptions> identityOptions,
+    IClock clock,
     ILogger<SmtpOtpSender> logger) : IOtpSender
 {
     private readonly EmailOptions _options = options.Value;
     private readonly int _expiryMinutes = identityOptions.Value.OtpExpiryMinutes;
 
-    public Task SendOtpAsync(EmailAddress email, string code, OtpPurpose purpose, CancellationToken cancellationToken)
-    {
-        var (subject, english, bangla) = purpose == OtpPurpose.PasswordReset
-            ? ($"{code} is your Ghurify password reset code",
-               $"Your password reset code is: {code}\n\nIt expires in {_expiryMinutes} minutes and can be used once.\nIf you did not ask to reset your password, ignore this email: your password has not changed.",
-               $"আপনার পাসওয়ার্ড রিসেট কোড: {code}\n\nকোডটি {_expiryMinutes} মিনিট পরে মেয়াদ শেষ হবে এবং একবারই ব্যবহার করা যাবে।\nআপনি পাসওয়ার্ড রিসেট করতে না চাইলে এই ইমেইলটি উপেক্ষা করুন: আপনার পাসওয়ার্ড বদলায়নি।")
-            : ($"{code} is your Ghurify confirmation code",
-               $"Welcome to Ghurify! Your confirmation code is: {code}\n\nEnter it to finish creating your account. It expires in {_expiryMinutes} minutes.\nIf you did not sign up, ignore this email and no account will be created.",
-               $"ঘুরিফাইতে স্বাগতম! আপনার নিশ্চিতকরণ কোড: {code}\n\nঅ্যাকাউন্ট তৈরি শেষ করতে কোডটি দিন। এটি {_expiryMinutes} মিনিট পরে মেয়াদ শেষ হবে।\nআপনি সাইন আপ না করে থাকলে এই ইমেইলটি উপেক্ষা করুন, কোনো অ্যাকাউন্ট তৈরি হবে না।");
+    public Task SendOtpAsync(EmailAddress email, string code, OtpPurpose purpose, CancellationToken cancellationToken) =>
+        SendAsync(
+            email,
+            AccountEmailTemplate.ForCode(code, purpose, _expiryMinutes, clock.UtcNow.Year),
+            purpose == OtpPurpose.PasswordReset ? "password reset code" : "confirmation code",
+            cancellationToken);
 
-        return SendAsync(email, subject, english, bangla, purpose == OtpPurpose.PasswordReset ? "password reset code" : "confirmation code", cancellationToken);
-    }
+    public Task SendNoticeAsync(EmailAddress email, AccountNotice notice, CancellationToken cancellationToken) =>
+        SendAsync(email, AccountEmailTemplate.ForNotice(notice, clock.UtcNow.Year), notice.ToString(), cancellationToken);
 
-    public Task SendNoticeAsync(EmailAddress email, AccountNotice notice, CancellationToken cancellationToken)
-    {
-        var (subject, english, bangla) = notice == AccountNotice.PasswordChanged
-            ? ("Your Ghurify password was changed",
-               "The password for your Ghurify account was just changed, and every device was signed out.\nIf this was you, there is nothing to do. If it was not, reset your password now with \"Forgot password\" and contact support.",
-               "আপনার ঘুরিফাই অ্যাকাউন্টের পাসওয়ার্ড এইমাত্র বদলানো হয়েছে এবং সব ডিভাইস থেকে সাইন আউট করা হয়েছে।\nএটি আপনি করে থাকলে কিছু করতে হবে না। না করে থাকলে এখনই \"পাসওয়ার্ড ভুলে গেছি\" দিয়ে পাসওয়ার্ড রিসেট করুন এবং সাপোর্টে যোগাযোগ করুন।")
-            : ("You already have a Ghurify account",
-               "Someone tried to create a Ghurify account with this email address, which already has one.\nIf it was you, just sign in. If you forgot your password, use \"Forgot password\" on the sign-in page.\nIf it was not you, you can ignore this email: nothing has changed.",
-               "কেউ এই ইমেইল ঠিকানা দিয়ে ঘুরিফাই অ্যাকাউন্ট খোলার চেষ্টা করেছেন, কিন্তু এই ঠিকানায় আগেই অ্যাকাউন্ট আছে।\nএটি আপনি হলে সাইন ইন করুন। পাসওয়ার্ড ভুলে গেলে সাইন ইন পেজে \"পাসওয়ার্ড ভুলে গেছি\" ব্যবহার করুন।\nআপনি না হলে এই ইমেইলটি উপেক্ষা করুন: কিছুই বদলায়নি।");
-
-        return SendAsync(email, subject, english, bangla, notice.ToString(), cancellationToken);
-    }
-
-    private async Task SendAsync(EmailAddress email, string subject, string english, string bangla, string what, CancellationToken cancellationToken)
+    private async Task SendAsync(EmailAddress email, AccountEmail content, string what, CancellationToken cancellationToken)
     {
         using var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_options.FromName, _options.EffectiveFromAddress));
         message.To.Add(MailboxAddress.Parse(email.Value));
-        message.Subject = subject;
+        message.Subject = content.Subject;
 
-        // Both languages in one message: the app is Bangla-first, but the recipient's mail
-        // client has no idea which language they chose in the app.
-        message.Body = new TextPart(TextFormat.Plain)
+        // HTML with the plain text beside it, and the images inside the message (multipart/
+        // related), so they show without the client fetching anything.
+        var body = new BodyBuilder { HtmlBody = content.Html, TextBody = content.Text };
+        foreach (var asset in AccountEmailTemplate.Assets)
         {
-            Text = $"Ghurify\n\n{english}\n\n---\n\nঘুরিফাই\n\n{bangla}\n",
-        };
+            using var stream = AccountEmailTemplate.OpenAsset(asset);
+            var image = body.LinkedResources.Add(asset.FileName, stream, new ContentType("image", asset.ImageSubtype), cancellationToken);
+            image.ContentId = asset.ContentId;
+        }
+
+        message.Body = body.ToMessageBody();
 
         using var client = new SmtpClient { Timeout = _options.TimeoutSeconds * 1000 };
 

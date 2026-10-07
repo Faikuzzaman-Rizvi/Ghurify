@@ -82,7 +82,7 @@ export function SiteHeader() {
       >
         <div className="container-page flex h-18 items-center justify-between gap-4">
           <Link to="/" aria-label={t('nav.home')} className="shrink-0 rounded-xl">
-            <Logo inverted={glass} />
+            <Logo inverted={glass} collapsible />
           </Link>
 
           <nav aria-label={t('nav.main')} className="hidden lg:block">

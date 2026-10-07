@@ -8,10 +8,10 @@ import { errorText } from '@/lib/errors';
 
 /** The input look shared by every account screen. */
 export const authInputClass =
-  'w-full rounded-xl border border-hill/20 bg-mist px-4 py-3.5 text-base transition focus:border-hill focus:bg-white';
+  'w-full rounded-xl border border-hill/15 bg-mist/60 px-4 py-3.5 text-base text-deep transition placeholder:text-deep/35 hover:border-hill/30 focus:border-hill focus:bg-white focus:outline-none focus:ring-4 focus:ring-hill/10 aria-invalid:border-jamdani aria-invalid:ring-jamdani/10';
 
 export const authButtonClass =
-  'rounded-full bg-hill px-4 py-3.5 font-semibold text-white shadow-sm transition hover:bg-deep disabled:opacity-60';
+  'inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-hill to-deep px-4 py-3.5 font-semibold text-white shadow-[0_10px_24px_rgba(36,92,67,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(36,92,67,0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-turmeric/50 disabled:translate-y-0 disabled:opacity-60';
 
 /**
  * Mirrors the backend: one @, something before it, a dotted domain after it. Telling the person

@@ -6,6 +6,7 @@ import { asNumber } from '@/api/client';
 import { CardSkeletons, EmptyState, ErrorState } from '@/components/States';
 import { PageBanner } from '@/components/ui/PageBanner';
 import { Pagination } from '@/components/ui/Pagination';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { formatCount, formatMoney, todayInDhaka, toLanguage } from '@/lib/format';
 import { TripCard } from './TripCard';
@@ -114,13 +115,14 @@ export function ExplorePage() {
             <label htmlFor="filter-from" className="text-sm font-semibold text-deep">
               {t('home.dateLabel')}
             </label>
-            <input
+            <DatePicker
               id="filter-from"
-              type="date"
               min={todayInDhaka()}
+              clearable
+              placeholder={t('datePicker.anyDate')}
               value={filters.from ?? ''}
-              onChange={(event) => update('from', event.target.value)}
-              className="w-full rounded-xl border border-hill/15 bg-white px-4 py-3 text-deep transition focus:border-hill"
+              onChange={(value) => update('from', value)}
+              inputClassName="rounded-xl border border-hill/15 bg-white px-4 py-3 text-deep outline-none transition hover:border-hill/30 focus:border-hill focus:ring-4 focus:ring-hill/10"
             />
           </div>
 

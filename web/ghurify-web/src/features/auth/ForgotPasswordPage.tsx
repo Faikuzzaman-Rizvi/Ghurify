@@ -38,6 +38,7 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthShell
+      photo="tanguar-haor"
       icon={<KeyRound aria-hidden="true" className="h-6 w-6" />}
       title={email === null ? t('auth.forgot.title') : t('auth.reset.title')}
       subtitle={email === null ? t('auth.forgot.subtitle') : t('auth.reset.sentTo', { email })}

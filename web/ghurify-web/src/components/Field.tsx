@@ -4,6 +4,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react';
+import { DatePicker, type DatePickerProps } from './ui/DatePicker';
 
 /** The one input style, so every form in the app looks and focuses the same way. */
 export const inputClass =
@@ -131,3 +132,24 @@ export const dangerButtonClass =
 /** A white card on the page background. */
 export const cardClass =
   'rounded-2xl bg-white p-5 shadow-[0_4px_24px_rgba(15,42,31,0.06)] ring-1 ring-hill/10 sm:p-7';
+
+type DateFieldProps = Omit<DatePickerProps, 'inputClassName' | 'invalid' | 'describedBy'> & {
+  label: string;
+  hint?: string | undefined;
+  error?: string | undefined;
+};
+
+/** A labelled calendar date picker, styled and wired like the other fields. */
+export function DateField({ id, label, hint, error, ...picker }: DateFieldProps) {
+  return (
+    <FieldShell id={id} label={label} hint={hint} error={error}>
+      <DatePicker
+        id={id}
+        invalid={Boolean(error)}
+        describedBy={describedBy(id, hint, error)}
+        inputClassName={inputClass}
+        {...picker}
+      />
+    </FieldShell>
+  );
+}

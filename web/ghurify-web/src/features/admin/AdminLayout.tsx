@@ -28,6 +28,7 @@ import { Logo } from '@/components/Logo';
 import { NotificationBell } from '@/components/NotificationBell';
 import { AccountMenu } from '@/components/AccountMenu';
 import { Avatar } from '@/components/Avatar';
+import { BangladeshArtwork, BangladeshMap } from '@/components/ui/BangladeshMap';
 import type { Role } from '@/features/auth/profileApi';
 import { useSignedInIdentity } from '@/features/auth/useAccount';
 import { useMyProfile } from '@/features/auth/useProfile';
@@ -182,14 +183,16 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-svh bg-mist lg:pl-72">
+    <div className="relative isolate min-h-svh bg-mist lg:pl-72">
+      <PortalBackdrop />
+
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 lg:block">
         <Sidebar />
       </aside>
 
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <header className="sticky top-0 z-30 border-b border-hill/10 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-hill/10 bg-white/75 shadow-[0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-xl">
         <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
           <button
             type="button"
@@ -252,6 +255,24 @@ export function AdminLayout() {
   );
 }
 
+/**
+ * Behind every admin page: two soft colour glows and a large, very faint map of Bangladesh in
+ * the lower right. Fixed, so it stays put while the page scrolls; pointer-events off and
+ * aria-hidden, so it never gets in the way of reading or clicking.
+ */
+function PortalBackdrop() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden lg:left-72"
+    >
+      <div className="absolute -right-40 -top-40 h-136 w-136 rounded-full bg-turmeric/10 blur-3xl" />
+      <div className="absolute -bottom-48 -left-24 h-120 w-120 rounded-full bg-hill/10 blur-3xl" />
+      <BangladeshArtwork className="absolute -bottom-40 -right-48 h-[110vh] max-h-280 w-auto opacity-35 mask-[linear-gradient(to_left,black_35%,transparent_85%)] sm:-right-32" />
+    </div>
+  );
+}
+
 /** The dark navigation column: brand, grouped sections with counts, and who is signed in. */
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const { t, i18n } = useTranslation();
@@ -270,7 +291,12 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   });
 
   return (
-    <div className="flex h-full flex-col bg-night text-white">
+    <div className="relative isolate flex h-full flex-col overflow-hidden bg-linear-to-b from-night via-night to-deep text-white">
+      {/* The same map, small and warm, sitting quietly at the foot of the column. */}
+      <BangladeshMap
+        tone="dark"
+        className="pointer-events-none absolute -bottom-10 -right-16 -z-10 h-80 w-auto opacity-15"
+      />
       <div className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5">
         <Link to="/admin" className="flex items-center gap-2 rounded-xl">
           <Logo inverted />
@@ -292,7 +318,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
       <nav
         aria-label={t('admin.nav.label')}
-        className="flex-1 overflow-y-auto px-3 py-5 [scrollbar-color:rgb(255_255_255/0.15)_transparent] [scrollbar-width:thin]"
+        className="flex-1 overflow-y-auto px-3 py-5 [scrollbar-color:rgb(255_255_255/0.15)_transparent] scrollbar-thin"
       >
         {visible.map((group) => (
           <div key={group.key} className="mb-6 last:mb-0">
@@ -308,26 +334,38 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                       to={to}
                       end={to === '/admin'}
                       className={({ isActive }) =>
-                        `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                        `group flex items-center gap-3 rounded-xl px-2 py-2 text-sm font-medium transition ${
                           isActive
-                            ? 'bg-white/10 text-white shadow-[inset_3px_0_0_var(--color-turmeric)]'
+                            ? 'bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]'
                             : 'text-white/70 hover:bg-white/5 hover:text-white'
                         }`
                       }
                     >
-                      <Icon aria-hidden="true" className="h-4.5 w-4.5 shrink-0" />
-                      <span className="flex-1 truncate">{t(label)}</span>
-                      {value > 0 && (
-                        <span
-                          className={`min-w-6 rounded-full px-1.5 py-0.5 text-center text-xs font-bold ${
-                            urgent
-                              ? 'animate-pulse bg-jamdani text-white'
-                              : 'bg-turmeric text-night'
-                          }`}
-                        >
-                          {formatCount(value, language)}
-                          <span className="sr-only"> {t('admin.portal.waiting')}</span>
-                        </span>
+                      {({ isActive }) => (
+                        <>
+                          <span
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${
+                              isActive
+                                ? 'bg-turmeric text-night shadow-[0_6px_16px_rgba(217,154,18,0.35)]'
+                                : 'bg-white/5 text-white/70 group-hover:bg-white/10 group-hover:text-white'
+                            }`}
+                          >
+                            <Icon aria-hidden="true" className="h-4 w-4" />
+                          </span>
+                          <span className="flex-1 truncate">{t(label)}</span>
+                          {value > 0 && (
+                            <span
+                              className={`min-w-6 rounded-full px-1.5 py-0.5 text-center text-xs font-bold ${
+                                urgent
+                                  ? 'animate-pulse bg-jamdani text-white'
+                                  : 'bg-turmeric text-night'
+                              }`}
+                            >
+                              {formatCount(value, language)}
+                              <span className="sr-only"> {t('admin.portal.waiting')}</span>
+                            </span>
+                          )}
+                        </>
                       )}
                     </NavLink>
                   </li>
