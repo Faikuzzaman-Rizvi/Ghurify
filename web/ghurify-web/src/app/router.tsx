@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
-import { createBrowserRouter, Outlet, RouterProvider, useLocation } from 'react-router';
+import { createBrowserRouter, Outlet, useLocation } from 'react-router';
+// The DOM build of the provider: it can render a navigation synchronously (flushSync), which
+// signing out relies on to leave a protected page before it notices the session has ended.
+import { RouterProvider } from 'react-router/dom';
 import { CreditsPage } from './CreditsPage';
 import { HomePage } from './HomePage';
 import { NotFoundPage } from './NotFoundPage';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { PageLoading } from '@/components/States';
 import { GuidedTour } from '@/components/tour/GuidedTour';
 import { useIsOverHero } from '@/components/ui/headerStore';
 import { hasSeenTour, useTourStore } from '@/components/tour/tourStore';
@@ -27,10 +31,15 @@ import { UsersPage } from '@/features/admin/UsersPage';
 import { UserDetailPage } from '@/features/admin/UserDetailPage';
 import { AdminTripsPage } from '@/features/admin/AdminTripsPage';
 import { BookingLookupPage } from '@/features/admin/BookingLookupPage';
+import { AdminPaymentsPage } from '@/features/admin/AdminPaymentsPage';
+import { AdminPaymentDetailPage } from '@/features/admin/AdminPaymentDetailPage';
 import { EmergencyPointsPage } from '@/features/admin/EmergencyPointsPage';
 import { AuditLogPage } from '@/features/admin/AuditLogPage';
+import { StoriesModerationPage } from '@/features/admin/StoriesModerationPage';
 import { TripSafetyPage } from '@/features/safety/TripSafetyPage';
 import { useSilentRefresh } from '@/features/auth/useSilentRefresh';
+import { useForgetOnSignOut } from '@/features/auth/useForgetOnSignOut';
+import { useLiveNotifications } from '@/hooks/useNotifications';
 import { ExplorePage } from '@/features/trips/ExplorePage';
 import { TripDetailPage } from '@/features/trips/TripDetailPage';
 import { HostTripsPage } from '@/features/trips/HostTripsPage';
@@ -38,6 +47,9 @@ import { ManageRequestsPage } from '@/features/bookings/ManageRequestsPage';
 import { MyTripsPage } from '@/features/bookings/MyTripsPage';
 import { CheckoutPage } from '@/features/payments/CheckoutPage';
 import { HostPayoutsPage } from '@/features/payments/HostPayoutsPage';
+import { PaymentHistoryPage } from '@/features/payments/PaymentHistoryPage';
+import { PaymentReceiptPage } from '@/features/payments/PaymentReceiptPage';
+import { ReceivedPaymentsPage } from '@/features/payments/ReceivedPaymentsPage';
 import { ChatPage } from '@/features/chat/ChatPage';
 import { FeedPage } from '@/features/feed/FeedPage';
 import { PublicProfilePage } from '@/features/feed/PublicProfilePage';
@@ -47,12 +59,20 @@ import { SandboxPaymentPage } from '@/features/payments/SandboxPaymentPage';
 import { TripWizardPage } from '@/features/trips/TripWizardPage';
 
 /**
- * Wraps every route: header, footer and the guided tour, and the session is restored from
- * the httpOnly refresh cookie once, on load, rather than per screen.
+ * The root of every route, the site's and the admin portal's alike. The session is restored from
+ * the httpOnly refresh cookie once, on load, and the live notification connection opened once;
+ * here rather than in each frame, so moving between the site and the portal does neither again.
  */
-function AppShell() {
+function RootLayout() {
   useSilentRefresh();
+  useForgetOnSignOut();
   useScrollOnNavigate();
+  useLiveNotifications();
+  return <Outlet />;
+}
+
+/** The public site's frame: header, footer and the guided tour. */
+function SiteShell() {
   useFirstVisitTour();
   // Photo-led pages set their own spacing down to the footer; the rest get a margin.
   const overHero = useIsOverHero();
@@ -67,13 +87,6 @@ function AppShell() {
       <GuidedTour />
     </div>
   );
-}
-
-/** The admin portal's root: the same session restore and scroll handling, none of the site chrome. */
-function AdminShell() {
-  useSilentRefresh();
-  useScrollOnNavigate();
-  return <Outlet />;
 }
 
 /**
@@ -115,145 +128,171 @@ function useFirstVisitTour() {
 
 const router = createBrowserRouter([
   {
-    element: <AppShell />,
-    children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/credits', element: <CreditsPage /> },
-      { path: '/trips', element: <ExplorePage /> },
-      { path: '/trips/:id', element: <TripDetailPage /> },
-      {
-        path: '/destinations/:slug',
-        // Loaded on demand: it is the only screen with a map, and Leaflet is most of the
-        // bundle. Everyone else never downloads it.
-        lazy: async () => ({
-          Component: (await import('@/features/trips/DestinationPage')).DestinationPage,
-        }),
-      },
-      { path: '/login', element: <LoginPage /> },
-      { path: '/register', element: <RegisterPage /> },
-      { path: '/forgot-password', element: <ForgotPasswordPage /> },
-      {
-        path: '/account',
-        element: (
-          <ProtectedRoute>
-            <AccountPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/account/verify',
-        element: (
-          <ProtectedRoute>
-            <VerificationPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/host/trips',
-        element: (
-          <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-            <HostTripsPage />
-          </RoleRoute>
-        ),
-      },
-      {
-        path: '/host/trips/new',
-        element: (
-          <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-            <TripWizardPage />
-          </RoleRoute>
-        ),
-      },
-      {
-        path: '/host/trips/:id/edit',
-        element: (
-          <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-            <TripWizardPage />
-          </RoleRoute>
-        ),
-      },
-      {
-        path: '/host/trips/:id/requests',
-        element: (
-          <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-            <ManageRequestsPage />
-          </RoleRoute>
-        ),
-      },
-      {
-        path: '/me/trips',
-        element: (
-          <ProtectedRoute>
-            <MyTripsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/bookings/:id/checkout',
-        element: (
-          <ProtectedRoute>
-            <CheckoutPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/payments/sandbox',
-        element: (
-          <ProtectedRoute>
-            <SandboxPaymentPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/payments/result',
-        element: (
-          <ProtectedRoute>
-            <PaymentResultPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/trips/:id/chat',
-        element: (
-          <ProtectedRoute>
-            <ChatPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/host/payouts',
-        element: (
-          <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-            <HostPayoutsPage />
-          </RoleRoute>
-        ),
-      },
-      { path: '/feed', element: <FeedPage /> },
-      { path: '/users/:id', element: <PublicProfilePage /> },
-      {
-        path: '/trips/:id/safety',
-        element: (
-          <ProtectedRoute>
-            <TripSafetyPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/trips/:id/review',
-        element: (
-          <ProtectedRoute>
-            <ReviewPage />
-          </ProtectedRoute>
-        ),
-      },
-      { path: '*', element: <NotFoundPage /> },
-    ],
-  },
-  {
-    // The admin portal has its own frame (sidebar and top bar), not the public header and footer.
-    element: <AdminShell />,
+    element: <RootLayout />,
     children: [
       {
+        element: <SiteShell />,
+        children: [
+          { path: '/', element: <HomePage /> },
+          { path: '/credits', element: <CreditsPage /> },
+          { path: '/trips', element: <ExplorePage /> },
+          { path: '/trips/:id', element: <TripDetailPage /> },
+          {
+            path: '/destinations/:slug',
+            // Loaded on demand: it is the only screen with a map, and Leaflet is most of the
+            // bundle. Everyone else never downloads it. Opened directly, the page waits for that
+            // download inside the site's frame.
+            hydrateFallbackElement: <PageLoading />,
+            lazy: async () => ({
+              Component: (await import('@/features/trips/DestinationPage')).DestinationPage,
+            }),
+          },
+          { path: '/login', element: <LoginPage /> },
+          { path: '/register', element: <RegisterPage /> },
+          { path: '/forgot-password', element: <ForgotPasswordPage /> },
+          {
+            path: '/account',
+            element: (
+              <ProtectedRoute>
+                <AccountPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/account/verify',
+            element: (
+              <ProtectedRoute>
+                <VerificationPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/host/trips',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
+                <HostTripsPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: '/host/trips/new',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
+                <TripWizardPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: '/host/trips/:id/edit',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
+                <TripWizardPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: '/host/trips/:id/requests',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
+                <ManageRequestsPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: '/me/trips',
+            element: (
+              <ProtectedRoute>
+                <MyTripsPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/bookings/:id/checkout',
+            element: (
+              <ProtectedRoute>
+                <CheckoutPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/payments/sandbox',
+            element: (
+              <ProtectedRoute>
+                <SandboxPaymentPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/payments/result',
+            element: (
+              <ProtectedRoute>
+                <PaymentResultPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/trips/:id/chat',
+            element: (
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/host/payouts',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
+                <HostPayoutsPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: '/host/payments',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
+                <ReceivedPaymentsPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: '/me/payments',
+            element: (
+              <ProtectedRoute>
+                <PaymentHistoryPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/me/payments/:id',
+            element: (
+              <ProtectedRoute>
+                <PaymentReceiptPage />
+              </ProtectedRoute>
+            ),
+          },
+          { path: '/feed', element: <FeedPage /> },
+          { path: '/users/:id', element: <PublicProfilePage /> },
+          {
+            path: '/trips/:id/safety',
+            element: (
+              <ProtectedRoute>
+                <TripSafetyPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/trips/:id/review',
+            element: (
+              <ProtectedRoute>
+                <ReviewPage />
+              </ProtectedRoute>
+            ),
+          },
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
+      {
+        // The admin portal has its own frame (sidebar and top bar), not the public header and footer.
         path: '/admin',
         element: (
           <RoleRoute allow={(profile) => isStaff(profile.roles)}>
@@ -277,6 +316,16 @@ const router = createBrowserRouter([
                 allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'Moderator')}
               >
                 <ReportsQueuePage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: 'stories',
+            element: (
+              <RoleRoute
+                allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'Moderator')}
+              >
+                <StoriesModerationPage />
               </RoleRoute>
             ),
           },
@@ -345,6 +394,22 @@ const router = createBrowserRouter([
             element: (
               <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
                 <BookingLookupPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: 'payments',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+                <AdminPaymentsPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: 'payments/:id',
+            element: (
+              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+                <AdminPaymentDetailPage />
               </RoleRoute>
             ),
           },

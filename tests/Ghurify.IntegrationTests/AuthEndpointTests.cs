@@ -306,6 +306,18 @@ public sealed class AuthEndpointTests(SqlServerFixture database)
     }
 
     [Fact]
+    public async Task Refresh_WithNoCookie_SaysThereIsNoSession_WithoutAnError()
+    {
+        await using var api = NewApi();
+        using var client = api.CreateClientWithoutCookieJar();
+
+        using var response = await client.PostAsync(new Uri("/api/v1/auth/refresh", UriKind.Relative), null, Token);
+
+        // Every visitor's first page load asks; for someone never signed in that is not a failure.
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Logout_StopsTheRefreshTokenWorking()
     {
         await using var data = new TestData(database.ConnectionString);

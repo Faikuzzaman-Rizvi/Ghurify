@@ -27,7 +27,7 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="mt-auto bg-night text-white/75">
+    <footer className="mt-auto bg-night text-white/75 print:hidden">
       <div className="container-page pt-16">
         <ul className="grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-3">
           {promises.map(({ key, icon: Icon }) => (

@@ -69,6 +69,24 @@ describe('payment screens', () => {
     expect((init?.headers as Record<string, string>)['Idempotency-Key']).toMatch(/^[a-f0-9]{32}$/);
   });
 
+  it('gives the test card on a sandbox checkout, and nothing of the kind on a live one', async () => {
+    stubApi([[/\/api\/v1\/bookings\/90\/checkout$/, { ...checkout, mode: 'Sandbox' }]]);
+    const { unmount } = renderScreen(<CheckoutPage />, {
+      at: '/bookings/90/checkout',
+      path: '/bookings/:id/checkout',
+    });
+
+    expect(await screen.findByText('Demo payment: no real money')).toBeInTheDocument();
+    expect(screen.getByText('4111 1111 1111 1111')).toBeInTheDocument();
+    unmount();
+
+    stubApi([[/\/api\/v1\/bookings\/90\/checkout$/, { ...checkout, mode: 'Live' }]]);
+    renderScreen(<CheckoutPage />, { at: '/bookings/90/checkout', path: '/bookings/:id/checkout' });
+
+    expect(await screen.findByRole('button', { name: /^Pay / })).toBeInTheDocument();
+    expect(screen.queryByText('4111 1111 1111 1111')).not.toBeInTheDocument();
+  });
+
   it('says plainly when a seat is already paid for', async () => {
     stubApi([[/\/api\/v1\/bookings\/90\/checkout$/, { ...checkout, status: 'Confirmed' }]]);
 

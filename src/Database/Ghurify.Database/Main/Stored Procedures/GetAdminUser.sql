@@ -21,7 +21,8 @@ BEGIN
            [p].[HomeDistrict],
            [p].[EmergencyContactName],
            [p].[EmergencyContactPhone],
-           [p].[AvatarUpdatedOn],
+           -- A version only while there is a picture: a removed one keeps its timestamp.
+           IIF([p].[AvatarBlob] IS NULL, NULL, [p].[AvatarUpdatedOn]) AS [AvatarUpdatedOn],
            CAST(CASE WHEN [c].[Id] IS NULL THEN 0 ELSE 1 END AS BIT) AS [HasPassword],
            CAST(ISNULL([c].[MustReset], 0) AS BIT)                    AS [MustResetPassword]
     FROM      [Main].[User]           AS [u]

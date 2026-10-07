@@ -2,7 +2,14 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Browser, type Page } from '@playwright/test';
-import { databaseName, mailDirectory, saPassword, sqlContainer, webUrl } from './settings.mjs';
+import {
+  databaseName,
+  mailDirectory,
+  paymentsProvider,
+  saPassword,
+  sqlContainer,
+  webUrl,
+} from './settings.mjs';
 
 /**
  * The core journey, in a real browser against the real API and database, at phone width:
@@ -80,12 +87,17 @@ test('a new traveller signs up, verifies, books, pays, chats and reviews', async
   await host.getByRole('button', { name: 'Approve and hold a seat' }).click();
   await expect(host.getByRole('button', { name: 'Approve and hold a seat' })).toHaveCount(0);
 
-  // 6. Pay into escrow through the sandbox gateway.
+  // 6. Pay into escrow: on the built-in pretend page, or the real SSLCommerz sandbox
+  //    (E2E_PAYMENTS=sslcommerz), which sends the traveller back through the API's return URL.
   await traveller.goto('/me/trips');
   await traveller.getByRole('link', { name: /^Pay / }).first().click();
   await traveller.getByRole('button', { name: /^Pay / }).click();
-  await traveller.getByRole('button', { name: 'Pay successfully' }).click();
-  await expect(traveller.getByText('You are going!')).toBeVisible();
+  if (paymentsProvider === 'sslcommerz') {
+    await payWithSslCommerzTestCard(traveller);
+  } else {
+    await traveller.getByRole('button', { name: 'Pay successfully' }).click();
+  }
+  await expect(traveller.getByText('You are going!')).toBeVisible({ timeout: 30_000 });
 
   // 7. Say hello to the group.
   await traveller.goto(`/trips/${tripId}/chat`);
@@ -102,6 +114,33 @@ test('a new traveller signs up, verifies, books, pays, chats and reviews', async
   await traveller.getByRole('button', { name: 'Submit review' }).first().click();
   await expect(traveller.getByText(/Thank you\. Your review of/).first()).toBeVisible();
 });
+
+/**
+ * On SSLCommerz's sandbox checkout: their published test VISA card. The PAY button only enables
+ * once the sandbox has looked the card up, so the click waits for it.
+ */
+async function payWithSslCommerzTestCard(page: Page) {
+  await page.waitForURL(/sandbox\.sslcommerz\.com/, { timeout: 30_000 });
+  await page.locator('#ccnum').pressSequentially('4111111111111111');
+  await page.locator('#expiry').pressSequentially('1230');
+  await page.locator('input[name=cvc]').pressSequentially('111');
+  await page.locator('input[name=name]').pressSequentially('Mitu Akter');
+  await page.keyboard.press('Tab');
+  await page.locator('button.loading-btn').click({ timeout: 45_000 });
+
+  // Larger amounts go through the sandbox's OTP simulator: any code, then "Success".
+  const result = new RegExp(`^${webUrl}/payments/result`);
+  const otp = page.getByRole('button', { name: 'Success', exact: true });
+  await expect(otp.or(page.getByText('You are going!'))).toBeVisible({ timeout: 60_000 });
+  if (!result.test(page.url())) {
+    await page
+      .locator('input[type=text], input[type=password], input:not([type])')
+      .first()
+      .fill('111111');
+    await otp.click();
+  }
+  await page.waitForURL(result, { timeout: 60_000 });
+}
 
 /** A fresh browser context in English, with the first-visit tour already seen. */
 async function openAs(browser: Browser): Promise<Page> {

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Ghurify.Application.Admin;
 using Ghurify.Application.Social;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,10 +49,37 @@ public static class SocialEndpoints
             .Produces<PostCreated>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
+        posts.MapPut("/{id:long}", EditPostAsync)
+            .WithName("EditPost")
+            .WithSummary("Edits your own story: the text, the destination, and which photos stay.")
+            .RequireRateLimiting(RateLimitPolicies.Content)
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         posts.MapDelete("/{id:long}", DeletePostAsync)
             .WithName("DeletePost")
             .WithSummary("Removes your own story.")
             .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        // Moderation from the admin portal: moderators and admins see every story and may remove any.
+        var moderation = app.MapGroup("/api/v1/admin/posts")
+            .WithTags("Admin")
+            .RequireAuthorization(Authorization.Policies.Moderator);
+
+        moderation.MapGet("/", ListAllPostsAsync)
+            .WithName("ListAllPosts")
+            .WithSummary("Every story, or one author's, newest first.")
+            .Produces<PostPage>()
+            .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        moderation.MapPost("/{id:long}/remove", RemovePostAsync)
+            .WithName("RemovePost")
+            .WithSummary("Removes anyone's story, with a reason that is audited and sent to the author.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         posts.MapPost("/{id:long}/likes", LikeAsync)
@@ -145,6 +173,20 @@ public static class SocialEndpoints
 
     private static async Task<IResult> DeletePostAsync(long id, ClaimsPrincipal principal, [FromServices] DeletePostHandler handler, CancellationToken cancellationToken) =>
         ApiResults.NoContent(await handler.HandleAsync(principal.RequireUserId(), id, cancellationToken));
+
+    private static async Task<IResult> EditPostAsync(long id, EditPostCommand command, ClaimsPrincipal principal, [FromServices] EditPostHandler handler, CancellationToken cancellationToken) =>
+        ApiResults.NoContent(await handler.HandleAsync(principal.RequireUserId(), id, command, cancellationToken));
+
+    private static async Task<IResult> ListAllPostsAsync(
+        ClaimsPrincipal principal,
+        [FromServices] ListAllPostsHandler handler,
+        CancellationToken cancellationToken,
+        long? authorId = null,
+        long? before = null) =>
+        ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), authorId, before, cancellationToken));
+
+    private static async Task<IResult> RemovePostAsync(long id, AdminReason command, ClaimsPrincipal principal, [FromServices] RemovePostHandler handler, CancellationToken cancellationToken) =>
+        ApiResults.NoContent(await handler.HandleAsync(principal.RequireUserId(), id, command, cancellationToken));
 
     private static async Task<IResult> LikeAsync(long id, ClaimsPrincipal principal, [FromServices] LikePostHandler handler, CancellationToken cancellationToken) =>
         ApiResults.NoContent(await handler.HandleAsync(principal.RequireUserId(), id, like: true, cancellationToken));

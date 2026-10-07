@@ -102,7 +102,8 @@ public sealed class IdentityDocumentEndpointTests(SqlServerFixture database)
         using var anonymous = api.CreateClientWithoutRedirects();
 
         using var before = await anonymous.GetAsync(new Uri($"/api/v1/users/{user.Id}/avatar", UriKind.Relative), Token);
-        Assert.Equal(HttpStatusCode.NotFound, before.StatusCode);
+        // No picture: 204 (the page shows initials), never a 404 that the browser reports as an error.
+        Assert.Equal(HttpStatusCode.NoContent, before.StatusCode);
 
         using var ticketResponse = await client.PostAsJsonAsync("/api/v1/me/avatar", new { contentType = "image/jpeg", sizeBytes = 2000 }, Token);
         var ticket = (await ticketResponse.Content.ReadFromJsonAsync<TicketResponse>(TestData.Json, Token))!;
@@ -121,8 +122,33 @@ public sealed class IdentityDocumentEndpointTests(SqlServerFixture database)
         using var removed = await client.DeleteAsync(new Uri("/api/v1/me/avatar", UriKind.Relative), Token);
         using var after = await anonymous.GetAsync(new Uri($"/api/v1/users/{user.Id}/avatar", UriKind.Relative), Token);
         Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, after.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, after.StatusCode);
         Assert.Empty(media.Blobs);
+
+        // No picture, no version: the page shows the initial without asking for one.
+        var afterRemoval = await client.GetFromJsonAsync<ProfileResponse>("/api/v1/me/profile", TestData.Json, Token);
+        Assert.Null(afterRemoval!.AvatarVersion);
+    }
+
+    [Fact]
+    public async Task ProfilePicture_WhenStorageIsUnreachable_AnswersStorageUnavailable_NotAServerError()
+    {
+        await using var data = new TestData(database.ConnectionString);
+        var user = await data.CreateUserAsync();
+        var media = new InMemoryMediaStorage();
+        await using var api = Api(new InMemoryDocumentStorage(), media);
+        using var client = TestData.ClientFor(api, user);
+
+        using var ticketResponse = await client.PostAsJsonAsync("/api/v1/me/avatar", new { contentType = "image/jpeg", sizeBytes = 2000 }, Token);
+        var ticket = (await ticketResponse.Content.ReadFromJsonAsync<TicketResponse>(TestData.Json, Token))!;
+        media.Put(ticket.UploadUrl, JpegWithGps());
+        media.Unreachable = true;
+
+        using var completed = await client.PostAsJsonAsync("/api/v1/me/avatar/complete", new { uploadId = ticket.Id }, Token);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, completed.StatusCode);
+        Assert.Equal("storage_unavailable", (await completed.Content.ReadFromJsonAsync<Problem>(TestData.Json, Token))!.Code);
+        Assert.True(completed.Headers.RetryAfter is not null);
     }
 
     [Fact]
@@ -187,4 +213,6 @@ public sealed class IdentityDocumentEndpointTests(SqlServerFixture database)
     private sealed record QueueItem(long Id, int DocumentCount);
 
     private sealed record ProfileResponse(long? AvatarVersion);
+
+    private sealed record Problem(string? Code);
 }

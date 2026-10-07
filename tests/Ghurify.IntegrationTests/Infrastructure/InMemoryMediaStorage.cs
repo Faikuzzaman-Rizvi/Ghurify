@@ -13,6 +13,9 @@ public sealed class InMemoryMediaStorage : IMediaStorage
 
     public bool IsConfigured => true;
 
+    /// <summary>When set, every read, write and delete fails as if the storage account were down.</summary>
+    public bool Unreachable { get; set; }
+
     public Uri CreateUploadUrl(string blobName, string contentType, DateTimeOffset expiresOn) =>
         new($"https://storage.test/media/{blobName}?sig=write");
 
@@ -26,18 +29,31 @@ public sealed class InMemoryMediaStorage : IMediaStorage
         Blobs[blob] = content;
     }
 
-    public Task<byte[]?> ReadAsync(string blobName, long maxBytes, CancellationToken cancellationToken) =>
-        Task.FromResult(Blobs.TryGetValue(blobName, out var content) && content.Length <= maxBytes ? content : null);
+    public Task<byte[]?> ReadAsync(string blobName, long maxBytes, CancellationToken cancellationToken)
+    {
+        ThrowIfUnreachable();
+        return Task.FromResult(Blobs.TryGetValue(blobName, out var content) && content.Length <= maxBytes ? content : null);
+    }
 
     public Task WriteAsync(string blobName, byte[] content, string contentType, CancellationToken cancellationToken)
     {
+        ThrowIfUnreachable();
         Blobs[blobName] = content;
         return Task.CompletedTask;
     }
 
     public Task DeleteAsync(string blobName, CancellationToken cancellationToken)
     {
+        ThrowIfUnreachable();
         Blobs.TryRemove(blobName, out _);
         return Task.CompletedTask;
+    }
+
+    private void ThrowIfUnreachable()
+    {
+        if (Unreachable)
+        {
+            throw new StorageUnavailableException("Blob storage at https://storage.test could not be reached.");
+        }
     }
 }

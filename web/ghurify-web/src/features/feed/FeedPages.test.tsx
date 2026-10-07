@@ -69,6 +69,76 @@ describe('stories and reviews', () => {
     );
   });
 
+  it('lets the author edit their own story: new text, a photo dropped', async () => {
+    const user = userEvent.setup();
+    useAuthStore.setState({
+      status: 'authenticated',
+      user: { id: 3, maskedEmail: 'n****n@example.com', displayName: 'Nadia Rahman' },
+    });
+    const fetchMock = stubApi([
+      [/\/api\/v1\/posts\/40$/, null, 204],
+      [/\/api\/v1\/feed/, { items: [post], nextBefore: null }],
+      [/\/api\/v1\/destinations$/, sampleDestinations],
+    ]);
+
+    renderScreen(<FeedPage />);
+    await user.click(await screen.findByRole('button', { name: 'Edit' }));
+    const text = screen.getByRole('textbox', { name: 'Your story' });
+    await user.clear(text);
+    await user.type(text, 'Sajek, above the clouds.');
+    await user.click(screen.getByRole('button', { name: 'Remove' }));
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => {
+      const edit = requests(fetchMock).find(
+        (request) => request.method === 'PUT' && request.url.endsWith('/posts/40'),
+      );
+      expect(JSON.parse(edit?.body ?? '{}')).toEqual({
+        body: 'Sajek, above the clouds.',
+        destinationSlug: 'sajek',
+        keepMediaIds: [],
+      });
+    });
+  });
+
+  it('deletes the author’s story only after they confirm', async () => {
+    const user = userEvent.setup();
+    useAuthStore.setState({
+      status: 'authenticated',
+      user: { id: 3, maskedEmail: 'n****n@example.com', displayName: 'Nadia Rahman' },
+    });
+    const fetchMock = stubApi([
+      [/\/api\/v1\/posts\/40$/, null, 204],
+      [/\/api\/v1\/feed/, { items: [post], nextBefore: null }],
+      [/\/api\/v1\/destinations$/, sampleDestinations],
+    ]);
+    const deletes = () =>
+      requests(fetchMock).filter(
+        (request) => request.method === 'DELETE' && request.url.endsWith('/posts/40'),
+      );
+
+    renderScreen(<FeedPage />);
+    await user.click(await screen.findByRole('button', { name: 'Delete' }));
+    expect(screen.getByText('Delete this story?')).toBeInTheDocument();
+    expect(deletes()).toHaveLength(0);
+
+    await user.click(screen.getByRole('button', { name: 'Delete story' }));
+    await waitFor(() => expect(deletes()).toHaveLength(1));
+  });
+
+  it('offers no edit or delete on someone else’s story, only a report', async () => {
+    stubApi([
+      [/\/api\/v1\/feed/, { items: [post], nextBefore: null }],
+      [/\/api\/v1\/destinations$/, sampleDestinations],
+    ]);
+
+    renderScreen(<FeedPage />);
+
+    expect(await screen.findByText('Clouds rolling over Sajek at dawn.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+  });
+
   it('shows a person with their rating and reviews, and lets you follow them', async () => {
     stubApi([
       [

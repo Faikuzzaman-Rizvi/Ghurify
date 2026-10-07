@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Ghurify.Api.Authorization;
 using Ghurify.Application.Admin;
+using Ghurify.Application.Payments;
 using Ghurify.Domain.Identity;
+using Ghurify.Domain.Payments;
 using Ghurify.Domain.Trips;
 using Microsoft.AspNetCore.Mvc;
 
@@ -72,6 +74,20 @@ public static class AdminPortalEndpoints
             .Produces<AdminBookingDetail>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        admin.MapGet("/payments", SearchPaymentsAsync)
+            .WithName("SearchPayments")
+            .WithSummary("Every payment, by number, transaction reference, gateway id, traveller email or name, or trip.")
+            .RequireAuthorization(Policies.AdminOnly)
+            .Produces<PaymentHistoryPage>()
+            .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        admin.MapGet("/payments/{id:long}", GetPaymentAsync)
+            .WithName("GetPaymentForAdmin")
+            .WithSummary("One payment in full: receipt, payer, gateway settlement, refunds and the callbacks received.")
+            .RequireAuthorization(Policies.AdminOnly)
+            .Produces<AdminPaymentDetail>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         admin.MapPost("/refunds/retry", RetryRefundsAsync)
             .WithName("RetryRefundsNow")
             .WithSummary("Retries every failed refund now.")
@@ -140,6 +156,19 @@ public static class AdminPortalEndpoints
     private static async Task<IResult> LookupBookingAsync(
         string q, ClaimsPrincipal principal, [FromServices] GetBookingForAdminHandler handler, CancellationToken cancellationToken) =>
         ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), q, cancellationToken));
+
+    private static async Task<IResult> SearchPaymentsAsync(
+        ClaimsPrincipal principal,
+        [FromServices] SearchPaymentsHandler handler,
+        CancellationToken cancellationToken,
+        string? search = null,
+        PaymentStatus? status = null,
+        int page = 1) =>
+        ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), search, status, page, cancellationToken));
+
+    private static async Task<IResult> GetPaymentAsync(
+        long id, ClaimsPrincipal principal, [FromServices] GetPaymentForAdminHandler handler, CancellationToken cancellationToken) =>
+        ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), id, cancellationToken));
 
     private static async Task<IResult> RetryRefundsAsync(
         ClaimsPrincipal principal, [FromServices] RetryRefundsNowHandler handler, CancellationToken cancellationToken) =>

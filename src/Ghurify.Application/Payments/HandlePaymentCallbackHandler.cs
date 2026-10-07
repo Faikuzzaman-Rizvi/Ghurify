@@ -93,8 +93,7 @@ public sealed class HandlePaymentCallbackHandler(
             return "not_validated";
         }
 
-        var settlement = await payments.SetSucceededAsync(
-            validation.TransactionRef, validation.ProviderTxnId, validation.Amount, validation.Currency, cancellationToken);
+        var settlement = await payments.SetSucceededAsync(validation, cancellationToken);
 
         switch (settlement.Outcome)
         {

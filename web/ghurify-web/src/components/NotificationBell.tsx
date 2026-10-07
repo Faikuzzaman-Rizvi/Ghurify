@@ -22,6 +22,8 @@ function linkFor(item: NotificationItem): string {
     case 'booking.traveler_confirmed':
     case 'payout.released':
       return '/host/payouts';
+    case 'post.removed':
+      return '/feed';
     default:
       return '/me/trips';
   }

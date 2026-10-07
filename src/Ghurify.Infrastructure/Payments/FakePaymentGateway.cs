@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Ghurify.Application.Payments;
+using Ghurify.Domain.Payments;
 using Microsoft.Extensions.Options;
 
 namespace Ghurify.Infrastructure.Payments;
@@ -109,12 +110,50 @@ public sealed class FakePaymentGateway(IOptions<PaymentsOptions> options) : IPay
             throw new PaymentGatewayException("The sandbox validation service timed out.");
         }
 
+        var valid = callback.Outcome == GatewayOutcome.Succeeded && callback.ValidationId is not null;
+        var amount = callback.Amount ?? 0;
+
         return Task.FromResult(new GatewayValidation(
-            callback.Outcome == GatewayOutcome.Succeeded && callback.ValidationId is not null,
+            valid,
             callback.TransactionRef,
             "FAKE-" + callback.ValidationId,
-            callback.Amount ?? 0,
-            callback.Currency ?? "BDT"));
+            amount,
+            callback.Currency ?? "BDT")
+        {
+            Details = valid ? SandboxDetails(callback.ValidationId!, amount) : null,
+        });
+    }
+
+    /// <summary>The ways to pay the sandbox page offers. Anything else is paid as a card.</summary>
+    public static IReadOnlyList<string> SandboxMethods { get; } = ["bkash", "nagad", "rocket", "card"];
+
+    /// <summary>
+    /// What a real gateway would report for the chosen method. The method rides in the signed
+    /// validation id ("VAL-BKASH-..."), so nothing is remembered between the page and the callback.
+    /// The sandbox keeps 2% as its own charge, so the store amount looks like a real settlement.
+    /// </summary>
+    private static GatewayPaymentDetails SandboxDetails(string validationId, decimal amount)
+    {
+        var parts = validationId.Split('-');
+        var method = parts.Length >= 3 ? parts[1].ToLowerInvariant() : "card";
+
+        var (type, name, last4, issuer) = method switch
+        {
+            "bkash" => (PaymentMethodType.MobileBanking, "bKash", "7788", "bKash Limited"),
+            "nagad" => (PaymentMethodType.MobileBanking, "Nagad", "4455", "Nagad"),
+            "rocket" => (PaymentMethodType.MobileBanking, "Rocket", "9911", "Dutch-Bangla Bank"),
+            _ => (PaymentMethodType.Card, "Visa", "4242", "Sandbox Bank"),
+        };
+
+        return new GatewayPaymentDetails(
+            type,
+            name,
+            last4,
+            issuer,
+            validationId,
+            DateTimeOffset.UtcNow,
+            amount - Math.Round(amount * 0.02m, 2, MidpointRounding.AwayFromZero),
+            RiskFlagged: false);
     }
 
     public Task<GatewayRefundResult> RefundAsync(GatewayRefundRequest request, CancellationToken cancellationToken)
@@ -129,17 +168,20 @@ public sealed class FakePaymentGateway(IOptions<PaymentsOptions> options) : IPay
 
     /// <summary>
     /// The fields of a callback for a payment, signed the way this gateway checks them. Used by the
-    /// sandbox endpoint and by tests.
+    /// sandbox endpoint and by tests. <paramref name="method"/> is one of <see cref="SandboxMethods"/>.
     /// </summary>
-    public Dictionary<string, string> SignedCallback(string transactionRef, bool succeeded, decimal amount, string? validationId = null)
+    public Dictionary<string, string> SignedCallback(
+        string transactionRef, bool succeeded, decimal amount, string? validationId = null, string method = "card")
     {
+        var chosen = SandboxMethods.Contains(method, StringComparer.OrdinalIgnoreCase) ? method.ToUpperInvariant() : "CARD";
+
         var fields = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["tran_id"] = transactionRef,
             ["status"] = succeeded ? "VALID" : "FAILED",
             ["amount"] = amount.ToString("0.00", CultureInfo.InvariantCulture),
             ["currency"] = "BDT",
-            ["val_id"] = validationId ?? "VAL" + Guid.NewGuid().ToString("N")[..16].ToUpperInvariant(),
+            ["val_id"] = validationId ?? $"VAL-{chosen}-{Guid.NewGuid().ToString("N")[..16].ToUpperInvariant()}",
         };
 
         fields["signature"] = Convert.ToHexString(Hash(fields));

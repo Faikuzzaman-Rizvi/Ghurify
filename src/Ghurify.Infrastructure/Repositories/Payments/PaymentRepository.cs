@@ -82,20 +82,25 @@ public sealed class PaymentRepository(IDbConnectionFactory connectionFactory) : 
             Procedures.Pay.SetPaymentFailed, parameters, commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
     }
 
-    public async Task<PaymentSettlement> SetSucceededAsync(
-        string transactionRef,
-        string providerTxnId,
-        decimal paidAmount,
-        string currency,
-        CancellationToken cancellationToken)
+    public async Task<PaymentSettlement> SetSucceededAsync(GatewayValidation validation, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(validation);
         await using var connection = await connectionFactory.OpenAsync(cancellationToken);
 
+        var details = validation.Details;
         var parameters = new DynamicParameters();
-        parameters.Add("@TransactionRef", transactionRef, DbType.AnsiString, size: 40);
-        parameters.Add("@ProviderTxnId", Truncate(providerTxnId, 100), DbType.AnsiString, size: 100);
-        parameters.Add("@PaidAmount", paidAmount, DbType.Decimal, precision: 18, scale: 2);
-        parameters.Add("@Currency", currency.ToUpperInvariant(), DbType.AnsiStringFixedLength, size: 3);
+        parameters.Add("@TransactionRef", validation.TransactionRef, DbType.AnsiString, size: 40);
+        parameters.Add("@ProviderTxnId", Truncate(validation.ProviderTxnId, 100), DbType.AnsiString, size: 100);
+        parameters.Add("@PaidAmount", validation.Amount, DbType.Decimal, precision: 18, scale: 2);
+        parameters.Add("@Currency", validation.Currency.ToUpperInvariant(), DbType.AnsiStringFixedLength, size: 3);
+        parameters.Add("@MethodType", details is null ? null : (byte)details.MethodType, DbType.Byte);
+        parameters.Add("@MethodName", TruncateOrNull(details?.MethodName, 60), DbType.String, size: 60);
+        parameters.Add("@AccountLast4", details?.AccountLast4, DbType.AnsiString, size: 4);
+        parameters.Add("@Issuer", TruncateOrNull(details?.Issuer, 100), DbType.String, size: 100);
+        parameters.Add("@ValidationId", TruncateOrNull(details?.ValidationId, 100), DbType.AnsiString, size: 100);
+        parameters.Add("@GatewayPaidOn", details?.PaidOn?.UtcDateTime, DbType.DateTime2);
+        parameters.Add("@StoreAmount", details?.StoreAmount, DbType.Decimal, precision: 18, scale: 2);
+        parameters.Add("@RiskFlagged", details?.RiskFlagged, DbType.Boolean);
         parameters.Add("@PaymentId", dbType: DbType.Int64, direction: ParameterDirection.Output);
         parameters.Add("@BookingId", dbType: DbType.Int64, direction: ParameterDirection.Output);
         parameters.Add("@UserId", dbType: DbType.Int64, direction: ParameterDirection.Output);
@@ -226,6 +231,9 @@ public sealed class PaymentRepository(IDbConnectionFactory connectionFactory) : 
     }
 
     private static string Truncate(string value, int length) => value.Length <= length ? value : value[..length];
+
+    private static string? TruncateOrNull(string? value, int length) =>
+        string.IsNullOrWhiteSpace(value) ? null : Truncate(value.Trim(), length);
 
     private static DateTimeOffset AsUtc(DateTime value) => new(DateTime.SpecifyKind(value, DateTimeKind.Utc));
 

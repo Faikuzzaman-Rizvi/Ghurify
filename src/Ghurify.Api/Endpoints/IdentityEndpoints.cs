@@ -90,8 +90,9 @@ public static class IdentityEndpoints
 
         session.MapPost("/refresh", RefreshAsync)
             .WithName("RefreshSession")
-            .WithSummary("Rotates the refresh cookie and returns a new access token.")
+            .WithSummary("Rotates the refresh cookie and returns a new access token; 204 when there is no cookie.")
             .Produces<SessionResponse>()
+            .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         session.MapPost("/logout", LogoutAsync)
@@ -209,7 +210,17 @@ public static class IdentityEndpoints
         [FromServices] RefreshSessionHandler handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.HandleAsync(context.Request.Cookies[RefreshCookieName], cancellationToken);
+        var refreshToken = context.Request.Cookies[RefreshCookieName];
+
+        // No cookie: nobody is signed in on this browser. The web app asks on every first page
+        // load, so this is a normal answer, not an error; as a 401 it put a red "failed to load"
+        // line in the console of every visitor. A cookie that is presented and refused is still 401.
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return Results.NoContent();
+        }
+
+        var result = await handler.HandleAsync(refreshToken, cancellationToken);
 
         if (!result.Succeeded)
         {

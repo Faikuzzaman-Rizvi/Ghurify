@@ -1,6 +1,7 @@
 -- Posts, newest first, a page at a time (keyset on Id, older than @BeforeId).
 --
 -- With @AuthorId: one person's posts (their profile).
+-- With @Everyone = 1 (staff, moderating): every live post, from anyone.
 -- Without:        the viewer's feed: posts by people they follow, their own, and every destination
 --                 story (a post about a destination is public by nature).
 -- Hidden and archived posts never appear. Two result sets: the posts, then their media (Ready
@@ -9,6 +10,7 @@ CREATE PROCEDURE [Social].[QueryPosts]
     @ViewerId  BIGINT = NULL,
     @AuthorId  BIGINT = NULL,
     @BeforeId  BIGINT = NULL,
+    @Everyone  BIT    = 0,
     @Take      INT
 AS
 BEGIN
@@ -23,6 +25,7 @@ BEGIN
       AND  [p].[Status] = 1
       AND  (@BeforeId IS NULL OR [p].[Id] < @BeforeId)
       AND  ((@AuthorId IS NOT NULL AND [p].[AuthorId] = @AuthorId)
+            OR (@AuthorId IS NULL AND @Everyone = 1)
             OR (@AuthorId IS NULL
                 AND ([p].[AuthorId] = @ViewerId
                      OR [p].[DestinationId] IS NOT NULL
@@ -48,7 +51,8 @@ BEGIN
              CAST(CASE WHEN EXISTS (SELECT 1 FROM [Social].[Like] AS [l]
                                     WHERE [l].[PostId] = [p].[Id] AND [l].[UserId] = @ViewerId AND [l].[Archived] = 0)
                        THEN 1 ELSE 0 END AS BIT) AS [LikedByMe],
-             [p].[Created]
+             [p].[Created],
+             [p].[EditedOn]
     FROM     @Page                AS [page]
     JOIN     [Social].[Post]      AS [p] ON [p].[Id] = [page].[Id]
     JOIN     [Main].[User]        AS [u] ON [u].[Id] = [p].[AuthorId]

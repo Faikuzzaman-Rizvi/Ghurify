@@ -70,6 +70,8 @@ public sealed class GhurifyApiFactory(
                 ["Verification:NidPepper"] = "integration-test-nid-pepper-32-chars-minimum",
                 ["Verification:CallbackSecret"] = CallbackSecret,
                 ["Ekyc:Provider"] = "fake",
+                // Development uses the SSLCommerz sandbox; tests never call out to a real gateway.
+                ["Payments:Provider"] = "fake",
                 // No scheduler in tests: queued jobs run inline, and tests run recurring jobs
                 // themselves, so nothing happens on a timer behind a test's back.
                 ["Jobs:Enabled"] = "false",

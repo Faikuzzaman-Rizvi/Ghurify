@@ -18,6 +18,12 @@ export type AuthStatus = 'unknown' | 'authenticated' | 'anonymous';
 interface AuthState {
   status: AuthStatus;
   user: AuthUser | null;
+  /**
+   * When the current access token stops working (epoch milliseconds), or null when signed out.
+   * The session is renewed shortly before, however it began: restored on load, signed in, or a
+   * new password.
+   */
+  expiresAt: number | null;
   signIn: (session: SessionResponse) => void;
   signOut: () => void;
   markAnonymous: () => void;
@@ -31,6 +37,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set) => ({
   status: 'unknown',
   user: null,
+  expiresAt: null,
 
   signIn: (session) => {
     setAccessToken(session.accessToken);
@@ -41,16 +48,17 @@ export const useAuthStore = create<AuthState>()((set) => ({
         maskedEmail: session.user.maskedEmail,
         displayName: session.user.displayName ?? null,
       },
+      expiresAt: Date.now() + asNumber(session.expiresInSeconds) * 1000,
     });
   },
 
   signOut: () => {
     setAccessToken(null);
-    set({ status: 'anonymous', user: null });
+    set({ status: 'anonymous', user: null, expiresAt: null });
   },
 
   markAnonymous: () => {
     setAccessToken(null);
-    set({ status: 'anonymous', user: null });
+    set({ status: 'anonymous', user: null, expiresAt: null });
   },
 }));

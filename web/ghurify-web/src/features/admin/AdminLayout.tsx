@@ -7,9 +7,11 @@ import {
   ArrowUpRight,
   BadgeCheck,
   ChevronRight,
+  CreditCard,
   Flag,
   LayoutDashboard,
   MapPinned,
+  Newspaper,
   Menu,
   Receipt,
   Scale,
@@ -24,8 +26,10 @@ import {
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Logo } from '@/components/Logo';
 import { NotificationBell } from '@/components/NotificationBell';
-import { AccountMenu } from '@/components/SiteHeader';
+import { AccountMenu } from '@/components/AccountMenu';
+import { Avatar } from '@/components/Avatar';
 import type { Role } from '@/features/auth/profileApi';
+import { useSignedInIdentity } from '@/features/auth/useAccount';
 import { useMyProfile } from '@/features/auth/useProfile';
 import { formatCount, toLanguage } from '@/lib/format';
 import { adminApi, type DashboardCounts } from './adminApi';
@@ -86,6 +90,12 @@ const groups: readonly Group[] = [
         count: 'openReports',
       },
       {
+        to: '/admin/stories',
+        label: 'admin.nav.stories',
+        icon: Newspaper,
+        roles: ['Admin', 'Moderator'],
+      },
+      {
         to: '/admin/disputes',
         label: 'admin.nav.disputes',
         icon: Scale,
@@ -107,6 +117,7 @@ const groups: readonly Group[] = [
       { to: '/admin/users', label: 'admin.nav.users', icon: Users, roles: ['Admin'] },
       { to: '/admin/trips', label: 'admin.nav.trips', icon: Tent, roles: ['Admin'] },
       { to: '/admin/bookings', label: 'admin.nav.bookings', icon: Receipt, roles: ['Admin'] },
+      { to: '/admin/payments', label: 'admin.nav.payments', icon: CreditCard, roles: ['Admin'] },
       {
         to: '/admin/payouts',
         label: 'admin.nav.payouts',
@@ -247,6 +258,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   const language = toLanguage(i18n.language);
   const visible = useVisibleGroups();
   const { data: profile } = useMyProfile();
+  const identity = useSignedInIdentity();
   const staffRoles = (profile?.roles ?? []).filter((role) => staff.includes(role));
 
   // Shares the dashboard's query and cache: one request a minute feeds both.
@@ -328,16 +340,15 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
       <div className="shrink-0 border-t border-white/10 p-4">
         <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-          <span
-            aria-hidden="true"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-hill font-display text-sm font-bold"
-          >
-            {(profile?.displayName ?? '?').charAt(0).toUpperCase()}
-          </span>
+          <Avatar
+            userId={identity.userId}
+            name={identity.name}
+            version={identity.avatarVersion}
+            size="sm"
+            className="h-9! w-9!"
+          />
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">
-              {profile?.displayName ?? t('account.title')}
-            </p>
+            <p className="truncate text-sm font-semibold">{identity.name}</p>
             <p className="truncate text-xs text-dusk">
               {staffRoles.map((role) => t(`roles.${role}`)).join(' · ')}
             </p>

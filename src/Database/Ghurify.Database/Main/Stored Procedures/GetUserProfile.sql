@@ -22,7 +22,8 @@ BEGIN
             WHERE  [v].[UserId] = [u].[Id]
               AND  [v].[Status] = 2
               AND  [v].[Archived] = 0) AS [VerifiedLevel],
-           [p].[AvatarUpdatedOn]
+           -- A version only while there is a picture: a removed one keeps its timestamp.
+           IIF([p].[AvatarBlob] IS NULL, NULL, [p].[AvatarUpdatedOn]) AS [AvatarUpdatedOn]
     FROM      [Main].[User]        AS [u]
     LEFT JOIN [Main].[UserProfile] AS [p] ON [p].[UserId] = [u].[Id] AND [p].[Archived] = 0
     WHERE     [u].[Id] = @UserId

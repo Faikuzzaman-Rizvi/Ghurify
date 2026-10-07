@@ -168,6 +168,94 @@ public sealed class SocialEndpointTests(SqlServerFixture database)
         Assert.DoesNotContain("+880", body, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task Editing_ChangesTheAuthorsOwnStory_DropsUnwantedPhotos_AndMarksItEdited()
+    {
+        await using var data = new TestData(database.ConnectionString);
+        var author = await data.CreateUserAsync();
+        var stranger = await data.CreateUserAsync();
+        var storage = new InMemoryMediaStorage();
+        await using var api = Api(storage);
+        using var client = TestData.ClientFor(api, author);
+        var first = await UploadPhotoAsync(client, storage);
+        var second = await UploadPhotoAsync(client, storage);
+
+        using var posted = await client.PostAsJsonAsync("/api/v1/posts", new { body = "Boga lake", mediaIds = new[] { first, second } }, Token);
+        var postId = (await posted.Content.ReadFromJsonAsync<CreatedResponse>(TestData.Json, Token))!.Id;
+
+        using var edited = await client.PutAsJsonAsync(
+            $"/api/v1/posts/{postId}", new { body = "Boga lake at dawn", destinationSlug = "bandarban", keepMediaIds = new[] { second } }, Token);
+        Assert.Equal(HttpStatusCode.NoContent, edited.StatusCode);
+
+        var feed = await client.GetFromJsonAsync<FeedResponse>("/api/v1/feed", TestData.Json, Token);
+        var post = Assert.Single(feed!.Items, item => item.Id == postId);
+        Assert.Equal("Boga lake at dawn", post.Body);
+        Assert.Equal(second, Assert.Single(post.Media).Id);
+        Assert.Equal("bandarban", post.DestinationSlug);
+        Assert.NotNull(post.EditedOn);
+
+        // Nothing left in it at all is refused; so is anyone else's edit, which looks like a missing post.
+        using var emptied = await client.PutAsJsonAsync($"/api/v1/posts/{postId}", new { body = "  ", keepMediaIds = Array.Empty<long>() }, Token);
+        using var strangerClient = TestData.ClientFor(api, stranger);
+        using var notTheirs = await strangerClient.PutAsJsonAsync($"/api/v1/posts/{postId}", new { body = "Hijacked" }, Token);
+        Assert.Equal(HttpStatusCode.BadRequest, emptied.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, notTheirs.StatusCode);
+
+        feed = await client.GetFromJsonAsync<FeedResponse>("/api/v1/feed", TestData.Json, Token);
+        Assert.Equal("Boga lake at dawn", Assert.Single(feed!.Items, item => item.Id == postId).Body);
+    }
+
+    [Fact]
+    public async Task AModerator_RemovesAnyonesStory_WithAReason_ThatIsAudited_AndSentToTheAuthor()
+    {
+        await using var data = new TestData(database.ConnectionString);
+        var author = await data.CreateUserAsync();
+        var traveller = await data.CreateVerifiedTravelerAsync();
+        var admin = await data.CreateAdminAsync();
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        var postId = await PostAsync(api, author, "Selling fake tickets here", destination: "sylhet");
+
+        using var travellerClient = TestData.ClientFor(api, traveller);
+        using var refused = await travellerClient.PostAsJsonAsync($"/api/v1/admin/posts/{postId}/remove", new { reason = "Spam" }, Token);
+        using var refusedList = await travellerClient.GetAsync(new Uri("/api/v1/admin/posts", UriKind.Relative), Token);
+        Assert.Equal(HttpStatusCode.Forbidden, refused.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, refusedList.StatusCode);
+
+        using var adminClient = TestData.ClientFor(api, admin);
+        var listed = await adminClient.GetFromJsonAsync<FeedResponse>($"/api/v1/admin/posts?authorId={author.Id}", TestData.Json, Token);
+        Assert.Contains(listed!.Items, item => item.Id == postId);
+
+        using var noReason = await adminClient.PostAsJsonAsync($"/api/v1/admin/posts/{postId}/remove", new { reason = " " }, Token);
+        using var removed = await adminClient.PostAsJsonAsync($"/api/v1/admin/posts/{postId}/remove", new { reason = "Scam: fake tickets." }, Token);
+        using var again = await adminClient.PostAsJsonAsync($"/api/v1/admin/posts/{postId}/remove", new { reason = "Twice." }, Token);
+        Assert.Equal(HttpStatusCode.BadRequest, noReason.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, again.StatusCode);
+
+        var feed = await travellerClient.GetFromJsonAsync<FeedResponse>("/api/v1/feed", TestData.Json, Token);
+        Assert.DoesNotContain(feed!.Items, item => item.Id == postId);
+
+        await using var connection = await data.OpenAsync();
+        Assert.Equal(1, await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            "SELECT COUNT(1) FROM [Safety].[AuditLog] WHERE [Action] = 'post.removed' AND [EntityId] = @PostId AND [ActorId] = @ActorId AND [Note] = N'Scam: fake tickets.';",
+            new { PostId = postId, ActorId = admin.Id }, cancellationToken: Token)));
+        Assert.Equal(1, await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            "SELECT COUNT(1) FROM [Main].[Notification] WHERE [UserId] = @AuthorId AND [Kind] = 'post.removed';",
+            new { AuthorId = author.Id }, cancellationToken: Token)));
+    }
+
+    /// <summary>Uploads a small photo through the real pipeline and returns its media id, ready to post.</summary>
+    private static async Task<long> UploadPhotoAsync(HttpClient client, InMemoryMediaStorage storage)
+    {
+        var photo = JpegWithGps();
+        using var linkResponse = await client.PostAsJsonAsync("/api/v1/media/upload-url", new { contentType = "image/jpeg", sizeBytes = photo.Length }, Token);
+        var link = (await linkResponse.Content.ReadFromJsonAsync<LinkResponse>(TestData.Json, Token))!;
+        storage.Put(link.UploadUrl, photo);
+        using var completed = await client.PostAsync(new Uri($"/api/v1/media/{link.MediaId}/complete", UriKind.Relative), null, Token);
+        Assert.Equal(HttpStatusCode.Accepted, completed.StatusCode);
+        return link.MediaId;
+    }
+
     private GhurifyApiFactory Api(InMemoryMediaStorage storage) => new(database.ConnectionString)
     {
         ReplaceServices = services => services.Replace(ServiceDescriptor.Singleton<IMediaStorage>(storage)),
@@ -220,7 +308,7 @@ public sealed class SocialEndpointTests(SqlServerFixture database)
 
     private sealed record FeedResponse(List<PostResponse> Items);
 
-    private sealed record PostResponse(long Id, string Body, int Likes, int Comments, bool LikedByMe, List<MediaResponse> Media);
+    private sealed record PostResponse(long Id, string Body, int Likes, int Comments, bool LikedByMe, List<MediaResponse> Media, string? DestinationSlug = null, DateTimeOffset? EditedOn = null);
 
     private sealed record MediaResponse(long Id, string Url);
 

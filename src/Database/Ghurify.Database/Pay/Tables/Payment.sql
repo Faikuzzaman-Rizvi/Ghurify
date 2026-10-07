@@ -29,6 +29,22 @@ CREATE TABLE [Pay].[Payment]
     [FailureReason]      NVARCHAR (300)  NULL,
     [CompletedOn]        DATETIME2 (0)   NULL,
 
+    -- How the traveller paid, from the gateway's server-side validation (never from the browser).
+    -- MethodType: 1 Card, 2 Mobile banking (bKash, Nagad, Rocket...), 3 Internet banking, 4 Other.
+    -- MethodName is the wallet or card network ("bKash", "Visa"); Issuer the bank or provider.
+    -- AccountLast4 is all we keep of the card or wallet number: never a full card number.
+    -- ValidationId is the gateway's id for the validation that confirmed the payment, and
+    -- GatewayPaidOn when the gateway says the money moved (UTC). StoreAmount is what the gateway
+    -- settles to us after its own charge; RiskFlagged is the gateway's fraud flag.
+    [MethodType]         TINYINT         NULL,
+    [MethodName]         NVARCHAR (60)   NULL,
+    [AccountLast4]       VARCHAR (4)     NULL,
+    [Issuer]             NVARCHAR (100)  NULL,
+    [ValidationId]       VARCHAR (100)   NULL,
+    [GatewayPaidOn]      DATETIME2 (0)   NULL,
+    [StoreAmount]        DECIMAL (18, 2) NULL,
+    [RiskFlagged]        BIT             NULL,
+
     [Archived]           BIT             CONSTRAINT [DF_Payment_Archived] DEFAULT ((0)) NOT NULL,
     [Created]            DATETIME2 (0)   CONSTRAINT [DF_Payment_Created] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedOn]          DATETIME2 (7)   CONSTRAINT [DF_Payment_UpdatedOn] DEFAULT (getutcdate()) NOT NULL,
@@ -38,7 +54,9 @@ CREATE TABLE [Pay].[Payment]
     CONSTRAINT [FK_Payment_Booking] FOREIGN KEY ([BookingId]) REFERENCES [Pay].[Booking] ([Id]),
     CONSTRAINT [FK_Payment_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [CK_Payment_Amounts] CHECK ([Amount] >= 0 AND [Fee] >= 0 AND [Total] = [Amount] + [Fee]),
-    CONSTRAINT [CK_Payment_Status] CHECK ([Status] BETWEEN 1 AND 5)
+    CONSTRAINT [CK_Payment_Status] CHECK ([Status] BETWEEN 1 AND 5),
+    CONSTRAINT [CK_Payment_MethodType] CHECK ([MethodType] IS NULL OR [MethodType] BETWEEN 1 AND 4),
+    CONSTRAINT [CK_Payment_AccountLast4] CHECK ([AccountLast4] IS NULL OR [AccountLast4] NOT LIKE '%[^0-9]%')
 );
 GO
 
@@ -59,4 +77,10 @@ GO
 CREATE NONCLUSTERED INDEX [IX_Payment_BookingId]
     ON [Pay].[Payment] ([BookingId] ASC)
     INCLUDE ([Status], [Total]);
+GO
+
+-- A traveller's payment history, newest first.
+CREATE NONCLUSTERED INDEX [IX_Payment_UserId]
+    ON [Pay].[Payment] ([UserId] ASC, [Id] DESC)
+    INCLUDE ([BookingId], [Status]);
 GO

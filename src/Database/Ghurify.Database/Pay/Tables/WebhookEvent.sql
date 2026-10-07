@@ -26,3 +26,8 @@ GO
 CREATE UNIQUE NONCLUSTERED INDEX [UX_WebhookEvent_Provider_EventId]
     ON [Pay].[WebhookEvent] ([Provider] ASC, [EventId] ASC);
 GO
+
+-- Every callback for one payment, for the admin desk's payment detail.
+CREATE NONCLUSTERED INDEX [IX_WebhookEvent_TransactionRef]
+    ON [Pay].[WebhookEvent] ([TransactionRef] ASC);
+GO

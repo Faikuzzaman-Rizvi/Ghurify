@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { asNumber } from '@/api/client';
-import { createHubConnection } from '@/api/realtime';
+import { createHubConnection, runHubConnection } from '@/api/realtime';
 import { cardClass, primaryButtonClass, secondaryButtonClass } from '@/components/Field';
 import { EmptyState, ErrorState } from '@/components/States';
 import { mapLink } from '@/features/safety/safetyApi';
@@ -55,11 +55,10 @@ export function SosBoardPage() {
     connection.onreconnected(() => void join());
     connection.onclose(() => setLive('offline'));
 
-    connection.start().then(join, () => setLive('offline'));
-
-    return () => {
-      void connection.stop();
-    };
+    return runHubConnection(connection, {
+      onStarted: () => void join(),
+      onFailed: () => setLive('offline'),
+    });
   }, [queryClient]);
 
   return (

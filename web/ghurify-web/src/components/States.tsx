@@ -29,6 +29,24 @@ export function CardSkeletons({
   );
 }
 
+/** A whole screen on its way: one loaded on demand (the map page) arriving over the network. */
+export function PageLoading() {
+  const { t } = useTranslation();
+
+  return (
+    <div
+      role="status"
+      className="container-page flex min-h-[60vh] items-center justify-center py-24"
+    >
+      <span
+        aria-hidden="true"
+        className="h-10 w-10 animate-spin rounded-full border-4 border-hill/15 border-t-hill"
+      />
+      <span className="sr-only">{t('common.loading')}</span>
+    </div>
+  );
+}
+
 /** Nothing to show, with a way forward. */
 export function EmptyState({
   title,

@@ -133,6 +133,9 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<HandlePaymentCallbackHandler>();
         services.AddScoped<RetryRefundsHandler>();
         services.AddScoped<ListMyRefundsHandler>();
+        services.AddScoped<ListMyPaymentsHandler>();
+        services.AddScoped<GetMyPaymentHandler>();
+        services.AddScoped<ListReceivedPaymentsHandler>();
 
         // --- Chat, payouts, cancellations ---
         services
@@ -169,6 +172,9 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<ProcessMediaHandler>();
         services.AddScoped<CreatePostHandler>();
         services.AddScoped<DeletePostHandler>();
+        services.AddScoped<EditPostHandler>();
+        services.AddScoped<RemovePostHandler>();
+        services.AddScoped<ListAllPostsHandler>();
         services.AddScoped<GetFeedHandler>();
         services.AddScoped<LikePostHandler>();
         services.AddScoped<AddCommentHandler>();
@@ -187,6 +193,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<SearchAllTripsHandler>();
         services.AddScoped<CancelTripAsAdminHandler>();
         services.AddScoped<GetBookingForAdminHandler>();
+        services.AddScoped<SearchPaymentsHandler>();
+        services.AddScoped<GetPaymentForAdminHandler>();
         services.AddScoped<RetryRefundsNowHandler>();
         services.AddScoped<SaveDestinationHandler>();
         services.AddScoped<SaveEmergencyPointHandler>();

@@ -14,11 +14,22 @@
 --       now full, or another payment already confirmed it): the money is held and the caller
 --       refunds it.
 --   5 = this gateway transaction id was already used for a different payment; nothing changed.
+--
+-- @MethodType ... @RiskFlagged are what the gateway's validation reported about how the traveller
+-- paid. They are recorded with the payment and never change the outcome.
 CREATE PROCEDURE [Pay].[SetPaymentSucceeded]
     @TransactionRef  VARCHAR (40),
     @ProviderTxnId   VARCHAR (100),
     @PaidAmount      DECIMAL (18, 2),
     @Currency        CHAR (3),
+    @MethodType      TINYINT         = NULL,
+    @MethodName      NVARCHAR (60)   = NULL,
+    @AccountLast4    VARCHAR (4)     = NULL,
+    @Issuer          NVARCHAR (100)  = NULL,
+    @ValidationId    VARCHAR (100)   = NULL,
+    @GatewayPaidOn   DATETIME2 (0)   = NULL,
+    @StoreAmount     DECIMAL (18, 2) = NULL,
+    @RiskFlagged     BIT             = NULL,
     @PaymentId       BIGINT          OUTPUT,
     @BookingId       BIGINT          OUTPUT,
     @UserId          BIGINT          OUTPUT,
@@ -85,6 +96,14 @@ BEGIN
            [CompletedOn]   = SYSUTCDATETIME(),
            [FailureReason] = CASE WHEN @PaidAmount <> @Total OR @Currency <> [Currency]
                                   THEN N'amount_mismatch' ELSE NULL END,
+           [MethodType]    = @MethodType,
+           [MethodName]    = @MethodName,
+           [AccountLast4]  = @AccountLast4,
+           [Issuer]        = @Issuer,
+           [ValidationId]  = @ValidationId,
+           [GatewayPaidOn] = @GatewayPaidOn,
+           [StoreAmount]   = @StoreAmount,
+           [RiskFlagged]   = @RiskFlagged,
            [UpdatedOn]     = SYSUTCDATETIME()
     WHERE  [Id] = @PaymentId;
 

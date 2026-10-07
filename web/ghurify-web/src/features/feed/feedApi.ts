@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost } from '@/api/client';
+import { ApiError, apiDelete, apiGet, apiPost, apiPut } from '@/api/client';
 import type { components } from '@/api/schema';
 
 /** All taken from the generated OpenAPI types. Regenerate with `npm run gen:api`. */
@@ -10,6 +10,7 @@ export type ReviewView = components['schemas']['ReviewView'];
 export type Reviewable = components['schemas']['Reviewable'];
 export type UploadLink = components['schemas']['UploadLink'];
 export type CreatePostCommand = components['schemas']['CreatePostCommand'];
+export type EditPostCommand = components['schemas']['EditPostCommand'];
 export type AddReviewCommand = components['schemas']['AddReviewCommand'];
 
 /** Stories, people and reviews. */
@@ -23,6 +24,10 @@ export const feedApi = {
   createPost: (command: CreatePostCommand) => apiPost<{ id: number }>('/api/v1/posts', command),
 
   deletePost: (postId: number) => apiDelete<void>(`/api/v1/posts/${postId}`),
+
+  /** The author's change: new text and place, and the ids of the photos that stay. */
+  editPost: (postId: number, command: EditPostCommand) =>
+    apiPut<void>(`/api/v1/posts/${postId}`, command),
 
   like: (postId: number) => apiPost<void>(`/api/v1/posts/${postId}/likes`),
 
@@ -55,7 +60,8 @@ export const feedApi = {
 
 /**
  * Uploads a file straight to storage with the link the API gave, reporting progress. A plain XHR,
- * because fetch cannot report upload progress.
+ * because fetch cannot report upload progress. A failure is an ApiError with code upload_failed,
+ * so the screen can say the photo did not get through rather than something vaguer.
  */
 export function uploadToStorage(
   url: string,
@@ -70,11 +76,11 @@ export function uploadToStorage(
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(event.loaded / event.total);
     };
+    const failed = () => new ApiError('Upload failed', request.status, undefined, 'upload_failed');
     request.onload = () =>
-      request.status >= 200 && request.status < 300
-        ? resolve()
-        : reject(new Error(`Upload failed (${request.status})`));
-    request.onerror = () => reject(new Error('Upload failed'));
+      request.status >= 200 && request.status < 300 ? resolve() : reject(failed());
+    // No answer at all: offline, or storage cannot be reached from this network.
+    request.onerror = () => reject(failed());
     request.send(file);
   });
 }

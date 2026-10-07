@@ -45,7 +45,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Redirects to the user's profile picture, or 404 if they have none. */
+        /** Redirects to the user's profile picture, or 204 if they have none. */
         get: operations["GetAvatar"];
         put?: never;
         post?: never;
@@ -244,6 +244,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your payment history: every attempt, newest first, with what you paid and had refunded. */
+        get: operations["ListMyPayments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of your payments as a receipt: amounts, method, gateway references and refunds. */
+        get: operations["GetMyPayment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/received-payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Paid bookings on your trips, newest first, optionally for one trip. */
+        get: operations["ListReceivedPayments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/chats": {
         parameters: {
             query?: never;
@@ -337,6 +388,23 @@ export interface paths {
         };
         /** Reports whether the API is running and can reach the database. */
         get: operations["GetHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/health/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reports each dependency: database (required), blob storage and email (optional), jobs. */
+        get: operations["GetReadiness"];
         put?: never;
         post?: never;
         delete?: never;
@@ -456,7 +524,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rotates the refresh cookie and returns a new access token. */
+        /** Rotates the refresh cookie and returns a new access token; 204 when there is no cookie. */
         post: operations["RefreshSession"];
         delete?: never;
         options?: never;
@@ -1091,7 +1159,8 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
+        /** Edits your own story: the text, the destination, and which photos stay. */
+        put: operations["EditPost"];
         post?: never;
         /** Removes your own story. */
         delete: operations["DeletePost"];
@@ -1126,6 +1195,40 @@ export interface paths {
         get: operations["ListComments"];
         put?: never;
         post: operations["AddComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every story, or one author's, newest first. */
+        get: operations["ListAllPosts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/posts/{id}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Removes anyone's story, with a reason that is audited and sent to the author. */
+        post: operations["RemovePost"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1516,6 +1619,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every payment, by number, transaction reference, gateway id, traveller email or name, or trip. */
+        get: operations["SearchPayments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One payment in full: receipt, payer, gateway settlement, refunds and the callbacks received. */
+        get: operations["GetPaymentForAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/refunds/retry": {
         parameters: {
             query?: never;
@@ -1636,6 +1773,19 @@ export interface components {
             created: string;
             /** Format: date-time */
             completedOn: null | string;
+        };
+        AdminPaymentDetail: {
+            payment: components["schemas"]["PaymentDetail"];
+            /** Format: int64 */
+            travellerId: number | string;
+            travellerName: null | string;
+            travellerEmail: string;
+            /** Format: int64 */
+            hostId: number | string;
+            /** Format: double */
+            storeAmount: null | number | string;
+            riskFlagged: null | boolean;
+            callbacks: components["schemas"]["PaymentCallbackView"][];
         };
         AdminReason: {
             reason: null | string;
@@ -1812,6 +1962,7 @@ export interface components {
             holdExpiresAt: string;
             latestPaymentStatus: null | components["schemas"]["PaymentStatus"];
             latestPaymentFailure: null | string;
+            mode?: components["schemas"]["PaymentMode"];
         };
         /** @enum {unknown} */
         BookingStatus: "Held" | "Confirmed" | "Cancelled" | "Refunded" | null;
@@ -2002,6 +2153,11 @@ export interface components {
         };
         /** @enum {unknown} */
         Difficulty: "Easy" | "Moderate" | "Challenging";
+        EditPostCommand: {
+            body: null | string;
+            destinationSlug: null | string;
+            keepMediaIds: null | (number | string)[];
+        };
         EmailOnlyCommand: {
             email: string;
         };
@@ -2211,6 +2367,126 @@ export interface components {
             /** Format: int32 */
             unreadCount: number | string;
         };
+        PaymentCallbackView: {
+            /** Format: int64 */
+            id: number | string;
+            eventId: string;
+            signatureValid: boolean;
+            outcome: null | string;
+            /** Format: date-time */
+            received: string;
+            /** Format: date-time */
+            processedOn: null | string;
+        };
+        PaymentDetail: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            bookingId: number | string;
+            bookingStatus: components["schemas"]["BookingStatus"];
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            hostName: null | string;
+            provider: string;
+            transactionRef: string;
+            providerTxnId: null | string;
+            validationId: null | string;
+            status: components["schemas"]["PaymentStatus"];
+            failureReason: null | string;
+            methodType: null | components["schemas"]["PaymentMethodType"];
+            methodName: null | string;
+            accountLast4: null | string;
+            issuer: null | string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            fee: number | string;
+            /** Format: double */
+            total: number | string;
+            /** Format: double */
+            paidAmount: null | number | string;
+            currency: string;
+            /** Format: double */
+            refunded: number | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            completedOn: null | string;
+            /** Format: date-time */
+            gatewayPaidOn: null | string;
+            refunds: components["schemas"]["PaymentRefundView"][];
+            /** Format: double */
+            netPaid?: number | string;
+        };
+        PaymentHistoryItem: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            bookingId: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: int64 */
+            travellerId: number | string;
+            travellerName: null | string;
+            provider: string;
+            transactionRef: string;
+            providerTxnId: null | string;
+            status: components["schemas"]["PaymentStatus"];
+            methodType: null | components["schemas"]["PaymentMethodType"];
+            methodName: null | string;
+            accountLast4: null | string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            fee: number | string;
+            /** Format: double */
+            total: number | string;
+            /** Format: double */
+            paidAmount: null | number | string;
+            currency: string;
+            /** Format: double */
+            refunded: number | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            completedOn: null | string;
+        };
+        PaymentHistoryPage: {
+            items: components["schemas"]["PaymentHistoryItem"][];
+            totals: components["schemas"]["PaymentTotals"];
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        /** @enum {unknown} */
+        PaymentMethodType: "Card" | "MobileBanking" | "InternetBanking" | "Other" | null;
+        /** @enum {unknown} */
+        PaymentMode: "Live" | "Sandbox" | "Pretend";
+        PaymentRefundView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            shortfall: number | string;
+            reason: components["schemas"]["RefundReason"];
+            status: components["schemas"]["RefundStatus"];
+            providerRefundRef: null | string;
+            failureReason: null | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            completedOn: null | string;
+        };
         PaymentStarted: {
             /** Format: int64 */
             paymentId: number | string;
@@ -2224,6 +2500,18 @@ export interface components {
         };
         /** @enum {unknown} */
         PaymentStatus: "Created" | "Pending" | "Succeeded" | "Failed" | "Expired" | null;
+        PaymentTotals: {
+            /** Format: int32 */
+            count: number | string;
+            /** Format: int32 */
+            succeeded: number | string;
+            /** Format: double */
+            paid: number | string;
+            /** Format: double */
+            refunded: number | string;
+            /** Format: double */
+            net: number | string;
+        };
         /** @enum {unknown} */
         PayoutStage: "BeforeDeparture" | "AfterStart";
         /** @enum {unknown} */
@@ -2280,6 +2568,8 @@ export interface components {
             /** Format: date-time */
             created: string;
             media: components["schemas"]["MediaView"][];
+            /** Format: date-time */
+            editedOn?: null | string;
         };
         ProblemDetails: {
             type?: null | string;
@@ -2354,6 +2644,51 @@ export interface components {
             /** Format: int32 */
             accuracyMeters: null | number | string;
             message: null | string;
+        };
+        ReadinessResponse: {
+            status: string;
+            database: string;
+            storage: string;
+            email: string;
+            jobs: string;
+        };
+        ReceivedPayment: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            bookingId: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: int64 */
+            travellerId: number | string;
+            travellerName: null | string;
+            transactionRef: string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            refunded: number | string;
+            currency: string;
+            /** Format: date-time */
+            paidOn: null | string;
+        };
+        ReceivedPaymentPage: {
+            items: components["schemas"]["ReceivedPayment"][];
+            totals: components["schemas"]["ReceivedPaymentTotals"];
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        ReceivedPaymentTotals: {
+            /** Format: int32 */
+            count: number | string;
+            /** Format: double */
+            bookingValue: number | string;
+            /** Format: double */
+            refunded: number | string;
         };
         /** @enum {unknown} */
         RefundReason: "TravelerCancelled" | "HostCancelled" | "DestinationClosed" | "LatePayment" | "DuplicatePayment" | "AmountMismatch" | "Admin";
@@ -2471,6 +2806,7 @@ export interface components {
         Role: "Traveler" | "Host" | "Creator" | "Celebrity" | "Guide" | "Operator" | "Partner" | "Moderator" | "SafetyDesk" | "Admin";
         SandboxCompletion: {
             succeed: boolean;
+            method?: null | string;
         };
         SandboxPayment: {
             reference: string;
@@ -2865,21 +3201,19 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Found */
             302: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
             };
         };
     };
@@ -3303,6 +3637,92 @@ export interface operations {
             };
         };
     };
+    ListMyPayments: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["PaymentStatus"];
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentHistoryPage"];
+                };
+            };
+        };
+    };
+    GetMyPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListReceivedPayments: {
+        parameters: {
+            query?: {
+                tripId?: number | string;
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceivedPaymentPage"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     ListMyChats: {
         parameters: {
             query?: never;
@@ -3474,6 +3894,35 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetReadiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
                 };
             };
         };
@@ -3783,6 +4232,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SessionResponse"];
                 };
+            };
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Unauthorized */
             401: {
@@ -5315,6 +5771,48 @@ export interface operations {
             };
         };
     };
+    EditPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditPostCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     DeletePost: {
         parameters: {
             query?: never;
@@ -5459,6 +5957,89 @@ export interface operations {
             };
             /** @description Bad Request */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListAllPosts: {
+        parameters: {
+            query?: {
+                authorId?: number | string;
+                before?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostPage"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemovePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReason"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6304,6 +6885,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminBookingDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SearchPayments: {
+        parameters: {
+            query?: {
+                search?: string;
+                status?: components["schemas"]["PaymentStatus"];
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentHistoryPage"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetPaymentForAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPaymentDetail"];
                 };
             };
             /** @description Not Found */

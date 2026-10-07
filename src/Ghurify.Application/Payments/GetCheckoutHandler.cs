@@ -19,6 +19,6 @@ public sealed class GetCheckoutHandler(IPaymentRepository payments, IOptions<Pay
         }
 
         var fee = PaymentFees.FeeFor(checkout.Amount, options.Value.ServiceFeePercent);
-        return checkout with { Fee = fee, Total = checkout.Amount + fee };
+        return checkout with { Fee = fee, Total = checkout.Amount + fee, Mode = options.Value.Mode };
     }
 }

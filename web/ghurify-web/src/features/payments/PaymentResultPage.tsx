@@ -47,7 +47,13 @@ export function PaymentResultPage() {
   const state: 'paid' | 'failed' | 'waiting' =
     status === 'Confirmed'
       ? 'paid'
-      : payment === 'Failed' || payment === 'Expired' || status === 'Cancelled' || said === 'cancel'
+      : payment === 'Failed' ||
+          payment === 'Expired' ||
+          status === 'Cancelled' ||
+          said === 'cancel' ||
+          said === 'fail' ||
+          // Not tied to a booking at all: there is nothing to wait for.
+          !(bookingId > 0)
         ? 'failed'
         : 'waiting';
   const { icon: Icon, tone, photo } = look[state];
@@ -87,6 +93,11 @@ export function PaymentResultPage() {
             {t('nav.myTrips')}
           </Link>
         </div>
+        {state !== 'waiting' && (
+          <Link to="/me/payments" className="text-sm font-semibold text-hill hover:underline">
+            {t('paymentResult.history')}
+          </Link>
+        )}
       </div>
     </section>
   );

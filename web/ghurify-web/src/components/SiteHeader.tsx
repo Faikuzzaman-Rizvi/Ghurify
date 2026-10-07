@@ -1,23 +1,14 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, useLocation } from 'react-router';
-import {
-  ChevronDown,
-  Compass,
-  LayoutDashboard,
-  LogIn,
-  Map,
-  Menu,
-  ShieldCheck,
-  Tent,
-  User,
-  X,
-} from 'lucide-react';
+import { Compass, LogIn, LogOut, Menu, ShieldCheck, X } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/authStore';
-import { isStaff } from '@/features/auth/profileApi';
-import { useMyProfile } from '@/features/auth/useProfile';
+import { useLogout } from '@/features/auth/useAuthMutations';
 import { useTourStore } from '@/components/tour/tourStore';
 import { useIsOverHero } from './ui/headerStore';
+import { useAccountLinks, useSignedInIdentity } from '@/features/auth/useAccount';
+import { AccountMenu } from './AccountMenu';
+import { Avatar } from './Avatar';
 import { LanguageToggle } from './LanguageToggle';
 import { NotificationBell } from './NotificationBell';
 import { Logo } from './Logo';
@@ -31,29 +22,6 @@ function usePublicLinks() {
     { to: '/feed', label: t('nav.stories'), end: false },
     { to: '/#destinations', label: t('nav.destinations'), end: true },
     { to: '/#safety', label: t('nav.safety'), end: true },
-  ];
-}
-
-/**
- * Signed-in destinations, by role: shown for convenience only, every screen behind them is
- * protected by the API regardless.
- */
-function useAccountLinks() {
-  const { t } = useTranslation();
-  const status = useAuthStore((state) => state.status);
-  const { data: profile } = useMyProfile();
-
-  if (status !== 'authenticated') return [];
-
-  return [
-    { to: '/account', label: t('account.title'), icon: User },
-    { to: '/me/trips', label: t('nav.myTrips'), icon: Map },
-    ...(profile?.roles.includes('Host')
-      ? [{ to: '/host/trips', label: t('nav.hosting'), icon: Tent }]
-      : []),
-    ...(isStaff(profile?.roles)
-      ? [{ to: '/admin', label: t('nav.admin'), icon: LayoutDashboard }]
-      : []),
   ];
 }
 
@@ -106,7 +74,7 @@ export function SiteHeader() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-40 transition-[background-color,box-shadow,color] duration-300 ${
+        className={`fixed inset-x-0 top-0 z-40 transition-[background-color,box-shadow,color] duration-300 print:hidden ${
           glass
             ? 'bg-linear-to-b from-night/55 to-transparent text-white'
             : 'bg-white/95 text-deep shadow-[0_5px_20px_rgba(15,42,31,0.08)] backdrop-blur'
@@ -196,98 +164,6 @@ export function SiteHeader() {
   );
 }
 
-/** The signed-in menu: an initial in a circle that opens the account destinations. */
-export function AccountMenu({ glass }: { glass: boolean }) {
-  const { t } = useTranslation();
-  const user = useAuthStore((state) => state.user);
-  const links = useAccountLinks();
-  const [open, setOpen] = useState(false);
-  const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const { key: locationKey } = useLocation();
-  const [seenLocation, setSeenLocation] = useState(locationKey);
-  const name = user?.displayName ?? t('account.title');
-
-  // Close on navigation (reset while rendering), outside click and Escape.
-  if (seenLocation !== locationKey) {
-    setSeenLocation(locationKey);
-    setOpen(false);
-  }
-
-  useEffect(() => {
-    if (!open) return;
-
-    function onPointer(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false);
-    }
-
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-controls={menuId}
-        className={`flex items-center gap-1.5 rounded-full p-1 pr-2 text-sm font-medium transition ${
-          glass ? 'text-white hover:bg-white/15' : 'text-deep hover:bg-hill/10'
-        }`}
-      >
-        <span
-          aria-hidden="true"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-hill font-display text-sm font-bold text-white ring-2 ring-white/70"
-        >
-          {name.charAt(0).toUpperCase()}
-        </span>
-        <span className="sr-only">{t('nav.accountMenu')}</span>
-        <ChevronDown
-          aria-hidden="true"
-          className={`hidden h-4 w-4 transition-transform sm:block ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {open && (
-        <div
-          id={menuId}
-          className="absolute right-0 z-50 mt-3 w-60 animate-fade-in overflow-hidden rounded-2xl bg-white text-deep shadow-xl ring-1 ring-hill/10"
-        >
-          <p className="truncate border-b border-hill/10 px-4 py-3 text-sm">
-            <span className="block text-xs text-deep/60">{t('nav.signedInAs')}</span>
-            <span className="font-semibold">{name}</span>
-          </p>
-          <ul className="py-1.5">
-            {links.map(({ to, label, icon: Icon }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-2.5 text-sm transition hover:bg-mist ${
-                      isActive ? 'font-semibold text-hill' : ''
-                    }`
-                  }
-                >
-                  <Icon aria-hidden="true" className="h-4 w-4 text-hill" />
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
 /**
  * Below `lg`: the sections in a panel from the right, on the native &lt;dialog&gt; so focus is
  * trapped and Escape closes it. Closes itself on navigation.
@@ -298,6 +174,8 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
   const titleId = useId();
   const links = usePublicLinks();
   const accountLinks = useAccountLinks();
+  const identity = useSignedInIdentity();
+  const logout = useLogout();
   const startTour = useTourStore((state) => state.start);
   const status = useAuthStore((state) => state.status);
 
@@ -361,6 +239,20 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
             {accountLinks.length > 0 && (
               <>
                 <p className="eyebrow mt-6 px-4">{t('nav.yourAccount')}</p>
+                <div className="mt-3 flex items-center gap-3 px-4">
+                  <Avatar
+                    userId={identity.userId}
+                    name={identity.name}
+                    version={identity.avatarVersion}
+                    size="md"
+                  />
+                  <p className="min-w-0 text-sm">
+                    <span className="block truncate font-semibold text-deep">{identity.name}</span>
+                    {identity.email && (
+                      <span className="block truncate text-xs text-deep/60">{identity.email}</span>
+                    )}
+                  </p>
+                </div>
                 <ul className="mt-2 flex flex-col gap-1">
                   {accountLinks.map(({ to, label, icon: Icon }) => (
                     <li key={to}>
@@ -395,6 +287,17 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                 <LogIn aria-hidden="true" className="h-4 w-4" />
                 {t('auth.signIn')}
               </Link>
+            )}
+            {status === 'authenticated' && (
+              <button
+                type="button"
+                onClick={() => logout.mutate()}
+                disabled={logout.isPending}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-jamdani/30 px-4 py-2.5 text-sm font-semibold text-jamdani transition hover:bg-jamdani/5 disabled:opacity-60"
+              >
+                <LogOut aria-hidden="true" className="h-4 w-4" />
+                {logout.isPending ? t('nav.signingOut') : t('auth.signOut')}
+              </button>
             )}
             <p className="flex items-center justify-center gap-1.5 text-xs text-deep/60">
               <ShieldCheck aria-hidden="true" className="h-4 w-4 text-hill" />

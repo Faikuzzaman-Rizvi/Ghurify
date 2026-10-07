@@ -100,7 +100,8 @@ public static class InfrastructureServiceCollectionExtensions
         // --- Payments ---
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IRefundRepository, RefundRepository>();
-        AddPaymentGateway(services, configuration);
+        services.AddScoped<IPaymentHistoryRepository, PaymentHistoryRepository>();
+        AddPaymentGateway(services, configuration, isDevelopment);
         services.AddScoped<PayoutRepository>();
         services.AddScoped<IPayoutRepository>(provider => provider.GetRequiredService<PayoutRepository>());
         services.AddScoped<IBookingCancellationRepository>(provider => provider.GetRequiredService<PayoutRepository>());
@@ -165,13 +166,20 @@ public static class InfrastructureServiceCollectionExtensions
     /// Chooses the payment gateway from Payments:Provider. The fake is also registered as itself so
     /// the sandbox endpoints and tests can drive it; the host refuses to start with it in production.
     /// </summary>
-    private static void AddPaymentGateway(IServiceCollection services, IConfiguration configuration)
+    private static void AddPaymentGateway(IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
         var provider = configuration[$"{PaymentsOptions.SectionName}:Provider"] ?? PaymentsOptions.FakeProvider;
 
         if (string.Equals(provider, PaymentsOptions.SslCommerzProvider, StringComparison.OrdinalIgnoreCase))
         {
             services.AddSingleton<IPaymentGateway, SslCommerzGateway>();
+
+            // Development maps the pretend page's endpoints whatever the provider (see Program).
+            if (isDevelopment)
+            {
+                services.AddSingleton<FakePaymentGateway>();
+            }
+
             return;
         }
 

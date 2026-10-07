@@ -83,6 +83,11 @@ Copy-Item .env.example .env      # then fill in Database__ConnectionString and t
 .env, then user-secrets, then the docker container, and prints only the server and database name.
 `-DryRun` writes the deployment script without touching the database.
 
+Point blob storage at the same server as the database (`Storage__ConnectionString` in `.env`,
+template in `.env.example`): the database keeps the names of uploaded pictures, so a shared
+database with Azurite on your own machine means uploads fail whenever your Azurite is off, and
+everyone else sees broken pictures. The shared `ras-x2` server runs Azurite on port 10000.
+
 The dev server proxies `/api` and `/hubs` to the API on port 5199, so the browser only ever talks
 to its own origin and local development needs no CORS exception.
 

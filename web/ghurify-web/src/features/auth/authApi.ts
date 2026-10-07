@@ -38,24 +38,25 @@ export const authApi = {
   changePassword: (command: ChangePasswordCommand) =>
     apiPost<SessionResponse>('/api/v1/auth/password/change', command),
 
-  refresh: () => apiPost<SessionResponse>('/api/v1/auth/refresh', undefined, anonymous),
+  /** A new session from the refresh cookie; undefined (204) when this browser has no cookie. */
+  refresh: () => apiPost<SessionResponse | undefined>('/api/v1/auth/refresh', undefined, anonymous),
 
   logout: () => apiPost<void>('/api/v1/auth/logout', undefined, anonymous),
 
   whoami: () => apiGet<WhoAmIResponse>('/api/v1/auth/whoami'),
 };
 
-let refreshing: Promise<SessionResponse> | null = null;
+let refreshing: Promise<SessionResponse | null> | null = null;
 
 /**
- * Renews the session, at most once at a time. Refresh tokens rotate, and the API treats a token
- * presented twice as stolen and ends the whole session; so two refreshes must never race with
- * the same cookie. Within a tab, callers share one request (React StrictMode mounts effects
- * twice in development); across tabs, a Web Lock makes them take turns, and each one sends the
- * cookie the previous one left.
+ * Renews the session, at most once at a time; null when nobody is signed in on this browser.
+ * Refresh tokens rotate, and the API treats a token presented twice as stolen and ends the whole
+ * session; so two refreshes must never race with the same cookie. Within a tab, callers share one
+ * request (React StrictMode mounts effects twice in development); across tabs, a Web Lock makes
+ * them take turns, and each one sends the cookie the previous one left.
  */
-export function refreshSession(): Promise<SessionResponse> {
-  refreshing ??= withRefreshLock(() => authApi.refresh()).finally(() => {
+export function refreshSession(): Promise<SessionResponse | null> {
+  refreshing ??= withRefreshLock(async () => (await authApi.refresh()) ?? null).finally(() => {
     refreshing = null;
   });
   return refreshing;

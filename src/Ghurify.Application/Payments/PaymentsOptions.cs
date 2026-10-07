@@ -34,6 +34,23 @@ public sealed class PaymentsOptions
     public string WebBaseUrl { get; set; } = "http://localhost:5173";
 
     public SslCommerzOptions SslCommerz { get; set; } = new();
+
+    /// <summary>Whether real money moves, from the provider and its sandbox switch.</summary>
+    public PaymentMode Mode =>
+        string.Equals(Provider, FakeProvider, StringComparison.OrdinalIgnoreCase) ? PaymentMode.Pretend
+        : SslCommerz.Sandbox ? PaymentMode.Sandbox
+        : PaymentMode.Live;
+}
+
+/// <summary>
+/// Pretend: the built-in page, no gateway at all. Sandbox: the gateway's test environment, with its
+/// test cards. Live: real money.
+/// </summary>
+public enum PaymentMode
+{
+    Live = 1,
+    Sandbox = 2,
+    Pretend = 3,
 }
 
 /// <summary>SSLCommerz store credentials. The password is a secret: .env / Key Vault only.</summary>

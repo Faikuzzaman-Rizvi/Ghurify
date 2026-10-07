@@ -24,6 +24,13 @@ npm run test:e2e
 Playwright then starts its own API on **5299** and web server on **5174**, so a development API
 on 5199 and web server on 5173 can keep running.
 
+Payment uses the built-in pretend gateway, so the run needs no internet. To pay on the real
+**SSLCommerz sandbox** page instead (its public test store and test card, OTP step included):
+
+```bash
+E2E_PAYMENTS=sslcommerz npm run test:e2e
+```
+
 ## What it never touches
 
 - Your development database: it uses `GhurifyE2E` only.

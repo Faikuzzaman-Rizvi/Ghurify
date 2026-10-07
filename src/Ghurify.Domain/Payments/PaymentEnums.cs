@@ -17,6 +17,20 @@ public enum PaymentStatus : byte
     Expired = 5,
 }
 
+/// <summary>How a traveller paid, as the gateway reported it. Stored as TINYINT in [Pay].[Payment].</summary>
+public enum PaymentMethodType : byte
+{
+    /// <summary>A debit or credit card (Visa, Mastercard, Amex...).</summary>
+    Card = 1,
+
+    /// <summary>A mobile wallet: bKash, Nagad, Rocket, Upay...</summary>
+    MobileBanking = 2,
+
+    /// <summary>A bank's own internet banking.</summary>
+    InternetBanking = 3,
+    Other = 4,
+}
+
 /// <summary>A line of the escrow ledger. Stored as TINYINT in [Pay].[EscrowLedger].</summary>
 public enum LedgerEntryType : byte
 {

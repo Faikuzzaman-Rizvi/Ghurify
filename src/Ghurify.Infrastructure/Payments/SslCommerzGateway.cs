@@ -2,8 +2,10 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ghurify.Application.Payments;
+using Ghurify.Domain.Payments;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -21,12 +23,24 @@ namespace Ghurify.Infrastructure.Payments;
 /// </summary>
 public sealed class SslCommerzGateway : IPaymentGateway, IDisposable
 {
+    // SSLCommerz reports tran_date in Bangladesh time, which has had no daylight saving since 2009.
+    private static readonly TimeSpan DhakaOffset = TimeSpan.FromHours(6);
+
     private readonly SslCommerzOptions _options;
     private readonly ILogger<SslCommerzGateway> _logger;
-    private readonly SocketsHttpHandler _handler;
+    private readonly HttpMessageHandler _handler;
     private readonly HttpClient _http;
 
     public SslCommerzGateway(IOptions<PaymentsOptions> options, ILogger<SslCommerzGateway> logger)
+        : this(options, logger, new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) })
+    {
+    }
+
+    /// <summary>
+    /// Talks to SSLCommerz through <paramref name="handler"/>, which the gateway then owns. Tests
+    /// pass one that answers like SSLCommerz does.
+    /// </summary>
+    public SslCommerzGateway(IOptions<PaymentsOptions> options, ILogger<SslCommerzGateway> logger, HttpMessageHandler handler)
     {
         ArgumentNullException.ThrowIfNull(options);
         _options = options.Value.SslCommerz;
@@ -34,7 +48,7 @@ public sealed class SslCommerzGateway : IPaymentGateway, IDisposable
 
         // One long-lived client for the gateway's lifetime (it is a singleton), with pooled
         // connections recycled so DNS changes at SSLCommerz are picked up.
-        _handler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) };
+        _handler = handler;
         _http = new HttpClient(_handler, disposeHandler: false)
         {
             BaseAddress = new Uri(_options.Sandbox ? "https://sandbox.sslcommerz.com/" : "https://securepay.sslcommerz.com/"),
@@ -152,7 +166,10 @@ public sealed class SslCommerzGateway : IPaymentGateway, IDisposable
             response.TranId ?? string.Empty,
             response.BankTranId ?? string.Empty,
             amount,
-            response.CurrencyType ?? response.Currency ?? "BDT");
+            response.CurrencyType ?? response.Currency ?? "BDT")
+        {
+            Details = valid ? ReadDetails(response, callback.ValidationId) : null,
+        };
     }
 
     public async Task<GatewayRefundResult> RefundAsync(GatewayRefundRequest request, CancellationToken cancellationToken)
@@ -241,6 +258,117 @@ public sealed class SslCommerzGateway : IPaymentGateway, IDisposable
         }
     }
 
+    /// <summary>
+    /// How the traveller paid, from the validation answer. SSLCommerz names the method in
+    /// card_type as "CODE-Label" ("BKASH-BKash", "VISA-Dutch Bangla", "CITYTOUCHIB-City Bank") and
+    /// its family in card_brand ("VISA", "MOBILEBANKING", "IB"). card_no arrives masked; only its
+    /// last four digits are kept, whatever it holds.
+    /// </summary>
+    private static GatewayPaymentDetails ReadDetails(ValidationResponse response, string? callbackValidationId)
+    {
+        var (code, label) = SplitCardType(Text(response.CardType));
+        var brand = Text(response.CardBrand)?.ToUpperInvariant() ?? string.Empty;
+        var type = MethodTypeOf(brand, code);
+
+        var name = type == PaymentMethodType.Card && CardNetworkName(brand.Length > 0 ? brand : code) is { } network
+            ? network
+            : WalletName(code) ?? label ?? (brand.Length > 0 ? brand : null);
+
+        decimal? storeAmount = decimal.TryParse(Text(response.StoreAmount), NumberStyles.Number, CultureInfo.InvariantCulture, out var store)
+            ? store
+            : null;
+
+        DateTimeOffset? paidOn = DateTime.TryParseExact(
+            Text(response.TranDate), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var local)
+                ? new DateTimeOffset(local, DhakaOffset).ToUniversalTime()
+                : null;
+
+        return new GatewayPaymentDetails(
+            type,
+            name,
+            LastFourDigits(Text(response.CardNo)),
+            Text(response.CardIssuer),
+            Text(response.ValId) ?? callbackValidationId,
+            paidOn,
+            storeAmount,
+            Text(response.RiskLevel) switch { "0" => false, "1" => true, _ => null });
+    }
+
+    /// <summary>A JSON string or number as trimmed text; null when missing, blank or anything else.</summary>
+    private static string? Text(JsonElement? element) => element?.ValueKind switch
+    {
+        JsonValueKind.String => NullIfBlank(element.Value.GetString() ?? string.Empty),
+        JsonValueKind.Number => element.Value.GetRawText(),
+        _ => null,
+    };
+
+    private static (string Code, string? Label) SplitCardType(string? cardType)
+    {
+        if (string.IsNullOrWhiteSpace(cardType))
+        {
+            return (string.Empty, null);
+        }
+
+        var dash = cardType.IndexOf('-', StringComparison.Ordinal);
+        return dash < 0
+            ? (cardType.Trim().ToUpperInvariant(), cardType.Trim())
+            : (cardType[..dash].Trim().ToUpperInvariant(), NullIfBlank(cardType[(dash + 1)..]));
+    }
+
+    private static PaymentMethodType MethodTypeOf(string brand, string code)
+    {
+        if (brand is "MOBILEBANKING" || WalletName(code) is not null)
+        {
+            return PaymentMethodType.MobileBanking;
+        }
+
+        if (brand is "IB" or "INTERNETBANKING" || code.EndsWith("IB", StringComparison.Ordinal))
+        {
+            return PaymentMethodType.InternetBanking;
+        }
+
+        return CardNetworkName(brand.Length > 0 ? brand : code) is not null
+            ? PaymentMethodType.Card
+            : PaymentMethodType.Other;
+    }
+
+    private static string? WalletName(string code) => code switch
+    {
+        "BKASH" => "bKash",
+        "NAGAD" => "Nagad",
+        "DBBLMOBILEB" or "ROCKET" => "Rocket",
+        "UPAY" => "Upay",
+        "TAP" => "Tap",
+        "MCASH" => "mCash",
+        "OKWALLET" => "OK Wallet",
+        _ => null,
+    };
+
+    private static string? CardNetworkName(string brandOrCode) => brandOrCode switch
+    {
+        "VISA" => "Visa",
+        "MASTER" or "MASTERCARD" => "Mastercard",
+        "AMEX" or "AMERICANEXPRESS" => "American Express",
+        "UNIONPAY" => "UnionPay",
+        "DINERS" or "DINERSCLUB" => "Diners Club",
+        "JCB" => "JCB",
+        "DISCOVER" => "Discover",
+        _ => null,
+    };
+
+    private static string? LastFourDigits(string? accountNumber)
+    {
+        if (string.IsNullOrEmpty(accountNumber))
+        {
+            return null;
+        }
+
+        var digits = new string([.. accountNumber.Where(char.IsAsciiDigit)]);
+        return digits.Length >= 4 ? digits[^4..] : null;
+    }
+
+    private static string? NullIfBlank(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
     private sealed record InitResponse(
         [property: JsonPropertyName("status")] string? Status,
         [property: JsonPropertyName("GatewayPageURL")] string? GatewayPageUrl,
@@ -253,7 +381,17 @@ public sealed class SslCommerzGateway : IPaymentGateway, IDisposable
         [property: JsonPropertyName("bank_tran_id")] string? BankTranId,
         [property: JsonPropertyName("amount")] string? Amount,
         [property: JsonPropertyName("currency")] string? Currency,
-        [property: JsonPropertyName("currency_type")] string? CurrencyType);
+        [property: JsonPropertyName("currency_type")] string? CurrencyType,
+        // How it was paid: informational only, so read loosely (a string or a number) and never
+        // allowed to fail the validation that the money decision rests on.
+        [property: JsonPropertyName("val_id")] JsonElement? ValId,
+        [property: JsonPropertyName("tran_date")] JsonElement? TranDate,
+        [property: JsonPropertyName("store_amount")] JsonElement? StoreAmount,
+        [property: JsonPropertyName("card_type")] JsonElement? CardType,
+        [property: JsonPropertyName("card_no")] JsonElement? CardNo,
+        [property: JsonPropertyName("card_brand")] JsonElement? CardBrand,
+        [property: JsonPropertyName("card_issuer")] JsonElement? CardIssuer,
+        [property: JsonPropertyName("risk_level")] JsonElement? RiskLevel);
 
     private sealed record RefundResponse(
         [property: JsonPropertyName("APIConnect")] string? ApiConnect,

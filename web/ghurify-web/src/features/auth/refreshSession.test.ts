@@ -21,7 +21,7 @@ describe('refreshSession', () => {
 
     const [first, second] = await Promise.all([refreshSession(), refreshSession()]);
 
-    expect(first.accessToken).toBe('access-token');
+    expect(first?.accessToken).toBe('access-token');
     expect(second).toBe(first);
     expect(
       requests(fetchMock).filter((request) => request.url.endsWith('/auth/refresh')),

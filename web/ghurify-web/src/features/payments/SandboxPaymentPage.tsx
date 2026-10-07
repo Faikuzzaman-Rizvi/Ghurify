@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -8,7 +9,7 @@ import { cardClass, dangerButtonClass, primaryButtonClass } from '@/components/F
 import { ErrorState } from '@/components/States';
 import { errorText } from '@/lib/errors';
 import { formatMoney, toLanguage } from '@/lib/format';
-import { paymentsApi } from './paymentsApi';
+import { paymentsApi, sandboxMethods, type SandboxMethod } from './paymentsApi';
 
 /**
  * The sandbox gateway's "payment page", used in development and demos instead of SSLCommerz. The
@@ -28,8 +29,10 @@ export function SandboxPaymentPage() {
     enabled: reference.length > 0,
   });
 
+  const [method, setMethod] = useState<SandboxMethod>('bkash');
+
   const complete = useMutation({
-    mutationFn: (succeed: boolean) => paymentsApi.completeSandbox(reference, succeed),
+    mutationFn: (succeed: boolean) => paymentsApi.completeSandbox(reference, succeed, method),
     onSuccess: (result, succeed) =>
       void navigate(
         `/payments/result?booking=${asNumber(result.bookingId ?? payment.data?.bookingId ?? 0)}&outcome=${
@@ -71,6 +74,36 @@ export function SandboxPaymentPage() {
             <p className="rounded-xl bg-mist py-4 font-display text-4xl font-bold text-hill">
               {formatMoney(payment.data.total, language)}
             </p>
+          )}
+
+          {payment.data && (
+            <fieldset className="text-left">
+              <legend className="mb-2 text-sm font-semibold text-deep">
+                {t('sandbox.methodLabel')}
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                {sandboxMethods.map((option) => (
+                  <label
+                    key={option}
+                    className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition has-focus-visible:outline-2 has-focus-visible:outline-turmeric ${
+                      method === option
+                        ? 'border-hill bg-hill/10 text-hill'
+                        : 'border-hill/15 text-deep hover:bg-mist'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="sandbox-method"
+                      value={option}
+                      checked={method === option}
+                      onChange={() => setMethod(option)}
+                      className="accent-hill"
+                    />
+                    {t(`sandbox.methods.${option}`)}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           )}
 
           {complete.isError && (

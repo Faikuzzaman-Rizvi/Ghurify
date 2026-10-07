@@ -158,6 +158,12 @@ public static class Procedures
         /// <summary>One booking with its payments, refunds and escrow totals, for the admin desk.</summary>
         public const string GetAdminBooking = "[Pay].[GetAdminBooking]";
 
+        /// <summary>Payment history for a traveller, a host or the admin desk, with totals.</summary>
+        public const string QueryPayments = "[Pay].[QueryPayments]";
+
+        /// <summary>One payment with its refunds (and, for the admin desk, its gateway callbacks).</summary>
+        public const string GetPayment = "[Pay].[GetPayment]";
+
         /// <summary>Creates a batch of refunds with their ledger entries, capped per booking.</summary>
         public const string AddRefunds = "[Pay].[AddRefunds]";
 
@@ -195,6 +201,9 @@ public static class Procedures
 
         /// <summary>Publishes a post and attaches the author's own media.</summary>
         public const string AddPost = "[Social].[AddPost]";
+
+        /// <summary>The author edits their own post: text, destination, which media stay.</summary>
+        public const string SetPost = "[Social].[SetPost]";
 
         /// <summary>Records a review after a completed trip and updates the rating summary.</summary>
         public const string AddReview = "[Social].[AddReview]";

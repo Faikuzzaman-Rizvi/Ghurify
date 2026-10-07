@@ -8,6 +8,7 @@ import {
   Clock,
   Landmark,
   PlaneTakeoff,
+  ReceiptText,
   Route,
   type LucideIcon,
 } from 'lucide-react';
@@ -59,13 +60,22 @@ export function HostPayoutsPage() {
         eyebrow={t('hosting.title')}
         titleKey="payouts.titleAccent"
         aside={
-          <Link
-            to="/host/trips"
-            className="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
-          >
-            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-            {t('hosting.myTrips')}
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/host/trips"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
+            >
+              <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+              {t('hosting.myTrips')}
+            </Link>
+            <Link
+              to="/host/payments"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
+            >
+              <ReceiptText aria-hidden="true" className="h-4 w-4" />
+              {t('received.link')}
+            </Link>
+          </div>
         }
       >
         <p className="mt-3 max-w-xl text-white/80">{t('payouts.subtitle')}</p>

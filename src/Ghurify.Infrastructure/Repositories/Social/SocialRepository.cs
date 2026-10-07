@@ -136,13 +136,61 @@ public sealed class SocialRepository(IDbConnectionFactory connectionFactory) : I
             cancellationToken: cancellationToken)) == 1;
     }
 
-    public async Task<PostPage> QueryPostsAsync(long? viewerId, long? authorId, long? beforeId, int take, CancellationToken cancellationToken)
+    public async Task<PostEditOutcome> SetPostAsync(PostEdit edit, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(edit);
+
+        using var keep = new DataTable();
+        keep.Columns.Add("Id", typeof(long));
+        foreach (var id in edit.KeepMediaIds)
+        {
+            keep.Rows.Add(id);
+        }
+
+        await using var connection = await connectionFactory.OpenAsync(cancellationToken);
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@PostId", edit.PostId, DbType.Int64);
+        parameters.Add("@AuthorId", edit.AuthorId, DbType.Int64);
+        parameters.Add("@Body", edit.Body, DbType.String, size: 2000);
+        parameters.Add("@DestinationId", edit.DestinationId, DbType.Int64);
+        parameters.Add("@KeepMediaIds", keep.AsTableValuedParameter("[Main].[IdList]"));
+        parameters.Add("@Result", dbType: DbType.Byte, direction: ParameterDirection.Output);
+
+        await connection.ExecuteAsync(new CommandDefinition(
+            Procedures.Social.SetPost, parameters, commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+
+        return (PostEditOutcome)parameters.Get<byte>("@Result");
+    }
+
+    public async Task<long?> RemovePostAsync(long postId, long moderatorId, CancellationToken cancellationToken)
+    {
+        await using var connection = await connectionFactory.OpenAsync(cancellationToken);
+
+        return await connection.QuerySingleOrDefaultAsync<long?>(new CommandDefinition(
+            """
+            UPDATE [Social].[Post]
+            SET    [Archived] = 1, [UpdatedOn] = SYSUTCDATETIME(), [UpdatedId] = @ModeratorId
+            OUTPUT [inserted].[AuthorId]
+            WHERE  [Id] = @Id AND [Archived] = 0;
+            """,
+            new { Id = postId, ModeratorId = moderatorId },
+            cancellationToken: cancellationToken));
+    }
+
+    public Task<PostPage> QueryPostsAsync(long? viewerId, long? authorId, long? beforeId, int take, CancellationToken cancellationToken) =>
+        QueryAsync(viewerId, authorId, beforeId, everyone: false, take, cancellationToken);
+
+    public Task<PostPage> QueryAllPostsAsync(long? authorId, long? beforeId, int take, CancellationToken cancellationToken) =>
+        QueryAsync(viewerId: null, authorId, beforeId, everyone: true, take, cancellationToken);
+
+    private async Task<PostPage> QueryAsync(long? viewerId, long? authorId, long? beforeId, bool everyone, int take, CancellationToken cancellationToken)
     {
         await using var connection = await connectionFactory.OpenAsync(cancellationToken);
 
         await using var results = await connection.QueryMultipleAsync(new CommandDefinition(
             Procedures.Social.QueryPosts,
-            new { ViewerId = viewerId, AuthorId = authorId, BeforeId = beforeId, Take = Math.Clamp(take, 1, 50) },
+            new { ViewerId = viewerId, AuthorId = authorId, BeforeId = beforeId, Everyone = everyone, Take = Math.Clamp(take, 1, 50) },
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken));
 
@@ -164,7 +212,8 @@ public sealed class SocialRepository(IDbConnectionFactory connectionFactory) : I
             row.LikedByMe,
             AsUtc(row.Created),
             // The blob name; MediaLinks turns it into a short-lived read link.
-            [.. media[row.Id].Select(item => new MediaView(item.Id, (MediaKind)item.Kind, item.ContentType, item.ProcessedBlob ?? string.Empty))]))
+            [.. media[row.Id].Select(item => new MediaView(item.Id, (MediaKind)item.Kind, item.ContentType, item.ProcessedBlob ?? string.Empty))],
+            row.EditedOn is null ? null : AsUtc(row.EditedOn.Value)))
             .ToList();
 
         return new PostPage(items, items.Count == take ? items[^1].Id : null);
@@ -373,7 +422,8 @@ public sealed class SocialRepository(IDbConnectionFactory connectionFactory) : I
         int Likes,
         int Comments,
         bool LikedByMe,
-        DateTime Created);
+        DateTime Created,
+        DateTime? EditedOn);
 
     private sealed record PostMediaRow(long Id, long PostId, byte Kind, string ContentType, string? ProcessedBlob);
 

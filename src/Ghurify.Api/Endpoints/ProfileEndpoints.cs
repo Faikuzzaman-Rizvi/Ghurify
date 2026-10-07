@@ -96,10 +96,10 @@ public static class ProfileEndpoints
         app.MapGet("/api/v1/users/{id:long}/avatar", GetAvatarAsync)
             .WithTags("Profile")
             .WithName("GetAvatar")
-            .WithSummary("Redirects to the user's profile picture, or 404 if they have none.")
+            .WithSummary("Redirects to the user's profile picture, or 204 if they have none.")
             .AllowAnonymous()
             .Produces(StatusCodes.Status302Found)
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status204NoContent);
 
         me.MapPost("/verification", StartVerificationAsync)
             .WithName("StartVerification")
@@ -224,7 +224,12 @@ public static class ProfileEndpoints
         var link = await handler.HandleAsync(id, cancellationToken);
         if (link is null)
         {
-            return Results.NotFound();
+            // No picture is a normal answer, not an error: the image fails quietly and the page
+            // shows the person's initial. A 404 here put a red "failed to load" line in the browser
+            // console for every person without a photo. Unknown ids answer the same, so this never
+            // tells anyone which accounts exist.
+            context.Response.Headers.CacheControl = "private, max-age=60";
+            return Results.NoContent();
         }
 
         // Shorter than the link's own lifetime, so a cached redirect never points at a dead link.

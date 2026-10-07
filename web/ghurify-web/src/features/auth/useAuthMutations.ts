@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
 import {
   authApi,
   type ChangePasswordCommand,
@@ -62,14 +63,24 @@ export function useChangePassword() {
   });
 }
 
-/** Ends the session. */
+/**
+ * Ends the session: the refresh token is revoked and they land on the home page. What was cached
+ * while signed in is dropped once the screens using it have gone (useForgetOnSignOut).
+ */
 export function useLogout() {
   const signOut = useAuthStore((state) => state.signOut);
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: () => authApi.logout(),
     // Clear locally either way: if the call failed, the user still asked to be signed out,
     // and the server-side token expires on its own.
-    onSettled: () => signOut(),
+    onSettled: async () => {
+      // Leave first, rendered at once (flushSync), and only then sign out. A navigation normally
+      // renders later, as a transition; the protected page still on screen would see the session
+      // end first and send them to the sign-in page instead of home.
+      await navigate('/', { replace: true, flushSync: true });
+      signOut();
+    },
   });
 }

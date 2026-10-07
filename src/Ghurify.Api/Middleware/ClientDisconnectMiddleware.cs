@@ -42,17 +42,31 @@ public sealed class ClientDisconnectMiddleware(RequestDelegate next, ILogger<Cli
         catch (Exception) when (context.RequestAborted.IsCancellationRequested)
 #pragma warning restore CA1031
         {
-            // Debug, not warning: on a busy site this is constant and completely normal.
-            logger.LogDebug(
-                "{Method} {Path} was abandoned by the caller before it finished.",
-                context.Request.Method,
-                context.Request.Path);
+            MarkAbandoned(context);
+            return;
+        }
 
-            // Only safe if nothing has been written yet; otherwise the status is already sent.
-            if (!context.Response.HasStarted)
-            {
-                context.Response.StatusCode = ClientClosedRequest;
-            }
+        // The caller also leaves without anything throwing: the account check at sign-in stops
+        // early, the request carries on as anonymous and is refused. Record that it was abandoned,
+        // not a 401 that nobody received and that reads like a sign-in problem.
+        if (context.RequestAborted.IsCancellationRequested)
+        {
+            MarkAbandoned(context);
+        }
+    }
+
+    private void MarkAbandoned(HttpContext context)
+    {
+        // Debug, not warning: on a busy site this is constant and completely normal.
+        logger.LogDebug(
+            "{Method} {Path} was abandoned by the caller before it finished.",
+            context.Request.Method,
+            context.Request.Path);
+
+        // Only safe if nothing has been written yet; otherwise the status is already sent.
+        if (!context.Response.HasStarted)
+        {
+            context.Response.StatusCode = ClientClosedRequest;
         }
     }
 }

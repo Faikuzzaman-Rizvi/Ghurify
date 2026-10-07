@@ -51,3 +51,9 @@ CREATE NONCLUSTERED INDEX [IX_Refund_Status]
     INCLUDE ([Attempts])
     WHERE [Status] IN (1, 3);
 GO
+
+-- What has gone back against each payment, for payment history and receipts.
+CREATE NONCLUSTERED INDEX [IX_Refund_PaymentId]
+    ON [Pay].[Refund] ([PaymentId] ASC)
+    INCLUDE ([Amount], [Status]);
+GO

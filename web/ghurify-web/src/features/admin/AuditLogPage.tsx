@@ -16,6 +16,7 @@ const entityTypes = [
   'Verification',
   'Trip',
   'Report',
+  'Post',
   'DestinationAlert',
   'SosEvent',
   'Payout',

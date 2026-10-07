@@ -55,7 +55,8 @@ public sealed class AuditLogRepository(IDbConnectionFactory connectionFactory) :
             new
             {
                 Take = Math.Clamp(take, 1, 200),
-                EntityType = entityType is null ? null : new DbString { Value = entityType, IsAnsi = true, Length = 40 },
+                // Always a DbString (Dapper refuses a null one); a null Value is sent as NULL: no filter.
+                EntityType = new DbString { Value = entityType, IsAnsi = true, Length = 40 },
                 EntityId = entityId,
             },
             cancellationToken: cancellationToken));

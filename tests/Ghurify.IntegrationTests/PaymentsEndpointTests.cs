@@ -33,6 +33,8 @@ public sealed class PaymentsEndpointTests(SqlServerFixture database)
         Assert.Equal(120m, checkout.Fee);
         Assert.Equal(6120m, checkout.Total);
         Assert.Equal("Held", checkout.Status);
+        // The tests pay through the pretend gateway, and the checkout says so (no test-card note).
+        Assert.Equal("Pretend", checkout.Mode);
 
         var stranger = await data.CreateVerifiedTravelerAsync();
         using var strangerClient = TestData.ClientFor(api, stranger);
@@ -443,5 +445,5 @@ public sealed class PaymentsEndpointTests(SqlServerFixture database)
 
     private sealed record StartedResponse(long PaymentId, string RedirectUrl, decimal Amount, decimal Fee, decimal Total);
 
-    private sealed record CheckoutResponse(long BookingId, decimal Amount, decimal Fee, decimal Total, string Status);
+    private sealed record CheckoutResponse(long BookingId, decimal Amount, decimal Fee, decimal Total, string Status, string Mode);
 }

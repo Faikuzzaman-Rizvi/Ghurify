@@ -4,6 +4,7 @@ import {
   apiUrl,
   connectionString,
   mailDirectory,
+  paymentsProvider,
   repoRoot,
   webPort,
   webUrl,
@@ -51,7 +52,8 @@ export default defineConfig({
         Email__PickupDirectory: mailDirectory,
         Jobs__Enabled: 'false',
         Ekyc__Provider: 'fake',
-        Payments__Provider: 'fake',
+        // The offline pretend gateway, or the SSLCommerz sandbox with E2E_PAYMENTS=sslcommerz.
+        Payments__Provider: paymentsProvider,
         Payments__ApiBaseUrl: apiUrl,
         Payments__WebBaseUrl: webUrl,
         Storage__ConnectionString: 'UseDevelopmentStorage=true',

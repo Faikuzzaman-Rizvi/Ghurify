@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { HubConnectionState } from '@microsoft/signalr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, asNumber } from '@/api/client';
-import { createHubConnection } from '@/api/realtime';
+import { createHubConnection, runHubConnection } from '@/api/realtime';
 import { useAuthStore } from '@/features/auth/authStore';
 import { chatApi, type ChatMessage } from './chatApi';
 
@@ -53,8 +52,12 @@ export function useTripChat(tripId: number) {
     [latest.data, live],
   );
 
+  // Only members can open the chat, and the history request is what says so: until it has
+  // answered there is nothing to join, and asking the hub anyway just gets a refusal.
+  const isMember = latest.isSuccess;
+
   useEffect(() => {
-    if (tripId <= 0) return;
+    if (tripId <= 0 || !isMember) return;
 
     const hub = createHubConnection('/hubs/chat');
     hub.on('message', (message: ChatMessage) => setLive((current) => [...current, message]));
@@ -67,21 +70,27 @@ export function useTripChat(tripId: number) {
     });
     hub.onclose(() => setConnection('offline'));
 
-    hub
-      .start()
-      .then(() => hub.invoke('JoinTrip', tripId))
-      .then(() => setConnection('live'))
-      .catch(() => {
-        if (hub.state === HubConnectionState.Connected) {
-          setNotMember(true);
-        }
-        setConnection('offline');
-      });
+    let active = true;
+    const stop = runHubConnection(hub, {
+      onStarted: () =>
+        void hub.invoke('JoinTrip', tripId).then(
+          () => {
+            if (active) setConnection('live');
+          },
+          () => {
+            if (!active) return;
+            setNotMember(true);
+            setConnection('offline');
+          },
+        ),
+      onFailed: () => setConnection('offline'),
+    });
 
     return () => {
-      void hub.stop();
+      active = false;
+      stop();
     };
-  }, [tripId, queryClient]);
+  }, [tripId, isMember, queryClient]);
 
   // Mark read up to the newest message on screen.
   const newest = messages.at(-1);

@@ -34,8 +34,9 @@ public static class Scenes
         return await HoldAsync(api, host, traveller, tripId);
     }
 
-    /// <summary>A seat paid in full (6,000 + 120 fee) through the sandbox gateway.</summary>
-    public static async Task<Scene> PaidBookingAsync(TestData data, GhurifyApiFactory api, int startIn = 20, string destination = "sajek")
+    /// <summary>A seat paid in full (6,000 + 120 fee) through the sandbox gateway, by <paramref name="method"/>.</summary>
+    public static async Task<Scene> PaidBookingAsync(
+        TestData data, GhurifyApiFactory api, int startIn = 20, string destination = "sajek", string method = "card")
     {
         ArgumentNullException.ThrowIfNull(api);
         var scene = await HeldBookingAsync(data, api, startIn: startIn, destination: destination);
@@ -55,7 +56,7 @@ public static class Scenes
         var gateway = api.Services.GetRequiredService<FakePaymentGateway>();
         using var anonymous = api.CreateClient();
         using var webhook = await anonymous.PostAsJsonAsync(
-            "/api/v1/payments/webhooks/fake", gateway.SignedCallback(payment.Reference, succeeded: true, payment.Total), Token);
+            "/api/v1/payments/webhooks/fake", gateway.SignedCallback(payment.Reference, succeeded: true, payment.Total, method: method), Token);
         Assert.Equal(HttpStatusCode.OK, webhook.StatusCode);
 
         return scene;

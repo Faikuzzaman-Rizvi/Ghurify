@@ -21,3 +21,6 @@ export const connectionString =
   process.env.E2E_DB ??
   `Server=localhost,1433;Database=${databaseName};User Id=sa;Password=${saPassword};TrustServerCertificate=True;Encrypt=False;`;
 export const mailDirectory = path.join(here, '.mail');
+// "fake" (offline, the default) or "sslcommerz": pay on the real SSLCommerz sandbox page with
+// its public test store and test card. Needs internet access.
+export const paymentsProvider = process.env.E2E_PAYMENTS === 'sslcommerz' ? 'sslcommerz' : 'fake';

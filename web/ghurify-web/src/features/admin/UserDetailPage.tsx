@@ -259,6 +259,10 @@ function UserRecord({ user, language }: { user: AdminUserDetail; language: 'bn' 
             })}{' '}
             <Link to="/admin/reports" className="text-hill underline">
               {t('admin.nav.reports')}
+            </Link>{' '}
+            ·{' '}
+            <Link to={`/admin/stories?author=${id}`} className="text-hill underline">
+              {t('admin.users.stories')}
             </Link>
           </p>
         </section>

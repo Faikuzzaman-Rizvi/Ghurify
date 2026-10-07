@@ -131,6 +131,8 @@
     <Build Include="Pay\Stored Procedures\AddRefund.sql" />
     <Build Include="Pay\Stored Procedures\GetBookingCheckout.sql" />
     <Build Include="Pay\Stored Procedures\GetAdminBooking.sql" />
+    <Build Include="Pay\Stored Procedures\QueryPayments.sql" />
+    <Build Include="Pay\Stored Procedures\GetPayment.sql" />
   </ItemGroup>
   <ItemGroup Label="Chat, payouts and refunds">
     <Build Include="Social\Tables\ChatMessage.sql" />
@@ -162,6 +164,7 @@
     <Build Include="Social\Tables\RatingSummary.sql" />
     <Build Include="Social\Stored Procedures\QueryPosts.sql" />
     <Build Include="Social\Stored Procedures\AddPost.sql" />
+    <Build Include="Social\Stored Procedures\SetPost.sql" />
     <Build Include="Social\Stored Procedures\AddReview.sql" />
     <Build Include="Social\Stored Procedures\QueryReviewable.sql" />
     <Build Include="Social\Stored Procedures\GetPublicProfile.sql" />

@@ -44,7 +44,9 @@
     "menu": "Menu",
     "accountMenu": "Your account menu",
     "signedInAs": "Signed in as",
-    "yourAccount": "Your account"
+    "yourAccount": "Your account",
+    "signingOut": "Signing out...",
+    "payments": "Payments"
   },
   "home": {
     "eyebrow": "Group trips across Bangladesh",
@@ -471,7 +473,7 @@
     "booking_not_cancellable": "Only a paid booking can be cancelled, and only before the trip starts.",
     "trip_not_cancellable": "This trip has already ended or been cancelled.",
     "payout_not_waiting": "This payout is not waiting for approval.",
-    "storage_unavailable": "Photo uploads are not available right now.",
+    "storage_unavailable": "Photos can't be saved right now. Please try again in a minute.",
     "media_type": "Upload a JPEG, PNG or WebP photo, or an MP4 or MOV video.",
     "media_too_large": "This file is too large.",
     "media_not_found": "That upload could not be found.",
@@ -543,7 +545,9 @@
     "point_name": "Give the name in both languages.",
     "point_phone": "Write the phone number with digits only, for example 01320-000000.",
     "point_position": "The position must be inside Bangladesh.",
-    "point_not_found": "That emergency point no longer exists."
+    "point_not_found": "That emergency point no longer exists.",
+    "upload_failed": "The photo didn't get through. Check your connection and try again.",
+    "payment_not_found": "There is no such payment."
   },
   "roles": {
     "Traveler": "Traveller",
@@ -711,7 +715,9 @@
       "trips": "Trips",
       "bookings": "Bookings & payments",
       "points": "Emergency points",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "payments": "Payments",
+      "stories": "Stories"
     },
     "verifications": {
       "title": "Verification queue",
@@ -870,7 +876,8 @@
           "Suspended": "Suspend",
           "Deactivated": "Close account"
         }
-      }
+      },
+      "stories": "Their stories"
     },
     "trips": {
       "title": "Trips",
@@ -973,6 +980,47 @@
       "title": "Ghurify admin",
       "backToSite": "View site",
       "waiting": "waiting"
+    },
+    "payments": {
+      "title": "Payments",
+      "search": "Search",
+      "searchHint": "Payment or booking number, transaction ID, gateway ID, email or name",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "empty": "No payments match",
+      "totals_one": "{{formatted}} payment · {{paid}} paid · {{refunded}} refunded",
+      "totals_other": "{{formatted}} payments · {{paid}} paid · {{refunded}} refunded",
+      "back": "All payments",
+      "detailTitle": "Payment #{{id}}",
+      "parties": "Who paid",
+      "payer": "Paid by",
+      "email": "Email",
+      "host": "Host",
+      "settlement": "Gateway settlement",
+      "gatewayCharge": "Gateway charge",
+      "storeAmount": "Settled to Ghurify",
+      "risk": "Gateway risk check",
+      "riskFlagged": "Flagged as risky",
+      "riskClear": "Clear",
+      "riskUnknown": "Not reported",
+      "callbacks": "Gateway callbacks",
+      "noCallbacks": "No callbacks received.",
+      "signatureValid": "Signature valid",
+      "signatureInvalid": "Bad signature",
+      "processed": "processed {{when}}",
+      "notProcessed": "not processed"
+    },
+    "stories": {
+      "title": "Stories",
+      "onePerson": "Only {{name}}",
+      "everyone": "Show everyone's",
+      "empty": "No stories here.",
+      "comments_one": "{{count}} comment",
+      "comments_other": "{{count}} comments",
+      "remove": "Remove story",
+      "more": "Load more",
+      "confirmTitle": "Remove this story by {{name}}?",
+      "confirmText": "It disappears for everyone. The author is told it was removed and why, and your reason is kept in the audit log."
     }
   },
   "tripStatus": {
@@ -1191,7 +1239,8 @@
       "destination.closed": "A destination on your trip was closed for safety. You will be refunded in full.",
       "safety.checkin_missed": "A traveller missed a safety check-in.",
       "review.invite": "How was your trip? Leave a review.",
-      "safety.sos": "Someone on your trip sent an SOS. The safety desk has been alerted."
+      "safety.sos": "Someone on your trip sent an SOS. The safety desk has been alerted.",
+      "post.removed": "A moderator removed one of your stories: {{reason}}"
     }
   },
   "checkout": {
@@ -1211,6 +1260,13 @@
       "pay": "You pay on the secure payment page. Your seat is held until the timer runs out.",
       "held": "Your money is held in escrow, not paid to the host.",
       "released": "The host is paid in stages: part before departure, the rest once the trip starts."
+    },
+    "sandbox": {
+      "title": "Demo payment: no real money",
+      "body": "This checkout uses the SSLCommerz sandbox. On the payment page, use this test card:",
+      "card": "Card",
+      "expiry": "Expiry",
+      "otp": "If asked, any code, then Success"
     }
   },
   "sandbox": {
@@ -1218,7 +1274,14 @@
     "title": "Test payment",
     "intro": "This is the test payment page used before real payments are switched on. No money moves.",
     "pay": "Pay successfully",
-    "fail": "Make the payment fail"
+    "fail": "Make the payment fail",
+    "methodLabel": "Pay with",
+    "methods": {
+      "bkash": "bKash",
+      "nagad": "Nagad",
+      "rocket": "Rocket",
+      "card": "Card"
+    }
   },
   "paymentResult": {
     "tryAgain": "Try paying again",
@@ -1233,7 +1296,8 @@
     "waiting": {
       "title": "Confirming your payment",
       "body": "We are checking with the payment service. This usually takes a few seconds."
-    }
+    },
+    "history": "See your payment history"
   },
   "payouts": {
     "title": "Payouts",
@@ -1344,7 +1408,24 @@
       "private": "Do not post phone numbers, addresses or anyone’s face without asking.",
       "real": "Share what you saw. Honest stories help others travel safely."
     },
-    "placesTitle": "Where people are going"
+    "placesTitle": "Where people are going",
+    "edited": "edited",
+    "edit": {
+      "open": "Edit",
+      "title": "Edit your story",
+      "save": "Save changes",
+      "photos": "Photos in this story",
+      "removePhoto": "Remove",
+      "keepPhoto": "Keep",
+      "empty": "A story needs some text or at least one photo.",
+      "text": "Your story"
+    },
+    "delete": {
+      "open": "Delete",
+      "title": "Delete this story?",
+      "body": "It will disappear from the feed and your profile, with its likes and comments. This can't be undone.",
+      "confirm": "Delete story"
+    }
   },
   "people": {
     "notFound": "We could not find this person.",
@@ -1451,5 +1532,124 @@
     "sundarbans": "A boat in a misty mangrove creek in the Sundarbans",
     "kuakata": "Sunset over boats on Kuakata beach",
     "rangamati": "The hanging bridge over Kaptai Lake in Rangamati"
+  },
+  "paymentHistory": {
+    "eyebrow": "Your money",
+    "titleAccent": "Payment <accent>history</accent>",
+    "subtitle": "Every payment you have made or tried on Ghurify, each with a receipt you can keep.",
+    "figures": {
+      "paid": "Paid",
+      "refunded": "Refunded to you",
+      "net": "Net paid"
+    },
+    "list": "Payments",
+    "count_one": "{{formatted}} payment",
+    "count_other": "{{formatted}} payments",
+    "filters": {
+      "label": "Show payments",
+      "all": "All",
+      "Succeeded": "Paid",
+      "Pending": "In progress",
+      "Failed": "Failed",
+      "Expired": "Expired"
+    },
+    "empty": "No payments yet",
+    "emptyHint": "When you pay for a seat, its receipt shows up here.",
+    "emptyFiltered": "No payments match this filter",
+    "findTrip": "Find a trip",
+    "status": {
+      "Created": "Started",
+      "Pending": "In progress",
+      "Succeeded": "Paid",
+      "Failed": "Failed",
+      "Expired": "Expired"
+    },
+    "method": {
+      "none": "Not paid",
+      "Card": "Card",
+      "MobileBanking": "Mobile banking",
+      "InternetBanking": "Internet banking",
+      "Other": "Other"
+    },
+    "endingIn": "ending in",
+    "transactionId": "Transaction ID",
+    "refundedAmount": "{{amount}} refunded",
+    "viewReceipt": "View receipt",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyLabel": "Copy {{label}}"
+  },
+  "receipt": {
+    "title": "Payment receipt",
+    "number": "Payment #{{id}}",
+    "back": "All payments",
+    "print": "Print receipt",
+    "amountPaid": "Amount paid",
+    "amountDue": "Amount to pay",
+    "dhakaTime": "All times are Bangladesh time.",
+    "bookingNumber": "Booking #{{id}}",
+    "noRefunds": "Nothing has been refunded for this payment.",
+    "shortfall": "{{amount}} was no longer in escrow to refund. Our support team will settle it with you.",
+    "sections": {
+      "transaction": "Transaction",
+      "method": "Payment method",
+      "amounts": "Amounts",
+      "dates": "Dates and times",
+      "booking": "Booking",
+      "refunds": "Refunds"
+    },
+    "fields": {
+      "transactionId": "Transaction ID",
+      "gatewayTxnId": "Gateway transaction ID",
+      "validationId": "Validation ID",
+      "gateway": "Payment gateway",
+      "status": "Status",
+      "method": "Paid with",
+      "methodType": "Type",
+      "issuer": "Issued by",
+      "currency": "Currency",
+      "price": "Trip price",
+      "fee": "Service fee",
+      "total": "Total charged",
+      "paid": "Amount paid",
+      "refunded": "Refunded",
+      "net": "Net paid",
+      "started": "Started",
+      "completed": "Completed",
+      "paidAtGateway": "Paid at the gateway",
+      "trip": "Trip",
+      "dates": "Trip dates",
+      "host": "Host",
+      "booking": "Booking",
+      "refundRef": "Refund reference"
+    },
+    "gateway": {
+      "fake": "Ghurify sandbox",
+      "sslcommerz": "SSLCommerz"
+    },
+    "failure": {
+      "declined": "The payment was declined.",
+      "cancelled_by_traveler": "You cancelled on the payment page.",
+      "gateway_unavailable": "The payment service did not answer. No money was taken.",
+      "amount_mismatch": "The amount charged did not match the total, so it is being refunded."
+    }
+  },
+  "received": {
+    "titleAccent": "Payments <accent>received</accent>",
+    "subtitle": "Seats travellers have paid for on your trips. The money waits in escrow and reaches you as payouts.",
+    "link": "Payments received",
+    "payouts": "Your payouts",
+    "figures": {
+      "count": "Paid seats",
+      "value": "Seat value",
+      "refunded": "Refunded to travellers"
+    },
+    "list": "Paid bookings",
+    "oneTrip": "One trip",
+    "showAll": "Show all trips",
+    "empty": "No paid bookings yet",
+    "emptyHint": "When a traveller pays for a seat on one of your trips, it appears here.",
+    "traveller": "Traveller",
+    "refunded": "{{amount}} refunded"
   }
 }

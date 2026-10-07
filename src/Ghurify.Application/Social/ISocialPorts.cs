@@ -44,7 +44,16 @@ public interface ISocialRepository
     /// <summary>Archives the author's own post. False if not theirs.</summary>
     Task<bool> ArchivePostAsync(long postId, long authorId, CancellationToken cancellationToken);
 
+    /// <summary>The author's edit of their own post; only theirs is ever touched.</summary>
+    Task<PostEditOutcome> SetPostAsync(PostEdit edit, CancellationToken cancellationToken);
+
+    /// <summary>A moderator removes anyone's post. The author's id, or null when there was no such post.</summary>
+    Task<long?> RemovePostAsync(long postId, long moderatorId, CancellationToken cancellationToken);
+
     Task<PostPage> QueryPostsAsync(long? viewerId, long? authorId, long? beforeId, int take, CancellationToken cancellationToken);
+
+    /// <summary>Every live post, or one author's, newest first: for staff moderating.</summary>
+    Task<PostPage> QueryAllPostsAsync(long? authorId, long? beforeId, int take, CancellationToken cancellationToken);
 
     /// <summary>True when the post exists and is visible.</summary>
     Task<bool> PostExistsAsync(long postId, CancellationToken cancellationToken);
@@ -109,6 +118,16 @@ public sealed record MediaRecord(
 
 public sealed record NewPost(long AuthorId, string Body, long? DestinationId, long? TripId, IReadOnlyList<long> MediaIds);
 
+/// <summary>An author's change to their post: the new text and place, and the media that stay.</summary>
+public sealed record PostEdit(long PostId, long AuthorId, string Body, long? DestinationId, IReadOnlyList<long> KeepMediaIds);
+
+public enum PostEditOutcome
+{
+    Saved = 0,
+    NotFound = 1,
+    WouldBeEmpty = 2,
+}
+
 public sealed record NewReview(long TripId, long ReviewerId, long RevieweeId, ReviewDirection Direction, byte Rating, string? Body);
 
 /// <summary>A post as the feed shows it. Media URLs are short-lived read links.</summary>
@@ -126,7 +145,8 @@ public sealed record PostView(
     int Comments,
     bool LikedByMe,
     DateTimeOffset Created,
-    IReadOnlyList<MediaView> Media);
+    IReadOnlyList<MediaView> Media,
+    DateTimeOffset? EditedOn = null);
 
 public sealed record MediaView(long Id, MediaKind Kind, string ContentType, string Url);
 

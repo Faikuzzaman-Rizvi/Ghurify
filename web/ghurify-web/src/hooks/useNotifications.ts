@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/api/client';
 import type { components } from '@/api/schema';
-import { createHubConnection } from '@/api/realtime';
+import { createHubConnection, runHubConnection } from '@/api/realtime';
 import { useAuthStore } from '@/features/auth/authStore';
 
 export type NotificationItem = components['schemas']['NotificationItem'];
@@ -13,19 +13,28 @@ function useNotificationsKey() {
   return ['me', user, 'notifications'] as const;
 }
 
-/** The bell's list and unread count, refreshed live from /hubs/notify while signed in. */
+/** The bell's list and unread count. Kept fresh by {@link useLiveNotifications}. */
 export function useNotifications() {
   const status = useAuthStore((state) => state.status);
-  const queryClient = useQueryClient();
   const key = useNotificationsKey();
 
-  const query = useQuery({
+  return useQuery({
     queryKey: key,
     queryFn: ({ signal }) => apiGet<NotificationPage>('/api/v1/me/notifications', { signal }),
     enabled: status === 'authenticated',
     // The hub pushes changes; this only catches up after a long disconnect.
     refetchInterval: 5 * 60_000,
   });
+}
+
+/**
+ * One live connection to /hubs/notify while signed in, for the whole app: mounted once at the
+ * root, so moving between the site and the admin portal (each with its own bell) never drops and
+ * reopens it.
+ */
+export function useLiveNotifications() {
+  const status = useAuthStore((state) => state.status);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (status !== 'authenticated') {
@@ -41,16 +50,9 @@ export function useNotifications() {
       void queryClient.invalidateQueries({ queryKey: ['host'] });
     });
 
-    connection.start().catch(() => {
-      // Offline or the hub is down: the bell still works from the periodic refetch.
-    });
-
-    return () => {
-      void connection.stop();
-    };
+    // Offline or the hub is down: the bell still works from the periodic refetch.
+    return runHubConnection(connection);
   }, [status, queryClient]);
-
-  return query;
 }
 
 export function useMarkNotificationsRead() {

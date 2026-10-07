@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Flag, MapPin, MessageCircle, SendHorizontal } from 'lucide-react';
+import { Flag, MapPin, MessageCircle, Pencil, SendHorizontal, Trash2 } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
-import { cardClass, inputClass } from '@/components/Field';
+import { Dialog } from '@/components/Dialog';
+import { cardClass, dangerButtonClass, inputClass, secondaryButtonClass } from '@/components/Field';
 import { Avatar as UserAvatar } from '@/components/Avatar';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { useAuthStore } from '@/features/auth/authStore';
@@ -13,6 +14,7 @@ import { ReportDialog } from '@/features/safety/ReportDialog';
 import { errorText } from '@/lib/errors';
 import { formatCount, toLanguage } from '@/lib/format';
 import { feedApi, type PostView } from './feedApi';
+import { PostEditor } from './PostEditor';
 
 /**
  * Someone's picture next to their name: their profile photo when we know who they are, else a
@@ -54,18 +56,31 @@ export function PostCard({ post }: { post: PostView }) {
   const status = useAuthStore((state) => state.status);
   const [showComments, setShowComments] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const viewer = useAuthStore((state) => state.user?.id);
   const id = asNumber(post.id);
+  const mine = status === 'authenticated' && viewer === asNumber(post.authorId);
+
+  const remove = useMutation({
+    mutationFn: () => feedApi.deletePost(id),
+    onSuccess: async () => {
+      setDeleting(false);
+      await queryClient.invalidateQueries({ queryKey: ['feed'] });
+    },
+  });
 
   const like = useMutation({
     mutationFn: () => (post.likedByMe ? feedApi.unlike(id) : feedApi.like(id)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feed'] }),
   });
 
-  const when = new Intl.DateTimeFormat(i18n.language, {
-    dateStyle: 'medium',
-    timeZone: 'Asia/Dhaka',
-  }).format(new Date(post.created));
+  const formatWhen = (iso: string) =>
+    new Intl.DateTimeFormat(i18n.language, {
+      dateStyle: 'medium',
+      timeZone: 'Asia/Dhaka',
+    }).format(new Date(iso));
+  const when = formatWhen(post.created);
 
   return (
     <article className={`${cardClass} flex flex-col gap-4`}>
@@ -81,7 +96,10 @@ export function PostCard({ post }: { post: PostView }) {
             </Link>
             <VerificationBadge level={post.authorVerifiedLevel} />
           </p>
-          <p className="text-xs text-deep/60">{when}</p>
+          <p className="text-xs text-deep/60">
+            {when}
+            {post.editedOn && <span title={formatWhen(post.editedOn)}> · {t('feed.edited')}</span>}
+          </p>
         </div>
         {post.destinationSlug && (
           <Link
@@ -94,9 +112,13 @@ export function PostCard({ post }: { post: PostView }) {
         )}
       </header>
 
-      {post.body && <p className="whitespace-pre-wrap leading-relaxed text-deep">{post.body}</p>}
+      {editing ? (
+        <PostEditor post={post} onDone={() => setEditing(false)} />
+      ) : (
+        post.body && <p className="whitespace-pre-wrap leading-relaxed text-deep">{post.body}</p>
+      )}
 
-      {post.media.length > 0 && (
+      {!editing && post.media.length > 0 && (
         <div
           className={`grid gap-2 overflow-hidden rounded-xl ${post.media.length > 1 ? 'grid-cols-2' : ''}`}
         >
@@ -146,7 +168,27 @@ export function PostCard({ post }: { post: PostView }) {
           {formatCount(post.comments, language)}
           <span className="sr-only">{t('feed.comments')}</span>
         </button>
-        {status === 'authenticated' && viewer !== asNumber(post.authorId) && (
+        {mine && !editing && (
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-deep/70 transition hover:bg-mist hover:text-hill"
+            >
+              <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
+              {t('feed.edit.open')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeleting(true)}
+              className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-deep/70 transition hover:bg-jamdani/10 hover:text-jamdani"
+            >
+              <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
+              {t('feed.delete.open')}
+            </button>
+          </div>
+        )}
+        {status === 'authenticated' && !mine && (
           <button
             type="button"
             onClick={() => setReporting(true)}
@@ -157,6 +199,34 @@ export function PostCard({ post }: { post: PostView }) {
           </button>
         )}
       </footer>
+      <Dialog
+        open={deleting}
+        title={t('feed.delete.title')}
+        onClose={() => {
+          remove.reset();
+          setDeleting(false);
+        }}
+      >
+        <p className="text-sm text-deep/80">{t('feed.delete.body')}</p>
+        {remove.isError && (
+          <p role="alert" className="mt-2 text-sm text-jamdani">
+            {errorText(remove.error, t)}
+          </p>
+        )}
+        <div className="mt-5 flex justify-end gap-2">
+          <button type="button" className={secondaryButtonClass} onClick={() => setDeleting(false)}>
+            {t('common.cancel')}
+          </button>
+          <button
+            type="button"
+            className={dangerButtonClass}
+            disabled={remove.isPending}
+            onClick={() => remove.mutate()}
+          >
+            {t('feed.delete.confirm')}
+          </button>
+        </div>
+      </Dialog>
       {reporting && (
         <ReportDialog kind="Post" targetId={id} open onClose={() => setReporting(false)} />
       )}

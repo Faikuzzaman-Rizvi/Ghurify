@@ -79,6 +79,18 @@ export function tripDays(start: string, end: string): number {
   );
 }
 
+/**
+ * An instant from the API ("2026-10-07T09:30:00Z") as the date and time it was in Dhaka:
+ * `7 Oct 2026, 15:30` (en) or its Bangla equivalent. Money moves are shown to the minute.
+ */
+export function formatDateTime(instant: string, language: Language): string {
+  return new Intl.DateTimeFormat(locale[language], {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Dhaka',
+  }).format(new Date(instant));
+}
+
 /** Today's date in Dhaka as "YYYY-MM-DD", for date inputs. */
 export function todayInDhaka(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dhaka' }).format(new Date());

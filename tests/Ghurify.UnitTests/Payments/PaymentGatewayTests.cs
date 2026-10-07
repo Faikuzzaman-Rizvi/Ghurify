@@ -25,6 +25,38 @@ public sealed class PaymentGatewayTests
         Assert.Equal(6120m, callback.Amount);
     }
 
+    // What the sandbox actually posts back when a card is declined or the traveller closes the page:
+    // signed, with no val_id, so the payment is closed without asking the validation API.
+    [Theory]
+    [InlineData("FAILED", "Invalid CVV", GatewayOutcome.Failed)]
+    [InlineData("CANCELLED", "Cancelled by User", GatewayOutcome.Cancelled)]
+    public void SslCommerz_ADeclinedOrCancelledReturn_IsReadAsSuch(string status, string error, GatewayOutcome expected)
+    {
+        using var gateway = SslCommerz();
+        var fields = SampleFields();
+        fields.Remove("val_id");
+        fields["status"] = status;
+        fields["error"] = error;
+
+        var callback = gateway.ReadCallback(Signed(fields));
+
+        Assert.NotNull(callback);
+        Assert.Equal(expected, callback.Outcome);
+        Assert.Null(callback.ValidationId);
+        Assert.Equal(error, callback.Reason);
+    }
+
+    [Theory]
+    [InlineData(PaymentsOptions.FakeProvider, true, PaymentMode.Pretend)]
+    [InlineData(PaymentsOptions.SslCommerzProvider, true, PaymentMode.Sandbox)]
+    [InlineData(PaymentsOptions.SslCommerzProvider, false, PaymentMode.Live)]
+    public void Mode_FollowsTheProviderAndItsSandboxSwitch(string provider, bool sandbox, PaymentMode expected)
+    {
+        var options = new PaymentsOptions { Provider = provider, SslCommerz = new SslCommerzOptions { Sandbox = sandbox } };
+
+        Assert.Equal(expected, options.Mode);
+    }
+
     [Fact]
     public void SslCommerz_ACallbackWhoseAmountWasChangedAfterSigning_IsRejected()
     {

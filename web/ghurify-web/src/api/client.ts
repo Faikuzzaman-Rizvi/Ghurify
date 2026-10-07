@@ -26,6 +26,16 @@ export function getAccessToken(): string | null {
 }
 
 /**
+ * Renews the session when a request finds its access token expired, and says whether it worked.
+ * Set by the auth feature (useSilentRefresh); this file knows nothing about sessions itself.
+ */
+let renewSession: (() => Promise<boolean>) | null = null;
+
+export function setSessionRenewer(renew: (() => Promise<boolean>) | null): void {
+  renewSession = renew;
+}
+
+/**
  * The generated types widen integers to `number | string`, because a 64-bit id can exceed
  * what JSON numbers hold exactly and may arrive as a string. Everything we read fits in a
  * JavaScript number, so narrow it once, here, rather than at every call site.
@@ -112,19 +122,25 @@ async function request<T>(
     headers['Content-Type'] = 'application/json';
   }
 
-  if (authenticated && accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`;
-  }
+  const send = (token: string | null) =>
+    fetch(`${baseUrl}${path}`, {
+      method,
+      headers: token ? { ...headers, Authorization: `Bearer ${token}` } : headers,
+      // Carries the httpOnly refresh cookie, including when the web app and the API are served
+      // from different origins.
+      credentials: 'include',
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(signal ? { signal } : {}),
+    });
 
-  const response = await fetch(`${baseUrl}${path}`, {
-    method,
-    headers,
-    // Carries the httpOnly refresh cookie, including when the web app and the API are served
-    // from different origins.
-    credentials: 'include',
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    ...(signal ? { signal } : {}),
-  });
+  const token = authenticated ? accessToken : null;
+  let response = await send(token);
+
+  // The token ran out (a laptop that slept through its renewal, say): renew once and try again,
+  // rather than show a signed-in person "you are signed out" on whatever they opened next.
+  if (response.status === 401 && token && renewSession && (await renewSession())) {
+    response = await send(accessToken);
+  }
 
   if (!response.ok) {
     throw await toApiError(response);

@@ -13,6 +13,9 @@ CREATE TABLE [Social].[Post]
     [Created]        DATETIME2 (0)   CONSTRAINT [DF_Post_Created] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedOn]      DATETIME2 (7)   CONSTRAINT [DF_Post_UpdatedOn] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedId]      BIGINT          NULL,
+    -- When the author last changed the text, place or photos (shown as 'edited'); NULL if never.
+    -- Last, so adding it was a plain ADD COLUMN rather than a rebuild of the table.
+    [EditedOn]       DATETIME2 (0)   NULL,
 
     CONSTRAINT [PK_Post] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Post_User_AuthorId] FOREIGN KEY ([AuthorId]) REFERENCES [Main].[User] ([Id]),

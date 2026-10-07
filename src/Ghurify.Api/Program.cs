@@ -70,6 +70,9 @@ try
             context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
         });
 
+    // Unreachable blob storage is an outage with a clear answer (503, try again), not a 500.
+    builder.Services.AddExceptionHandler<StorageUnavailableHandler>();
+
     // Enums travel as their names ("WomenOnly", not 2): readable in the browser, stable in the
     // generated client, and a reordered enum can never silently change what a number means.
     builder.Services.ConfigureHttpJsonOptions(options =>
@@ -128,10 +131,24 @@ try
                         return;
                     }
 
+                    var aborted = context.HttpContext.RequestAborted;
                     var access = context.HttpContext.RequestServices.GetRequiredService<AccessService>();
-                    if (!(await access.GetAsync(userId, context.HttpContext.RequestAborted)).IsActive)
+                    try
                     {
-                        context.Fail("The account is not active.");
+                        if (!(await access.GetAsync(userId, aborted)).IsActive)
+                        {
+                            context.Fail("The account is not active.");
+                        }
+                    }
+                    // The caller left while the account was being checked: a page change, or React
+                    // StrictMode dropping its first request. Caught here because the JWT handler
+                    // would otherwise log it as an error and Visual Studio would break on it as
+                    // user-unhandled on almost every navigation. Nobody is waiting for the answer.
+#pragma warning disable CA1031 // Deliberately broad, and only while the request is already aborted.
+                    catch (Exception) when (aborted.IsCancellationRequested)
+#pragma warning restore CA1031
+                    {
+                        context.Fail("The request was abandoned.");
                     }
                 },
             };
@@ -162,8 +179,8 @@ try
 
     // --- Rate limiting: a global fallback now; auth, join-request and payment endpoints
     //     attach their own stricter policies as those features arrive. ---
-    // Requests per minute per client IP across the API. Configurable so a load-test environment can
-    // raise it (one load generator is one IP); production keeps the default.
+    // Requests per minute per caller (user, or IP when anonymous) across the API. Configurable so a
+    // load-test environment can raise it (one load generator is one IP); production keeps the default.
     var globalPermitsPerMinute = Math.Max(60, builder.Configuration.GetValue("RateLimits:GlobalPerMinute", 300));
 
     builder.Services.AddRateLimiter(options =>
@@ -201,8 +218,10 @@ try
 
         options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             RateLimitPartition.GetFixedWindowLimiter(
-                // Partition by caller so one noisy client cannot starve the rest.
-                partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                // Partition by caller so one noisy client cannot starve the rest: per signed-in
+                // user, per IP otherwise. Many people share one IP behind a mobile carrier's NAT,
+                // and one person's tabs all share one, so an IP alone is too coarse.
+                partitionKey: CallerKey(context),
                 factory: _ => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = globalPermitsPerMinute,
@@ -236,6 +255,16 @@ try
             "Payments:Provider is \"fake\" in Production. Configure \"sslcommerz\" with live credentials.");
     }
 
+    // Likewise the SSLCommerz sandbox: its payments are pretend, so it must never take real bookings.
+    var sslCommerz = app.Services.GetRequiredService<IOptions<PaymentsOptions>>().Value;
+    if (app.Environment.IsProduction()
+        && string.Equals(sslCommerz.Provider, PaymentsOptions.SslCommerzProvider, StringComparison.OrdinalIgnoreCase)
+        && sslCommerz.SslCommerz.Sandbox)
+    {
+        throw new InvalidOperationException(
+            "Payments:SslCommerz:Sandbox is on in Production. Set it to false and use the live store credentials.");
+    }
+
     WarnIfSignInCodesWillNotBeDelivered(app);
 
     app.UseSecurityHeaders();
@@ -260,8 +289,11 @@ try
     }
 
     app.UseCors(CorsOptions.PolicyName);
-    app.UseRateLimiter();
     app.UseAuthentication();
+
+    // After authentication, so the limits can be per user: before it, every request looks
+    // anonymous and the per-user policies quietly fall back to the IP address.
+    app.UseRateLimiter();
     app.UseAuthorization();
 
     app.MapHealthEndpoints();
@@ -271,7 +303,10 @@ try
     app.MapAdminEndpoints();
     app.MapBookingsEndpoints();
     app.MapNotificationsEndpoints();
-    app.MapPaymentsEndpoints(sandboxEnabled: sandboxPayments);
+    // The pretend gateway's page is always there in Development, whichever provider is set, so the
+    // API description (and the client generated from it) does not change with local settings. It
+    // cannot settle another provider's payment: the callback handler refuses a provider mismatch.
+    app.MapPaymentsEndpoints(sandboxEnabled: sandboxPayments || app.Environment.IsDevelopment());
 
     app.MapChatEndpoints();
     app.MapSocialEndpoints();
@@ -307,15 +342,19 @@ public partial class Program
     private static void AddPerUserPolicy(RateLimiterOptions options, string name, int permits, TimeSpan window) =>
         options.AddPolicy(name, context =>
             RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey: context.User.FindUserId()?.ToString(CultureInfo.InvariantCulture)
-                    ?? context.Connection.RemoteIpAddress?.ToString()
-                    ?? "unknown",
+                partitionKey: CallerKey(context),
                 factory: _ => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = permits,
                     Window = window,
                     QueueLimit = 0,
                 }));
+
+    /// <summary>The signed-in user, or the client IP for anonymous callers.</summary>
+    private static string CallerKey(HttpContext context) =>
+        context.User.FindUserId() is { } userId
+            ? "user:" + userId.ToString(CultureInfo.InvariantCulture)
+            : "ip:" + (context.Connection.RemoteIpAddress?.ToString() ?? "unknown");
 
     /// <summary>
     /// Says once, at startup, where sign-in codes will actually go. A test mailbox reports every

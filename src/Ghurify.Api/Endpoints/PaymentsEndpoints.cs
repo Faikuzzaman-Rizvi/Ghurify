@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Ghurify.Application.Payments;
+using Ghurify.Domain.Payments;
 using Ghurify.Infrastructure.Payments;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -91,6 +92,29 @@ public static class PaymentsEndpoints
             .RequireAuthorization()
             .Produces<IReadOnlyList<RefundView>>();
 
+        app.MapGet("/api/v1/me/payments", ListMyPaymentsAsync)
+            .WithTags("Payments")
+            .WithName("ListMyPayments")
+            .WithSummary("Your payment history: every attempt, newest first, with what you paid and had refunded.")
+            .RequireAuthorization()
+            .Produces<PaymentHistoryPage>();
+
+        app.MapGet("/api/v1/me/payments/{id:long}", GetMyPaymentAsync)
+            .WithTags("Payments")
+            .WithName("GetMyPayment")
+            .WithSummary("One of your payments as a receipt: amounts, method, gateway references and refunds.")
+            .RequireAuthorization()
+            .Produces<PaymentDetail>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        app.MapGet("/api/v1/me/received-payments", ListReceivedPaymentsAsync)
+            .WithTags("Payments")
+            .WithName("ListReceivedPayments")
+            .WithSummary("Paid bookings on your trips, newest first, optionally for one trip.")
+            .RequireAuthorization(Authorization.Policies.Host)
+            .Produces<ReceivedPaymentPage>()
+            .ProducesProblem(StatusCodes.Status403Forbidden);
+
         if (sandboxEnabled)
         {
             MapSandbox(app);
@@ -156,6 +180,7 @@ public static class PaymentsEndpoints
         string outcome,
         HttpRequest request,
         [FromServices] HandlePaymentCallbackHandler handler,
+        [FromServices] IPaymentRepository payments,
         [FromServices] IOptions<PaymentsOptions> options,
         [FromServices] ILoggerFactory loggers,
         CancellationToken cancellationToken)
@@ -174,6 +199,14 @@ public static class PaymentsEndpoints
             // shows "we are confirming your payment" and polls.
             loggers.CreateLogger(nameof(PaymentsEndpoints))
                 .LogWarning(ex, "Could not settle a returning payment now; the IPN will retry.");
+        }
+
+        // Not settled now (validation down, or a callback that did not check out): still send the
+        // traveller to their booking's result page, which polls the API and only ever shows what
+        // the verified callback recorded. The reference picks the page; it never moves money.
+        if (bookingId is null && fields.TryGetValue("tran_id", out var reference) && !string.IsNullOrWhiteSpace(reference))
+        {
+            bookingId = (await payments.FindByReferenceAsync(reference, cancellationToken))?.BookingId;
         }
 
         var web = options.Value.WebBaseUrl.TrimEnd('/');
@@ -212,6 +245,29 @@ public static class PaymentsEndpoints
         CancellationToken cancellationToken) =>
         Results.Ok(await handler.HandleAsync(principal.RequireUserId(), cancellationToken));
 
+    private static async Task<IResult> ListMyPaymentsAsync(
+        ClaimsPrincipal principal,
+        [FromServices] ListMyPaymentsHandler handler,
+        CancellationToken cancellationToken,
+        PaymentStatus? status = null,
+        int page = 1) =>
+        Results.Ok(await handler.HandleAsync(principal.RequireUserId(), status, page, cancellationToken));
+
+    private static async Task<IResult> GetMyPaymentAsync(
+        long id,
+        ClaimsPrincipal principal,
+        [FromServices] GetMyPaymentHandler handler,
+        CancellationToken cancellationToken) =>
+        ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), id, cancellationToken));
+
+    private static async Task<IResult> ListReceivedPaymentsAsync(
+        ClaimsPrincipal principal,
+        [FromServices] ListReceivedPaymentsHandler handler,
+        CancellationToken cancellationToken,
+        long? tripId = null,
+        int page = 1) =>
+        ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), tripId, page, cancellationToken));
+
     private static async Task<IResult> GetSandboxAsync(
         string reference,
         ClaimsPrincipal principal,
@@ -241,7 +297,7 @@ public static class PaymentsEndpoints
             return Results.Problem(title: "Not found", detail: "No such payment.", statusCode: StatusCodes.Status404NotFound);
         }
 
-        var fields = gateway.SignedCallback(reference, completion.Succeed, payment.Total);
+        var fields = gateway.SignedCallback(reference, completion.Succeed, payment.Total, method: completion.Method ?? "card");
         return ApiResults.Ok(await handler.HandleAsync(gateway.Name, fields, cancellationToken));
     }
 
@@ -282,5 +338,6 @@ public static class PaymentsEndpoints
 
     public sealed record SandboxPayment(string Reference, long BookingId, decimal Total, string Status);
 
-    public sealed record SandboxCompletion(bool Succeed);
+    /// <summary>Pay or fail; <c>Method</c> is bkash, nagad, rocket or card (the default).</summary>
+    public sealed record SandboxCompletion(bool Succeed, string? Method = null);
 }

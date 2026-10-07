@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { CalendarDays, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react';
+import { CalendarDays, FlaskConical, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
 import { accentButtonClass, cardClass, primaryButtonClass } from '@/components/Field';
@@ -186,6 +186,26 @@ export function CheckoutPage() {
               <ShieldCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-hill" />
               {t('checkout.escrow')}
             </p>
+
+            {booking.mode === 'Sandbox' && (
+              <div className="rounded-xl bg-mist p-4 text-sm text-deep ring-1 ring-hill/15">
+                <p className="flex items-center gap-2 font-semibold">
+                  <FlaskConical aria-hidden="true" className="h-4 w-4 text-hill" />
+                  {t('checkout.sandbox.title')}
+                </p>
+                <p className="mt-1 text-deep/70">{t('checkout.sandbox.body')}</p>
+                <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-xs">
+                  <dt className="text-deep/60">{t('checkout.sandbox.card')}</dt>
+                  <dd>4111 1111 1111 1111</dd>
+                  <dt className="text-deep/60">{t('checkout.sandbox.expiry')}</dt>
+                  <dd>12/30</dd>
+                  <dt className="text-deep/60">CVV</dt>
+                  <dd>111</dd>
+                  <dt className="text-deep/60">OTP</dt>
+                  <dd>{t('checkout.sandbox.otp')}</dd>
+                </dl>
+              </div>
+            )}
           </div>
         </aside>
       </div>

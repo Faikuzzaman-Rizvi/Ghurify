@@ -85,6 +85,34 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
     }
 
     [Fact]
+    public async Task AuditLog_ListsTheLatestEntries_WithOrWithoutAFilter_ForAdminsOnly()
+    {
+        await using var data = new TestData(database.ConnectionString);
+        var person = await data.CreateVerifiedTravelerAsync();
+        var admin = await data.CreateAdminAsync();
+        var moderator = await data.CreateUserAsync(Gender.Male, "Moderator", [Role.Moderator]);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var adminClient = TestData.ClientFor(api, admin);
+
+        using var suspended = await adminClient.PostAsJsonAsync(
+            $"/api/v1/admin/users/{person.Id}/status", new { status = "Suspended", reason = "Audit log test." }, Token);
+        Assert.Equal(HttpStatusCode.NoContent, suspended.StatusCode);
+
+        // No filter is what the page asks for first; it once failed with a 500.
+        var everything = await adminClient.GetFromJsonAsync<List<AuditItem>>("/api/v1/admin/audit", TestData.Json, Token);
+        var forPerson = await adminClient.GetFromJsonAsync<List<AuditItem>>(
+            $"/api/v1/admin/audit?entityType=User&entityId={person.Id}", TestData.Json, Token);
+
+        Assert.Contains(everything!, entry => entry.Action == "user.suspended" && entry.EntityId == person.Id);
+        var only = Assert.Single(forPerson!);
+        Assert.Equal("user.suspended", only.Action);
+
+        using var moderatorClient = TestData.ClientFor(api, moderator);
+        using var refused = await moderatorClient.GetAsync(new Uri("/api/v1/admin/audit", UriKind.Relative), Token);
+        Assert.Equal(HttpStatusCode.Forbidden, refused.StatusCode);
+    }
+
+    [Fact]
     public async Task AnAdmin_CannotSuspendThemselves_OrAnotherAdmin()
     {
         await using var data = new TestData(database.ConnectionString);
@@ -270,6 +298,8 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
             new { Action = action, EntityId = entityId, ActorId = actorId },
             cancellationToken: Token));
     }
+
+    private sealed record AuditItem(long Id, string Action, string EntityType, long EntityId);
 
     private sealed record UserPage(List<UserItem> Items, int TotalCount);
 

@@ -10,8 +10,11 @@ const sizes = {
 
 /**
  * Someone's profile picture, or their initial on a hill-green circle when they have none (the
- * API answers 404 and the image quietly gives way). Decorative next to a name, so no alt text
+ * API answers 204 and the image quietly gives way). Decorative next to a name, so no alt text
  * repeats it; pass `label` where the picture stands alone.
+ *
+ * `version` is the picture's version where the page knows it. Null means "no picture", and then
+ * nothing is requested at all; left out, the picture is asked for and may turn out not to exist.
  */
 export function Avatar({
   userId,
@@ -33,7 +36,7 @@ export function Avatar({
   const initial = (name?.trim() || 'G').charAt(0).toUpperCase();
   const box = `${sizes[size]} shrink-0 rounded-full ${className}`;
 
-  if (failed === src) {
+  if (version === null || failed === src) {
     return (
       <span
         role={label ? 'img' : undefined}

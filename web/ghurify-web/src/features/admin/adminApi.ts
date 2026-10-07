@@ -24,6 +24,9 @@ export type AdminUserDetail = components['schemas']['AdminUserDetail'];
 export type AdminTripPage = components['schemas']['AdminTripPage'];
 export type AdminTripItem = components['schemas']['AdminTripItem'];
 export type AdminBookingDetail = components['schemas']['AdminBookingDetail'];
+export type PaymentHistoryPage = components['schemas']['PaymentHistoryPage'];
+export type AdminPaymentDetail = components['schemas']['AdminPaymentDetail'];
+export type PaymentStatus = NonNullable<components['schemas']['PaymentStatus']>;
 export type EmergencyPointView = components['schemas']['EmergencyPointView'];
 export type EmergencyPointEdit = components['schemas']['EmergencyPointEdit'];
 export type DestinationRequest = components['schemas']['DestinationRequest'];
@@ -119,6 +122,16 @@ export const adminApi = {
     ),
 
   retryRefunds: () => apiPost<{ count: number | string }>('/api/v1/admin/refunds/retry'),
+
+  /** Every payment, by number, transaction or gateway reference, traveller email or name, or trip. */
+  payments: (search: string, status: PaymentStatus | '', page: number, signal?: AbortSignal) =>
+    apiGet<PaymentHistoryPage>(
+      `/api/v1/admin/payments?search=${encodeURIComponent(search)}&page=${page}${status ? `&status=${status}` : ''}`,
+      withSignal(signal),
+    ),
+
+  payment: (id: number, signal?: AbortSignal) =>
+    apiGet<AdminPaymentDetail>(`/api/v1/admin/payments/${id}`, withSignal(signal)),
 
   saveDestination: (slug: string, request: DestinationRequest) =>
     apiPut<{ slug: string; added: boolean }>(

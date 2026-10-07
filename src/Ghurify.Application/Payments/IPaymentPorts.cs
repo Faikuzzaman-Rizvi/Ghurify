@@ -69,7 +69,25 @@ public sealed record GatewayValidation(
     string TransactionRef,
     string ProviderTxnId,
     decimal Amount,
-    string Currency);
+    string Currency)
+{
+    /// <summary>How the traveller paid, when the gateway said. Recorded with the payment; never trusted for money.</summary>
+    public GatewayPaymentDetails? Details { get; init; }
+}
+
+/// <summary>
+/// What a gateway's validation says about how a payment was made. <c>AccountLast4</c> is the only
+/// part of a card or wallet number ever kept.
+/// </summary>
+public sealed record GatewayPaymentDetails(
+    PaymentMethodType MethodType,
+    string? MethodName,
+    string? AccountLast4,
+    string? Issuer,
+    string? ValidationId,
+    DateTimeOffset? PaidOn,
+    decimal? StoreAmount,
+    bool? RiskFlagged);
 
 public sealed record GatewayRefundRequest(string ProviderTxnId, decimal Amount, string Reference, string Remarks);
 
@@ -87,12 +105,8 @@ public interface IPaymentRepository
 
     Task SetFailedAsync(long? paymentId, string? transactionRef, string reason, CancellationToken cancellationToken);
 
-    Task<PaymentSettlement> SetSucceededAsync(
-        string transactionRef,
-        string providerTxnId,
-        decimal paidAmount,
-        string currency,
-        CancellationToken cancellationToken);
+    /// <summary>Settles a payment the gateway validated, recording how it was paid.</summary>
+    Task<PaymentSettlement> SetSucceededAsync(GatewayValidation validation, CancellationToken cancellationToken);
 
     /// <summary>Stores a callback once. Returns its id and whether it was already processed.</summary>
     Task<(long Id, bool AlreadyProcessed)> AddWebhookEventAsync(
@@ -200,7 +214,11 @@ public sealed record BookingCheckout(
     BookingStatus Status,
     DateTimeOffset HoldExpiresAt,
     PaymentStatus? LatestPaymentStatus,
-    string? LatestPaymentFailure);
+    string? LatestPaymentFailure)
+{
+    /// <summary>Whether this payment is real; a sandbox checkout shows which test card to use.</summary>
+    public PaymentMode Mode { get; init; } = PaymentMode.Live;
+}
 
 public sealed record LedgerEntry(
     long Id,
