@@ -1,0 +1,874 @@
+GHURIFY - GOOGLE STITCH PROMPTS
+Airbnb-style redesign, one prompt per screen. Plain text, ready to paste.
+
+HOW TO USE
+1. Create one Stitch project for web. Paste the STYLE prompt first, on its own.
+2. Then paste one screen prompt at a time, in order. Each one starts with
+   "Same Ghurify style" so Stitch keeps the theme. If a result drifts, paste the
+   STYLE prompt again together with the screen prompt.
+3. For the mobile version, create a second Stitch project set to mobile, paste the
+   STYLE prompt, then the same screen prompts. Each prompt ends with a MOBILE line that
+   says what changes on a phone.
+4. All sample content below matches the fields the Ghurify API really returns. Do not
+   let Stitch add photos, star ratings on trip cards, wishlist hearts or profile photos:
+   the app has no data for them.
+5. To get a Bangla version of a screen, after it is generated ask Stitch:
+   "Translate all interface text on this screen to Bangla, keep the layout."
+
+
+==================================================================================
+STYLE PROMPT (paste first)
+==================================================================================
+
+Design system for "Ghurify", a web app for joining group trips around Bangladesh with
+verified hosts, escrow payments and an SOS button on every trip. Use Airbnb's design
+language as the reference: a quiet white canvas, near-black text, thin grey divider
+lines between sections instead of boxed cards, large media tiles with 12px rounded
+corners, generous whitespace, and only one strong coloured button per screen. Do not use
+Airbnb's logo, red colour or name.
+
+Colours: background white #FFFFFF; main text #222222; secondary text #6A6A6A; divider
+lines #DDDDDD; light grey surfaces #F7F7F7. Brand button: a horizontal gradient of
+jamdani pink-maroon from #8C2650 to #A3305C to #B8486F with white text. Dark button:
+#222222 with white text. Trust colour (verified badges, success, logo): forest green
+#245C43. Highlight colour (few seats left, new requests): turmeric #D99A12. Error and
+emergency red: #C13515. Warning: amber. Status chips for destinations: green "Open",
+amber "Caution", red "Closed".
+
+Typography: Hind Siliguri for all text (it supports Bangla and English). Titles semibold,
+body regular 16px. Headline sizes: page title 32px, section title 22px. The logo
+wordmark "Ghurify" uses Baloo Da 2 bold in forest green.
+
+Shapes: buttons 8px radius, 48px tall; cards and media tiles 12px radius; pills fully
+rounded; avatars are circles showing the person's initial on a soft coloured background
+(there are no profile photos). Shadows are soft and rare: only on the search pill, the
+sticky booking card and pop-up menus.
+
+Images: there are NO photographs in this product. Every place where Airbnb would show a
+photo shows a flat, layered vector landscape illustration in soft natural colours that
+matches the destination type: hills, beach, island, forest, wetland, tea garden, lake
+or river.
+
+Icons: simple outline icons, 2px stroke, rounded ends. Currency is Bangladeshi taka,
+written like "৳8,500". Language toggle shows "EN | বাং". Tone: warm, calm, trustworthy,
+sentence case everywhere.
+
+Global header (on every screen, white, 80px, thin bottom divider): "Ghurify" logo on the
+left; in the centre a rounded search pill reading "Anywhere | Any dates | Add travellers"
+with a round brand-gradient search button; on the right a "Lead a trip" text link, a
+globe icon, a bell icon, and a rounded user-menu pill with a hamburger icon and an avatar.
+
+Footer (light grey #F7F7F7): three link columns - Explore (Trips, Destinations,
+Stories), Safety (How SOS works, Women-only trips, Emergency 999), Hosting (Lead a trip,
+Hosting dashboard); bottom row with "© 2026 Ghurify", the language button, and a small
+green dot with "All systems normal".
+
+
+==================================================================================
+SCREEN 1 - HOME PAGE
+==================================================================================
+
+Same Ghurify style. Home page of the travel web app.
+
+Top: the header in its expanded state. Above it, a short headline in Baloo Da 2: "Travel
+Bangladesh together, safely". Below the headline, a large search bar in a light grey
+rounded container with four segments: "Where - Any destination", "From - Add date",
+"To - Add date", "Who - Group type and travellers", and a brand-gradient "Search" pill.
+
+Under the search: a horizontal category bar of outline icons with small labels: All,
+Hills, Beach, Island, Forest, Wetland, Tea garden, Lake, River. "All" is selected with a
+dark underline.
+
+Section "Destinations": a grid of 5 cards per row. Each card: a rounded landscape
+illustration tile (square-ish 20:19), a small white status chip in the top-left corner
+only when not open, then text below with no border:
+- Sajek Valley (bold) / Rangamati division / 8 upcoming trips / from ৳6,500 (bold)
+- Cox's Bazar / Chattogram division / 12 upcoming trips / from ৳5,200
+- Saint Martin's Island, chip "Caution" / Chattogram division / 3 upcoming trips / from ৳9,800
+- Sundarbans / Khulna division / 5 upcoming trips / from ৳11,000
+- Srimangal / Sylhet division / 6 upcoming trips / from ৳4,800
+- Tanguar Haor, chip "Closed", tile faded / Sylhet division / no trips yet
+- Kaptai Lake / Chattogram division / 2 upcoming trips / from ৳3,900
+- Bandarban / Chattogram division / 7 upcoming trips / from ৳7,200
+
+Section "Leaving soon" with a "Show all (48)" link and round left/right arrow buttons: a
+horizontal row of trip cards (format described in screen 2).
+
+Section "Women-only trips": another row of 4 trip cards, each with a pink-maroon
+"Women only" chip on the image.
+
+Section "How Ghurify works": four steps in a row with large outline icons and short text:
+Find a trip; Request to join, free; Pay into escrow once approved; Travel with SOS and
+check-ins.
+
+Full-width light grey band "Safety on every trip" with five columns: Verified hosts,
+Escrow-protected payments, SOS on every trip, Women-only trips, Closure alerts.
+
+Split block "Lead a trip in Bangladesh": a large rounded hills illustration on the left,
+on the right the title, one sentence "Share the places you love and earn while you host
+verified travellers." and a dark "Start hosting" button. Then the footer.
+
+MOBILE: the header becomes one "Where to?" pill with a filter icon; category bar scrolls
+sideways; destination and trip rows scroll sideways with the next card peeking; a bottom
+tab bar with Explore, Stories, Trips, Messages, Profile.
+
+
+==================================================================================
+SCREEN 2 - EXPLORE TRIPS (SEARCH RESULTS)
+==================================================================================
+
+Same Ghurify style. Search results page, like Airbnb's split list and map view.
+
+Header in compact state showing "Sajek Valley | 12 - 14 Oct | 2 travellers". Under it a
+sticky filter row: chips "Women only", "Students", "Families", "Verified hosts",
+"Under ৳7,500", then on the right an outlined "Filters" button with a small count badge
+"2" and a "Sort: Soonest" dropdown.
+
+Result line: "48 trips" bold.
+
+Left 60%: a grid of trip cards, 3 per row. Trip card format: rounded landscape
+illustration tile (20:19) with at most one chip in the top-left; under it, no border:
+line 1 bold destination name with a small green verified shield on the right; line 2
+grey trip title; line 3 grey dates and length; line 4 bold price plus "per person".
+Sample cards:
+- Sajek Valley / Clouds and sunrise in Sajek / 12 - 14 Oct · 3 days / ৳6,500 per person
+- Sajek Valley, chip "Only 2 seats left" (turmeric) / Sajek for students / 19 - 21 Oct · 3 days / ৳5,800 per person
+- Bandarban, chip "Women only" (pink-maroon) / Nilgiri and Boga Lake trek / 24 - 27 Oct · 4 days / ৳8,500 per person
+- Srimangal / Tea gardens and Lawachara forest / 1 - 2 Nov · 2 days / ৳4,800 per person
+- Cox's Bazar, chip "Full" (grey, card slightly faded) / Long beach weekend / 7 - 9 Nov · 3 days / ৳5,200 per person
+- Sundarbans / Three days in the mangroves / 14 - 16 Nov · 3 days / ৳11,000 per person
+
+Under the grid: numbered round pagination "1 2 3 ... 8" with arrows and "Showing 1 - 24
+of 48 trips".
+
+Right 40%: a sticky map of Bangladesh with rounded corners and white price-pill markers
+("৳6,500", "৳8,500", "৳4,800"); one marker is dark because its card is hovered.
+
+Bottom centre floating dark pill button "Show list" with a list icon.
+
+Also generate the Filters pop-up as a separate screen: centred modal 780px wide, "X" on
+the top left, title "Filters" centred, sections separated by thin lines: Price (chips
+৳5,000, ৳7,500, ৳10,000, ৳15,000 and a "Max price" field), Dates (From, To), Group type
+(four large selectable cards with icons: Open to everyone, Women only, Students,
+Families), Travellers (stepper "- 2 +"), Host (switch "Verified hosts only"). Footer:
+"Clear all" underlined link on the left, dark "Show 48 trips" button on the right.
+
+MOBILE: one column of full-width cards, the filter chips scroll sideways, a floating dark
+"Map" pill at the bottom, the Filters modal becomes a full-screen sheet.
+
+
+==================================================================================
+SCREEN 3 - TRIP DETAIL (LISTING PAGE)
+==================================================================================
+
+Same Ghurify style. A trip page like an Airbnb listing page, max width 1120px.
+
+Title row: "Nilgiri and Boga Lake trek" (32px semibold). Below: "★ 4.8 · 12 reviews of
+the host · Bandarban, Chattogram division" with the place underlined. On the right
+"Share" and "Report" text buttons with icons.
+
+A wide rounded hills landscape illustration (2.4:1) with a pink-maroon "Women only" chip
+top-left. No photo grid.
+
+Two columns. LEFT (sections separated by thin grey lines):
+1. "Group trip in Bandarban hosted by Nusrat" (22px) and grey "10 seats · 4 days ·
+   Challenging", a round avatar "N" on the right.
+2. Three highlight rows with outline icons: "ID + selfie verified host - Nusrat confirmed
+   her national ID and a selfie"; "Escrow-protected payment - your money is released to
+   the host only after departure"; "Women-only group - only women can see and join this
+   trip".
+3. Description paragraph, 5 lines, then "Show more >".
+4. "What your money covers": two columns of rows with icons and amounts: Transport -
+   Bus Dhaka to Bandarban and jeep - ৳2,800; Stay - Two nights in a cottage - ৳2,400;
+   Food - All meals - ৳1,800; Guide - Local trekking guide - ৳900; Fees - Park entry -
+   ৳300; Buffer - Weather and emergencies - ৳300. A thin coloured bar split by these
+   amounts. Total ৳8,500 per person.
+5. "Itinerary": a vertical line with numbered day circles: Day 1 - Dhaka to Bandarban,
+   chip Easy; Day 2 - Nilgiri sunrise and trek, chip Moderate; Day 3 - Boga Lake, chip
+   Challenging; then an outlined "Show all 4 days" button.
+6. "Where you'll meet": "Arambagh bus counter, Dhaka, 9:30 pm" and a rounded map.
+7. "★ 4.8 · 12 reviews": two columns of 4 review cards, each with avatar initial,
+   reviewer name, trip title, month, and three lines of text. Outlined "Show all 12
+   reviews". A grey note: "Reviews of Nusrat as a host across her trips."
+8. "Meet your host": a white card with shadow holding a large avatar "N", name "Nusrat",
+   "Host", and on the right stacked stats "12 Reviews / 4.8 Rating / 3 Years on Ghurify";
+   beside the card: a short bio, "Lives in Chattogram", "Identity verified", a dark "View
+   profile" button, and a small shield note "To protect your payment, never pay outside
+   Ghurify."
+9. "Things to know" in three columns: Group (Women only, 10 seats, "4 women joined");
+   Safety (SOS button, scheduled check-ins, verified host); Cancellation (14+ days: full
+   trip price back; 7 - 13 days: half; under 7 days: no refund; host cancels or area
+   closed: everything back) with "Show more".
+
+RIGHT: a sticky booking card with a thin border, 12px radius and soft shadow: "৳8,500 /
+person"; a bordered box split into "STARTS 24 Oct" and "ENDS 27 Oct", and below it
+"Travellers: 1 seat"; a row of 10 small squares, 6 filled, "4 of 10 seats left"; a
+full-width brand-gradient "Request to join" button; centred grey text "You won't be
+charged yet"; price lines "Trip price ৳8,500" and "Service fee (2%) shown at checkout";
+under the card a small flag link "Report this trip".
+
+MOBILE: the image goes edge to edge, sections stack, and the booking card is replaced by
+a fixed bottom bar with "৳8,500 / person" and "24 - 27 Oct" underlined on the left and the
+"Request to join" button on the right.
+
+
+==================================================================================
+SCREEN 4 - DESTINATION PAGE
+==================================================================================
+
+Same Ghurify style. A destination landing page, max width 1120px.
+
+A large rounded island landscape illustration (2.4:1) with "Island · Chattogram division"
+and the name "Saint Martin's Island" in large white text over a soft dark gradient at the
+bottom left.
+
+Directly under it, a full-width amber warning box with an icon: "Caution in Saint
+Martin's Island - Rough sea expected this week. Check with your host before travelling."
+
+"About Saint Martin's Island": a short paragraph about Bangladesh's only coral island,
+then a grey line "3 upcoming trips · from ৳9,800".
+
+"Trips to Saint Martin's Island": three trip cards in a row (same format as screen 2),
+with "Show all with filters" underlined.
+
+"Where it is": a rounded map with a brand-colour pin and an "Open in maps" link. Footer.
+
+Also make two small variants of the warning box: green "Open for travel" with a check
+icon, and red "Closed - Travellers booked on trips here are refunded in full."
+
+MOBILE: illustration edge to edge, cards stack, map 200px tall.
+
+
+==================================================================================
+SCREEN 5 - LOG IN OR SIGN UP
+==================================================================================
+
+Same Ghurify style. A centred 568px white card with 12px radius and shadow on a light
+grey page, like Airbnb's "Log in or sign up" modal.
+
+Card header: "X" on the left, title "Log in or sign up" centred, thin line below.
+Body: "Welcome to Ghurify" (22px). One input box 56px tall with the label "Email" inside
+at the top. Grey help text: "We'll email you a 6-digit code. No password needed." A
+full-width brand-gradient "Continue" button. Below, three small rows with green outline
+icons: Verified hosts, Escrow-protected payments, SOS on every trip.
+
+Generate a second screen for step 2: header with a back arrow and title "Confirm your
+email". Text "Enter the code we sent to rizvi@example.com" with an underlined "Change"
+link. Six separate square boxes for digits, three already filled. Grey "Code expires in
+10 minutes". "Didn't get it? Check spam, or resend in 0:42". Brand "Continue" button.
+Include an error variant with red text under the boxes: "That code is wrong or has
+expired."
+
+MOBILE: the card fills the whole screen.
+
+
+==================================================================================
+SCREEN 6 - STORIES FEED
+==================================================================================
+
+Same Ghurify style, applied to a social feed. Centred 600px column, plus a right sidebar
+on wide screens.
+
+Top: a composer pill with your avatar and the text "Share a story from your trip".
+
+Posts separated by thin grey lines, not boxed:
+- Post 1: avatar "T", "Tanvir" bold with a green verified shield, grey "· 2h", a small
+  chip "Sajek Valley". Text: "Woke up above the clouds. Our host had tea ready at 5 am."
+  A rounded image block with 2 photos side by side. Action row of outline icons: heart
+  "24", comment "5", share, and a "..." menu.
+- Post 2: avatar "M", "Mitu", "· 1d", chip "Srimangal". Three lines of text ending in
+  "Show more". A 2x2 photo grid with "+3" on the last tile. Heart filled pink-maroon "58",
+  comment "12". Under it an open comment thread with two short comments and an input
+  "Add a comment".
+- Post 3: text only, no media.
+
+Right sidebar: "Popular destinations" with small round landscape thumbnails, names and
+"12 trips"; a card "Lead a trip" with a dark button.
+
+Also generate the composer as a modal: "X", title "New story", a text area with a
+counter "0 / 2000", an "Add a place" dropdown, a row of 3 photo thumbnails with circular
+upload progress and remove buttons, a privacy note, and a brand "Post" button.
+
+MOBILE: full-width posts, photos edge to edge, bottom tab bar.
+
+
+==================================================================================
+SCREEN 7 - PUBLIC PROFILE
+==================================================================================
+
+Same Ghurify style. A person's profile page like Airbnb's user profile, max width 1120px.
+
+LEFT column (340px): a white card with large rounded corners and shadow. Inside: a
+104px avatar circle "N" with a small green shield, "Nusrat" (32px), "Host"; on the right
+side of the card three stacked stats separated by thin lines: "15 Reviews", "4.8 ★
+Rating", "3 Years on Ghurify". Under the card: "Nusrat's confirmed information" with
+check rows "Identity (ID + selfie)" and "Email". Then a dark "Follow" button and grey
+"120 followers · 80 following". A small flag link "Report this profile".
+
+RIGHT column, sections split by thin lines:
+- "About Nusrat": a home icon row "Lives in Chattogram", and a 3-line bio.
+- "Nusrat's reviews": a horizontal carousel of 3 rounded review cards with 4 lines of
+  text, reviewer avatar, name, "October 2026", trip title, and "as host"; arrow buttons;
+  "Show all 15 reviews".
+- "Nusrat's trips": a carousel of small trip tiles with landscape illustrations, status
+  chips ("Published", "Completed") and dates.
+- "Stories": a 3-column grid of square post thumbnails.
+
+MOBILE: the identity card on top, then the sections.
+
+
+==================================================================================
+SCREEN 8 - PAGE NOT FOUND
+==================================================================================
+
+Same Ghurify style. Left: "Oops!" very large in Baloo Da 2, "We can't find the page
+you're looking for.", grey "Error code: 404", then "Here are some helpful links
+instead:" with underlined links Home, Explore trips, Stories, Safety. Right: a rounded
+river landscape illustration with a small lost wooden boat.
+
+MOBILE: illustration on top, text below.
+
+
+==================================================================================
+SCREEN 9 - ACCOUNT
+==================================================================================
+
+Same Ghurify style. Account settings like Airbnb's account page, max width 1080px.
+
+Title "Account". Line under it: "Rizvi Ahmed, r***@example.com · Go to profile".
+
+A banner at the top in light amber: "Finish your profile to join trips: add your phone
+and emergency contact."
+
+A grid of 6 setting cards, 3 per row, each with an outline icon, a bold title and one
+grey line:
+- Personal info - Name, gender, phone and about you
+- Safety contact - Who we text if you send an SOS
+- Identity verification - ID verified. Upgrade to host.
+- Hosting - Lead trips and earn
+- Trips - Your requests and bookings
+- Earnings - Payouts for your trips
+At the bottom an underlined "Log out".
+
+Generate a second screen, "Personal info", with the breadcrumb "Account > Personal info"
+and Airbnb-style rows separated by thin lines; each row has a bold label, a grey value
+and an underlined "Edit" link on the right:
+- Display name / Rizvi Ahmed / Edit
+- Email / r***@example.com / no edit, grey note "This is how you log in"
+- Gender / Male / a small lock icon and "Locked after verification"
+- Phone / Not provided / Add, note "Used for SOS and payouts, never shown to other
+  travellers"
+- Home district / Dhaka / Edit
+- About / Not provided / Add
+Show the "Phone" row open in edit mode: an input "+8801XXXXXXXXX", and "Cancel" link and
+dark "Save" button. On the right side a light grey info card: "Which details can be
+edited? Your email can't be changed. Gender is locked once your ID is verified."
+
+MOBILE: cards in one column; each section opens as its own page with a back arrow.
+
+
+==================================================================================
+SCREEN 10 - IDENTITY VERIFICATION
+==================================================================================
+
+Same Ghurify style. Full-screen step flow like Airbnb's identity verification.
+
+Minimal header: logo on the left, an "Exit" pill on the right. Content centred, 630px.
+Title "Let's verify your identity". Two large selectable cards with icons:
+"National ID - needed to join trips" and "National ID + selfie - needed to host trips"
+(the second is selected with a 2px dark border). Footer fixed at the bottom: a
+3-segment progress bar (first segment filled), "Back" underlined on the left, dark
+"Next" on the right.
+
+Generate step 2: "Enter your national ID details", input "NID number" with grey
+"13 digits" under it, input "Date of birth", and a light grey lock panel: "Your number is
+sent once. We keep only a scrambled version and never show it again."
+
+Generate step 3, the result: a green check illustration, "You're verified", a green
+badge "ID + selfie verified", and a dark "Done" button. Also a pending variant: "We're
+checking your details. We'll let you know, usually within minutes."
+
+MOBILE: same flow, full screen.
+
+
+==================================================================================
+SCREEN 11 - MY TRIPS
+==================================================================================
+
+Same Ghurify style. Airbnb-style Trips page, max width 1120px. Title "Trips".
+
+Top banner with a pink-maroon border: "Pay for Nilgiri and Boga Lake trek within 24:13
+to keep your seat" and a brand "Pay now" button.
+
+"Upcoming": wide cards with 12px radius and shadow, text on the left half, landscape
+illustration on the right half.
+- Card 1: chip "Approved - awaiting payment" (turmeric); "Nilgiri and Boga Lake trek"
+  bold; "Bandarban · 24 - 27 Oct"; "Hosted by Nusrat"; a 4-step progress line Requested -
+  Approved - Paid - Travel with the second step active; a red countdown "Pay within
+  24:13"; brand button "Pay ৳8,500"; underlined "Withdraw".
+- Card 2: chip "Confirmed" (green); "Clouds and sunrise in Sajek"; "Sajek Valley · 12 -
+  14 Oct"; "Hosted by Rizvi"; progress at Paid; dark "Message the group" with a red "3"
+  badge; outlined "Safety"; a "..." menu.
+- Card 3: chip "Waiting for the host"; "Tea gardens and Lawachara forest"; "Srimangal ·
+  1 - 2 Nov"; underlined "Withdraw request".
+
+"Where you've been": a grid of small rows, each with a 64px square landscape thumbnail,
+the trip title, destination and month, and a brand pill "Write a review" on two of them.
+
+A collapsed row "Cancelled and declined (2)".
+
+"Refunds": rows "Long beach weekend · Host cancelled · ৳5,304 · Completed" and
+"Sundarbans trip · You cancelled · ৳5,500 · In progress".
+
+Also generate the empty state: "No trips booked... yet!", "Time to dust off your bags
+and start planning your next adventure.", a dark "Start searching" button and a
+landscape illustration.
+
+MOBILE: the illustration moves above the text in each card; bottom tab bar.
+
+
+==================================================================================
+SCREEN 12 - CONFIRM AND PAY
+==================================================================================
+
+Same Ghurify style. Checkout page like Airbnb's "Confirm and pay", max width 1120px.
+Minimal header with only the logo.
+
+A round back-arrow button and the title "Confirm and pay". A full-width banner with a
+countdown ring: "Your seat is held for 24:13 · until 4:32 pm".
+
+LEFT column, sections separated by thin lines:
+- "Your trip": rows "Dates - 24 - 27 Oct 2026", "Travellers - 1 traveller", "Host -
+  Nusrat".
+- "Pay with": one selected option row with a card icon, "Pay online through the secure
+  payment gateway".
+- "Cancellation policy": 14+ days before: trip price back; 7 - 13 days: half back; under 7
+  days: no refund. Underlined "Learn more".
+- "How your payment is protected": three icons in a row joined by arrows: You pay ->
+  Ghurify holds it -> Host is paid after departure.
+- Small grey print about agreeing to the refund policy.
+- A large brand-gradient button "Confirm and pay ৳8,670".
+
+RIGHT column: a sticky card with border and shadow: a small rounded hills illustration
+next to "Nilgiri and Boga Lake trek" and "Hosted by Nusrat"; a thin line; "Price
+details": "Trip price ৳8,500", "Service fee ৳170", a thin line, bold "Total (BDT)
+৳8,670".
+
+Also generate an error variant with a red box above the button: "Your last payment
+didn't go through: the payment was declined. Please try again."
+
+MOBILE: the summary collapses into one line at the top that expands; the pay button sits
+in a fixed bottom bar.
+
+
+==================================================================================
+SCREEN 13 - SANDBOX PAYMENT (DEVELOPMENT ONLY)
+==================================================================================
+
+A plain grey page that must NOT look like Ghurify. A simple white card with a yellow and
+black diagonal striped banner "SANDBOX - no real money". Monospace text "Reference:
+SBX-7F3A92C1", "Booking #1042", "Total ৳8,670". Two plain grey buttons: "Simulate
+success" and "Simulate failure". No logo, no gradient.
+
+
+==================================================================================
+SCREEN 14 - BOOKING CONFIRMATION
+==================================================================================
+
+Same Ghurify style. Centred 680px column, like an Airbnb reservation confirmation.
+
+Light confetti at the top. Title "You're going to Bandarban!". A card with a landscape
+illustration, "Nilgiri and Boga Lake trek", "24 - 27 Oct 2026", "Hosted by Nusrat",
+"Total paid ৳8,670". "What happens next" with three icon rows: "Your group chat is open
+- say hello to the host and travellers"; "Check-ins keep everyone safe during the trip";
+"The host is paid only after departure". A dark "Message the group" button and an
+outlined "Go to Trips" button.
+
+Also generate two variants: a waiting state with a calm spinner, "Confirming your
+payment...", "This can take a minute. You can leave this page, we'll notify you."; and a
+failed state, "Your payment didn't go through", with a brand "Try again" button and
+"Your seat is still held for 12:05".
+
+
+==================================================================================
+SCREEN 15 - MESSAGES (TRIP GROUP CHAT)
+==================================================================================
+
+Same Ghurify style. Group messaging like Airbnb's Messages, three panes, full height
+under the header, no footer.
+
+LEFT pane 360px: title "Messages", a list of conversations, each with a round landscape
+thumbnail, trip title and an unread badge: "Clouds and sunrise in Sajek" (bold, red "3",
+selected with a light grey background), "Nilgiri and Boga Lake trek", "Tea gardens and
+Lawachara forest".
+
+MIDDLE pane: header with "Clouds and sunrise in Sajek", grey "Host + travellers with a
+seat", a green dot "Live", and a "Trip details" button. Under it a pinned bar with a pin
+icon: "Bus leaves Arambagh at 9:30 pm sharp. Bring a warm layer."
+Thread: centred date separator "Yesterday", then messages all aligned left, each group
+with an avatar, bold name and grey time:
+- "Rizvi" with a small green "Host" chip, 8:12 pm: "Welcome everyone! Seats are
+  confirmed."
+- A full-width announcement card with a turmeric left border and a megaphone icon:
+  "Bus leaves Arambagh at 9:30 pm sharp. Bring a warm layer."
+- Centred small grey system text: "Tanvir joined the trip"
+- "Tanvir", 8:40 pm: "Can't wait! Is there a phone signal in Sajek?"
+- "You", 8:45 pm: "My number is [hidden]" with a small lock icon and a tooltip "Phone
+  numbers and emails are hidden for your safety".
+- Date separator "Today", "Mitu", 7:02 am: "Packing now."
+Composer at the bottom: a rounded 24px text field "Write a message" with a round dark
+send button inside, and for the host a small switch "Pin as announcement".
+
+RIGHT pane 375px: a landscape illustration, "Clouds and sunrise in Sajek", "12 - 14
+Oct", "Meeting point: Arambagh bus counter", host row with avatar "R" and "Rizvi", and
+links "View trip", "Safety", "Report".
+
+MOBILE: only the thread, with a back arrow and the trip title in the header; trip
+details open as a sheet.
+
+
+==================================================================================
+SCREEN 16 - TRIP SAFETY (SOS AND CHECK-INS)
+==================================================================================
+
+Same Ghurify style, but emergency-first: very clear, very large touch targets, high
+contrast. Design this one MOBILE FIRST (390px wide), then the web version as a centred
+680px column.
+
+Header: back arrow, title "Safety", grey "Clouds and sunrise in Sajek", and on the right
+an outlined red "Call 999" button with a phone icon.
+
+Centre: a huge round red #C13515 button, 180px, labelled "SOS", with "Send an alert"
+under it, and one grey line: "The safety desk, your host and your emergency contact get
+your location."
+
+Section "Check-ins" (thin line above): a vertical timeline:
+- "Reached Sajek" · due 12 Oct, 6:00 pm · green chip "Done" · "Checked in by Rizvi, 5:48
+  pm"
+- "Back from Konglak hill" · due 13 Oct, 1:00 pm · grey chip "Scheduled" · outlined
+  "I'm OK" button
+- "Bus departed" · due 11 Oct, 10:00 pm · red chip "Missed"
+For the host: a small form "Schedule a check-in" with "Label" and "Due at" fields and a
+dark "Add" button. Grey note: "A missed check-in alerts the safety desk."
+
+Generate the "SOS sent" state as a second screen: a full-width red panel "SOS sent. Help
+is being alerted.", a check row "Your emergency contact has been texted.", a pulsing
+dot "Sharing your live location", then "Nearest help" rows with icons, names, distance
+and a round call button: "Sajek police camp · 1.2 km", "Ruilui para clinic · 2.8 km",
+"Army camp Sajek · 3.5 km", a grey note "Distances are approximate", and a large dark
+button "I'm safe now".
+
+Generate the confirm dialog too: title "Send SOS?", an optional field "What is
+happening? (optional)", a very large red "Send SOS now" button and a small grey "Cancel".
+
+
+==================================================================================
+SCREEN 17 - WRITE REVIEWS
+==================================================================================
+
+Same Ghurify style. A full-screen review flow like Airbnb's post-trip review, one
+person per screen.
+
+Minimal header with the logo and an "Exit" pill. Centred: a 64px avatar "R", title "How
+was Rizvi as a host?", five large outline stars with the fourth one selected (four
+filled turmeric) and the word "Great" under them, a text area "Tell future travellers
+about Rizvi (optional)" with a counter "0 / 1000". Footer with a segmented progress bar
+"2 of 4", "Skip" underlined, dark "Submit".
+
+Also generate the intro screen: a landscape illustration, "How was Clouds and sunrise in
+Sajek?", "Your reviews help the next travellers.", a list of 4 people with avatars and
+"Host" / "Traveller" labels (one already checked), and a dark "Get started" button.
+And the final screen: "Thanks for your reviews", a brand "Share a story" button and
+"Back to Trips".
+
+
+==================================================================================
+SCREEN 18 - HOSTING DASHBOARD
+==================================================================================
+
+Same Ghurify style. A host's dashboard like Airbnb's hosting "Today" page, max width
+1280px.
+
+Header in hosting mode: logo, centred text tabs "Today" (active, underlined), "Trips",
+"Earnings"; on the right "Switch to travelling" and the avatar menu.
+
+"Welcome back, Rizvi" (32px) and a brand "Create a trip" button on the right.
+
+"Your reservations" with pill tabs: "Needs your reply (3)" active, "Happening now (1)",
+"Starting soon (2)", "Upcoming (4)", "Drafts (1)". Under them a horizontal row of rounded
+cards with a thin border: turmeric text "3 requests to review", bold "Clouds and sunrise
+in Sajek", "12 - 14 Oct", "6 of 10 seats filled" with a thin progress bar, and an
+outlined "Review requests" button.
+
+"Your trips" table: columns Trip (56px rounded landscape thumbnail, title, destination),
+Status (coloured dot and label), Dates, Seats, Price, Requests, and a "..." menu.
+Rows:
+- Clouds and sunrise in Sajek · Sajek Valley · Published · 12 - 14 Oct · 6 / 10 · ৳6,500 · badge 3
+- Nilgiri and Boga Lake trek · Bandarban · Full · 24 - 27 Oct · 10 / 10 · ৳8,500 · -
+- Winter in Srimangal · Srimangal · Draft · 20 - 21 Dec · 0 / 12 · ৳4,800 · -
+- Long beach weekend · Cox's Bazar · Cancelled · 7 - 9 Nov · 0 / 8 · ৳5,200 · -
+- Monsoon in Tanguar Haor · Tanguar Haor · Completed · 2 - 4 Aug · 9 / 10 · ৳5,500 · -
+Above the table, filter chips: All, Published, Full, Draft, Completed, Cancelled.
+Show the "..." menu open on the first row: Requests, Messages, Safety, Edit, and a red
+"Cancel trip".
+
+MOBILE: cards instead of a table; tabs scroll sideways.
+
+
+==================================================================================
+SCREEN 19 - CREATE A TRIP (HOST FLOW)
+==================================================================================
+
+Same Ghurify style. A full-screen step-by-step creation flow like Airbnb's "become a
+host", one question per screen. Generate these screens with the same chrome:
+minimal header with the logo on the left and two outlined pills "Questions?" and
+"Save & exit" on the right; a fixed footer with a 3-segment progress bar along its top
+edge (Basics, Costs, Itinerary), "Back" underlined on the left and a dark "Next" button
+on the right. Content centred, 630px, titles 32px.
+
+Screen A: "Where is your trip going?" - a grid of destination tiles with landscape
+illustrations and names; "Bandarban" selected with a 2px dark border; "Tanguar Haor"
+disabled with a red "Closed" chip.
+
+Screen B: "Who is this trip for?" - four large option cards with icons: "Open to
+everyone", "Women only - only women can see and join", "Students", "Families".
+
+Screen C: "When is it?" - a two-month calendar with 24 - 27 October selected, and
+"4 days" under it.
+
+Screen D: "Give your trip a title" with a large input and counter "26 / 150", then
+"Describe the trip" with a text area and counter.
+
+Screen E: "Break down the cost" - the price "৳8,500 per person" huge at the top,
+editable rows (category dropdown with an icon, description, amount): Transport ৳2,800,
+Stay ৳2,400, Food ৳1,800, Guide ৳900, Fees ৳300, Buffer ৳300, each with a remove icon;
+"+ Add a cost" underlined; a thin coloured bar showing the split; hint "Travellers trust
+itemised prices."
+
+Screen F: "Plan the days" - collapsible cards "Day 1 · Thu 24 Oct" (open: title, details,
+difficulty segmented control Easy / Moderate / Challenging), "Day 2 · Fri 25 Oct"
+(collapsed), and so on.
+
+Screen G: "Review your trip" - on the left the trip card exactly as travellers will see
+it, with "Show preview"; on the right "What's next" with three icon rows: Publish your
+trip; Review requests; Travellers pay into escrow. Footer buttons: outlined "Save draft"
+and brand "Publish".
+
+MOBILE: same screens full width; the calendar shows one month.
+
+
+==================================================================================
+SCREEN 20 - JOIN REQUESTS (HOST)
+==================================================================================
+
+Same Ghurify style. Max width 1120px. Back arrow, title "Requests", grey "Clouds and
+sunrise in Sajek · 12 - 14 Oct". On the right, a summary card: "4 of 10 seats left", a row
+of 10 small squares with 6 filled, "4 women · 2 men".
+
+Tabs: "Pending (3)" active, "Awaiting payment (1)", "Confirmed (6)", "Other".
+
+Request cards with a thin border and 12px radius:
+- Avatar "T", "Tanvir" bold, green badge "ID verified", grey "Male · Requested 2 hours
+  ago"; a quote block with a turmeric left line: "First time in the hills, travelling
+  with my cousin who also requested."; on the right a dark "Approve" and an outlined
+  "Decline".
+- Avatar "S", "Sadia", badge "ID + selfie verified", "Female · Requested 5 hours ago",
+  quote "I hiked Bandarban last year and loved it."; Approve / Decline.
+- Avatar "A", "Arif", no badge, "Requested 1 day ago", no message; Approve / Decline.
+
+Also show a card from the "Awaiting payment" tab: "Mitu", a red countdown "Pay within
+18:42", grey "Waiting for payment". And a dark toast at the bottom: "Seat held for 30
+minutes while they pay."
+
+MOBILE: buttons move under each card at full width.
+
+
+==================================================================================
+SCREEN 21 - EARNINGS (HOST)
+==================================================================================
+
+Same Ghurify style. Like Airbnb's earnings page, max width 1120px.
+
+Title "Earnings". A big line "You've been paid ৳84,600" (40px) and a grey line "৳12,300
+on its way". A simple bar chart of the last 6 months (May to October) with one bar per
+month.
+
+A light grey card "How payouts work": your travellers pay into escrow -> part is released
+before departure -> the rest after the trip starts -> Ghurify sends it to you.
+
+"Transaction history" with tabs "Paid" and "On its way". A table grouped by trip:
+"Monsoon in Tanguar Haor · starts 2 Aug": rows "Before departure · ৳24,750 · green chip
+Paid · 1 Aug 2026 · Ghurify fee ৳990" and "After the trip starts · ৳24,750 · Paid · 3 Aug
+2026 · Ghurify fee ৳990". "Clouds and sunrise in Sajek · starts 12 Oct": "Before
+departure · ৳12,300 · blue chip On its way · 10 Oct 2026".
+
+Empty variant: "No earnings yet" and "Payouts start when travellers pay for your trips."
+
+MOBILE: rows instead of a table.
+
+
+==================================================================================
+SCREEN 22 - ADMIN OVERVIEW
+==================================================================================
+
+Same Ghurify style, as a dense internal tool. Left sidebar 240px with the logo "Ghurify
+Admin" and items with counts: Overview (active), Verifications 7, Reports 4, Disputes 1,
+Destinations, SOS 1 (red), Payouts 5. Top bar with a red pill "1 open SOS" and the
+avatar menu.
+
+Title "Overview" and grey "Updated 20 s ago". Three groups of stat tiles (number 32px
+semibold, grey label, 12px radius, thin border):
+- "Needs attention now": "1 Open SOS alerts" (red border and red number), "2 Missed
+  check-ins today" (red).
+- "Queues": "7 Verifications waiting", "4 Open reports", "1 Open dispute", "5 Payouts to
+  send".
+- "Platform": "14 Live trips", "23 Bookings confirmed today", "3 Refunds in progress",
+  "1 Destination on caution", "1 Closed destination".
+A tile with zero shows a quiet "All clear".
+
+
+==================================================================================
+SCREEN 23 - ADMIN VERIFICATION QUEUE
+==================================================================================
+
+Same admin style with sidebar ("Verifications" active). Title "Verifications". A
+segmented control "Pending / Approved / Rejected" with Pending selected.
+
+A table: Person (avatar, name, masked email) · Level · Provider · Submitted · Status ·
+Actions. Rows:
+- Sadia, s***@gmail.com · ID + selfie · e-KYC, ref PR-88213 in monospace · 12 min ago ·
+  Pending · dark "Approve", outlined "Reject"
+- Tanvir, t***@yahoo.com · National ID · e-KYC, PR-88207 · 40 min ago · Pending
+- Arif, a***@gmail.com · National ID · manual · 2 h ago · Pending, shown with "Reject"
+  expanded into a reason field "Reason (required)" and a red "Confirm reject" button.
+Numbered pagination at the bottom, "7 waiting".
+
+
+==================================================================================
+SCREEN 24 - ADMIN REPORTS AND DISPUTES
+==================================================================================
+
+Same admin style with sidebar ("Reports" active). Master-detail layout.
+
+Left list 400px with filter chips "All, User, Post, Trip". Rows: red chip "Harassment",
+"User #8", "by Mitu", "2 h"; red chip "Fraud", "Trip #12", "by Tanvir", "5 h" (selected,
+light grey background); grey chip "Inappropriate", "Post #31", "by Sadia", "1 d".
+
+Right detail: "Fraud report on Trip #12" (link), "Reported by Tanvir" (link), the
+details text "The host asked us to pay the rest in cash outside Ghurify.", then "Action"
+as radio rows: Dismiss, Resolve (no Hide post or Suspend for a trip report), a required
+"Resolution note" text area with "0 / 500", and a dark "Save decision" button.
+
+Also generate the disputes variant titled "Disputes": a row "Payment · Booking #1042 ·
+by Rizvi", with the extra action "Refund booking" and a confirm box "This is audited and
+can't be undone."
+
+
+==================================================================================
+SCREEN 25 - ADMIN DESTINATION STATUS
+==================================================================================
+
+Same admin style ("Destinations" active). Title "Destination safety". Filter chips All,
+Open, Caution, Closed. A table: small landscape thumbnail, name in English and Bangla
+("Saint Martin's Island / সেন্টমার্টিন দ্বীপ"), division, type, status chip, current note,
+upcoming trips, and a "Change status" link. Rows for Sajek Valley (Open), Saint Martin's
+Island (Caution, "Rough sea expected this week"), Tanguar Haor (Closed, "Flooding"),
+Bandarban (Open), Cox's Bazar (Open).
+
+Also generate the "Change status" modal: three large option cards Open, Caution, Closed
+(Closed selected, red border); two text areas side by side "Note in English" and "Note in
+Bangla" with counters "/ 300"; a preview of the red alert travellers will see; a red
+warning "Everyone booked on the 3 upcoming trips here will be refunded in full and
+notified." with a checkbox "I understand"; footer "Cancel" and a dark "Save".
+
+
+==================================================================================
+SCREEN 26 - ADMIN LIVE SOS BOARD
+==================================================================================
+
+Same admin style ("SOS" active), designed for a large monitor. Title "SOS board", a
+green dot "Live", counts "1 open · 1 acknowledged", and a switch "Show resolved".
+
+A grid of large cards:
+- OPEN (red left border, soft red pulse): "Tanvir Hasan" (20px) with a phone link
+  "+8801712345678"; trip "Clouds and sunrise in Sajek" (link); "Host: Rizvi ·
+  +8801812345678"; message "Lost on the trail near Konglak"; "Raised 4:12 pm" and "Last
+  seen 2 min ago"; coordinates "23.3810, 92.2930" in monospace with a copy icon and
+  "Open map"; a dark "Acknowledge" and an outlined "Resolve".
+- ACKNOWLEDGED (amber left border): "Sadia Islam", trip "Nilgiri and Boga Lake trek",
+  "Last seen 14 min ago" in red because it is stale; outlined "Resolve".
+Right side panel "Missed check-ins": "Bus departed · Long beach weekend · Contact host",
+"Back from Boga Lake · Nilgiri and Boga Lake trek · Contact host".
+
+MOBILE: cards stacked, the missed check-ins panel below.
+
+
+==================================================================================
+SCREEN 27 - ADMIN PAYOUT QUEUE
+==================================================================================
+
+Same admin style ("Payouts" active). Title "Payouts". Segmented control "To send /
+Sent". A table: Host (link) · Trip and start date · Stage · Amount · Ghurify fee ·
+Created · action. Rows:
+- Rizvi · Clouds and sunrise in Sajek, 12 Oct · Before departure · ৳12,300 · ৳490 · 10
+  Oct · dark "Mark as sent"
+- Nusrat · Nilgiri and Boga Lake trek, 24 Oct · Before departure · ৳42,500 · ৳1,700 ·
+  22 Oct · "Mark as sent"
+Table footer "Total ৳54,800". Also generate the confirm modal: "Mark payout as sent?",
+"Rizvi · ৳12,300 · Before departure", "This is recorded in the audit log.", "Cancel" and
+a dark "Mark as sent".
+
+
+==================================================================================
+SCREEN 28 - DIALOGS
+==================================================================================
+
+Same Ghurify style. Generate these modals, each centred with "X" top left, a centred
+title, a thin line under the header and a footer with a thin line above it. On mobile
+they are full-height sheets sliding up.
+
+A. "Request to join": a compact trip row (small landscape thumbnail, "Clouds and sunrise
+   in Sajek", "12 - 14 Oct", "৳6,500 per person"); a text area "Message the host
+   (optional)" with counter "0 / 500" and three tappable example chips "First time in the
+   hills", "Travelling with a friend", "I've done this route before"; "What happens next"
+   as three steps: The host reviews your request -> You get 30 minutes to pay -> You're
+   in. Footer: a full-width brand "Send request" and centred grey "You won't be charged
+   yet". Variant: an amber box "Verify your ID before joining trips" with a "Verify now"
+   link. Success variant: a green check, "Request sent", a dark "Go to Trips".
+
+B. "Cancel your booking": "12 days before departure"; a two-row table "You paid ৳6,630"
+   and "You'll get back ৳3,250"; the line "You will get half the trip price back."
+   Footer: outlined "Keep my booking" and a red "Cancel and get ৳3,250 back".
+
+C. "Report this trip": step 1 radio rows with one-line descriptions: Harassment, Fraud,
+   Unsafe, Inappropriate, Payment, Other; dark "Next". Step 2: "Details" text area with
+   "0 / 1000", grey "Reports are private. The person won't know who reported them.", and
+   a dark "Submit". Success: "Thanks, we'll look into it."
+
+D. "Send SOS?": optional field "What is happening?", a very large red "Send SOS now"
+   button, and a small grey "Cancel" link.
+
+
+==================================================================================
+SCREEN 29 - NOTIFICATIONS PANEL AND USER MENU
+==================================================================================
+
+Same Ghurify style. Show the home page header with two open overlays.
+
+Notifications dropdown (400px, 12px radius, shadow) under the bell, which has a red "3"
+badge: header "Notifications" and an underlined "Mark all as read". Group "Today":
+- brand-colour icon disc, bold "You are approved! Pay within 30 minutes to keep your
+  seat.", "5 min ago", unread dot
+- red icon disc, bold "A destination on your trip was closed for safety. You will be
+  refunded in full.", "1 h ago", unread dot
+- "New request to join Clouds and sunrise in Sajek.", "3 h ago", unread dot
+Group "Earlier":
+- "Payment received. You are going!", "Yesterday"
+- "How was your trip? Leave a review.", "2 days ago"
+
+User menu dropdown (240px) under the avatar pill: "Rizvi Ahmed" bold, "r***@example.com"
+grey, a green "ID verified" badge; then "Trips", "Messages" with a red "3", "Account";
+a thin line; "Hosting", "Earnings"; a thin line; "Log out".
+
+MOBILE: notifications open as a full-screen sheet; the bottom tab bar shows Explore,
+Stories, Trips, Messages (with a red dot), Profile.

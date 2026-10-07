@@ -28,7 +28,8 @@ export function stubResponse(body: unknown, status = 200): StubResponse {
  * Returns the mock so tests can inspect which URLs were requested.
  */
 export function stubApi(routes: [RegExp, unknown, number?][]) {
-  const fetchMock = vi.fn((input: string | URL | Request) => {
+  // `_init` is not used to route, but is in the signature so tests can inspect method and body.
+  const fetchMock = vi.fn((input: string | URL | Request, _init?: RequestInit) => {
     const url = urlOf(input);
     const route = routes.find(([pattern]) => pattern.test(url));
 
@@ -48,6 +49,17 @@ function urlOf(input: string | URL | Request): string {
 /** Every URL the stubbed fetch was asked for, in order. */
 export function requestedUrls(fetchMock: ReturnType<typeof stubApi>): string[] {
   return fetchMock.mock.calls.map(([input]) => urlOf(input));
+}
+
+/** Every request the stubbed fetch received: URL, method and body text, in order. */
+export function requests(
+  fetchMock: ReturnType<typeof stubApi>,
+): { url: string; method: string; body: string | undefined }[] {
+  return fetchMock.mock.calls.map(([input, init]) => ({
+    url: urlOf(input),
+    method: init?.method ?? 'GET',
+    body: typeof init?.body === 'string' ? init.body : undefined,
+  }));
 }
 
 export const sampleDestinations = [

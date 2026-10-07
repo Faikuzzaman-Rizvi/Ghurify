@@ -14,6 +14,14 @@ export type SupportedLanguage = (typeof supportedLanguages)[number];
  */
 export const defaultLanguage: SupportedLanguage = 'bn';
 
+// Keeps <html lang> in step with the language, including the one restored on load: screen
+// readers pick their voice from it, and the styles drop letter-spacing for Bangla by it.
+i18n.on('languageChanged', (language) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = language;
+  }
+});
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)

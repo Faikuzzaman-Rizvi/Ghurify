@@ -132,8 +132,7 @@ public sealed class RefreshSessionHandlerTests
 
     private async Task<(User User, string RefreshToken)> StartSessionAsync()
     {
-        var user = await _users.GetOrAddByEmailAsync(
-            Email.Parse("rizvi@example.com"), TestContext.Current.CancellationToken);
+        var user = _users.Add(Email.Parse("rizvi@example.com"));
 
         var (token, hash) = _tokenIssuer.IssueRefreshToken();
 

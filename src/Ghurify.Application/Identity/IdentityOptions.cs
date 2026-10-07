@@ -56,4 +56,22 @@ public sealed class IdentityOptions
     /// <summary>How long the UI should disable "resend" for.</summary>
     [Range(10, 600)]
     public int OtpResendAfterSeconds { get; set; } = 60;
+
+    /// <summary>
+    /// PBKDF2-SHA256 work factor. 600,000 is OWASP's current recommendation; tests lower it so
+    /// the suite stays fast. Stored per hash, so raising it upgrades hashes as people sign in.
+    /// </summary>
+    [Range(10_000, 5_000_000)]
+    public int PasswordIterations { get; set; } = 600_000;
+
+    /// <summary>Wrong passwords for one address, inside the window, before sign-in pauses.</summary>
+    [Range(3, 20)]
+    public byte SignInMaxFailures { get; set; } = 5;
+
+    [Range(1, 1440)]
+    public int SignInWindowMinutes { get; set; } = 15;
+
+    /// <summary>How long sign-in for that address stays paused.</summary>
+    [Range(1, 1440)]
+    public int SignInPauseMinutes { get; set; } = 15;
 }

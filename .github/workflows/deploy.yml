@@ -1,0 +1,79 @@
+name: Deploy
+
+# Ships a green main to staging, then (after a person approves in GitHub) to production.
+#
+# Order, in every environment: DbUp pre -> dacpac publish -> DbUp data -> jobs worker -> API -> web.
+# Both environments deploy the SAME build artifacts: what was tested on staging is what reaches
+# production.
+#
+# Set up once (docs/RUNBOOK.md, "First-time setup"): GitHub environments `staging` and
+# `production` (production with required reviewers: that is the manual approval), their
+# secrets and variables, and Azure federated credentials for OIDC sign-in.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build release artifacts
+    # Only after CI passed (or when started by hand).
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Publish the API (also the jobs worker)
+        run: dotnet publish src/Ghurify.Api --configuration Release --output artifacts/api
+
+      - name: Publish the DbUp console
+        run: dotnet publish src/Ghurify.DatabaseUpdate --configuration Release --output artifacts/dbup
+
+      - name: Build the dacpac
+        run: |
+          dotnet build src/Database/Ghurify.Database --configuration Release
+          mkdir -p artifacts/dacpac
+          cp src/Database/Ghurify.Database/bin/Release/Ghurify.Database.dacpac artifacts/dacpac/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: artifacts
+          if-no-files-found: error
+
+  staging:
+    name: Staging
+    needs: build
+    uses: ./.github/workflows/deploy-environment.yml
+    with:
+      environment: staging
+    secrets: inherit
+
+  production:
+    name: Production
+    needs: staging
+    uses: ./.github/workflows/deploy-environment.yml
+    with:
+      environment: production
+    secrets: inherit

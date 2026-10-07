@@ -1,4 +1,20 @@
-<Project Sdk="Microsoft.Build.Sql/2.2.0">
+<Project Sdk="Microsoft.Build.Sql/2.2.0" TreatAsLocalProperty="SSDTPath;UseTaskHostFactory">
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
+    <!-- Visual Studio builds only. `dotnet build` (MSBuildRuntimeType Core) uses the SDK's net8.0
+         tools and is unaffected.
+         VS 18 ships an older Microsoft.Data.Tools.Schema.Tasks.Sql.dll (170.4.53) with the SAME
+         assembly identity (Version=170.0.0.0) as the one in this SDK (170.4.83). The 2.2.0 targets
+         pass parameters the older DLL lacks (MSB4064 AutomaticIndexCompaction), so two things:
+         1. SSDTPath: point the tasks at the DLLs shipped with this SDK, not VS's SQLDB\DAC folder.
+            TreatAsLocalProperty lets this override the value VS passes in.
+         2. UseTaskHostFactory: VS already has its own copy loaded in-process, and .NET Framework
+            hands back an already-loaded assembly with the same identity whatever path is asked
+            for. Running the tasks in a separate task-host process makes the SDK's DLL load. -->
+    <SSDTPath>$(NETFrameworkTargetsPath)</SSDTPath>
+    <UseTaskHostFactory>true</UseTaskHostFactory>
+  </PropertyGroup>
+  <!-- The SDK declares no task-host variant of SqlDeployTask (used by F5 / SqlDeploy), so add one. -->
+  <UsingTask Condition="'$(MSBuildRuntimeType)' == 'Full'" TaskName="SqlDeployTask" TaskFactory="TaskHostFactory" AssemblyFile="$(NETFrameworkTargetsPath)\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
   <PropertyGroup>
     <Name>Ghurify.Database</Name>
     <RootNamespace>Ghurify.Database</RootNamespace>
@@ -39,11 +55,39 @@
     <Build Include="Main\Tables\UserHistory.sql" />
     <Build Include="Main\Tables\OtpCode.sql" />
     <Build Include="Main\Tables\RefreshToken.sql" />
+    <Build Include="Main\Tables\UserCredential.sql" />
+    <Build Include="Main\Tables\SignInThrottle.sql" />
+    <Build Include="Main\Stored Procedures\AddPendingUser.sql" />
+    <Build Include="Main\Stored Procedures\SetUserPassword.sql" />
+    <Build Include="Main\Stored Procedures\SetSignInFailure.sql" />
+    <Build Include="Main\Stored Procedures\GetUserCredential.sql" />
     <Build Include="Main\Stored Procedures\AddOtpCode.sql" />
     <Build Include="Main\Stored Procedures\SetOtpCodeAttempted.sql" />
-    <Build Include="Main\Stored Procedures\GetOrAddUserByEmail.sql" />
     <Build Include="Main\Stored Procedures\SetRefreshTokenRotated.sql" />
     <Build Include="Main\Stored Procedures\SetRefreshTokenFamilyRevoked.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Main - Profiles and verification">
+    <Build Include="Main\Tables\UserProfile.sql" />
+    <Build Include="Main\Tables\UserRole.sql" />
+    <Build Include="Main\Tables\Verification.sql" />
+    <Build Include="Main\Tables\VerificationDocument.sql" />
+    <Build Include="Main\Stored Procedures\SetUserAvatar.sql" />
+    <Build Include="Main\Stored Procedures\QueryVerificationDocumentsToPurge.sql" />
+    <Build Include="Main\Stored Procedures\GetUserAccess.sql" />
+    <Build Include="Main\Stored Procedures\GetUserProfile.sql" />
+    <Build Include="Main\Stored Procedures\SetUserProfile.sql" />
+    <Build Include="Main\Stored Procedures\AddVerification.sql" />
+    <Build Include="Main\Stored Procedures\SetVerificationSettled.sql" />
+    <Build Include="Main\Stored Procedures\QueryVerificationQueue.sql" />
+    <Build Include="Main\Stored Procedures\QueryAdminUsers.sql" />
+    <Build Include="Main\Stored Procedures\GetAdminUser.sql" />
+    <Build Include="Main\Stored Procedures\SetUserStatus.sql" />
+    <Build Include="Main\Stored Procedures\SetPasswordResetRequired.sql" />
+    <Build Include="Main\Stored Procedures\QueryAdminTrips.sql" />
+    <Build Include="Main\Stored Procedures\SetDestination.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Safety">
+    <Build Include="Safety\Tables\AuditLog.sql" />
   </ItemGroup>
   <ItemGroup Label="Main - Trips">
     <Build Include="Main\Tables\Destination.sql" />
@@ -54,6 +98,88 @@
     <Build Include="Main\Stored Procedures\QueryDestinations.sql" />
     <Build Include="Main\Stored Procedures\QueryTrips.sql" />
     <Build Include="Main\Stored Procedures\GetTrip.sql" />
+    <Build Include="Main\User Defined Types\TripCostItemList.sql" />
+    <Build Include="Main\User Defined Types\ItineraryDayList.sql" />
+    <Build Include="Main\Stored Procedures\AddTrip.sql" />
+    <Build Include="Main\Stored Procedures\SetTrip.sql" />
+    <Build Include="Main\Stored Procedures\SetTripPublished.sql" />
+    <Build Include="Main\Stored Procedures\QueryHostTrips.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Bookings and notifications">
+    <Build Include="Main\Tables\JoinRequest.sql" />
+    <Build Include="Main\Tables\Notification.sql" />
+    <Build Include="Pay\Tables\Booking.sql" />
+    <Build Include="Pay\Tables\BookingHistory.sql" />
+    <Build Include="Main\Stored Procedures\AddJoinRequest.sql" />
+    <Build Include="Main\Stored Procedures\SetJoinRequestApproved.sql" />
+    <Build Include="Main\Stored Procedures\SetJoinRequestDeclined.sql" />
+    <Build Include="Main\Stored Procedures\SetJoinRequestCancelled.sql" />
+    <Build Include="Main\Stored Procedures\QueryTripJoinRequests.sql" />
+    <Build Include="Pay\Stored Procedures\SetBookingHoldsExpired.sql" />
+    <Build Include="Pay\Stored Procedures\QueryMyBookings.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Payments and escrow">
+    <Build Include="Pay\Tables\Payment.sql" />
+    <Build Include="Pay\Tables\EscrowLedger.sql" />
+    <Build Include="Pay\Tables\WebhookEvent.sql" />
+    <Build Include="Pay\Tables\Refund.sql" />
+    <Build Include="Pay\Stored Procedures\AddPayment.sql" />
+    <Build Include="Pay\Stored Procedures\SetPaymentPending.sql" />
+    <Build Include="Pay\Stored Procedures\SetPaymentFailed.sql" />
+    <Build Include="Pay\Stored Procedures\SetPaymentSucceeded.sql" />
+    <Build Include="Pay\Stored Procedures\AddWebhookEvent.sql" />
+    <Build Include="Pay\Stored Procedures\AddRefund.sql" />
+    <Build Include="Pay\Stored Procedures\GetBookingCheckout.sql" />
+    <Build Include="Pay\Stored Procedures\GetAdminBooking.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Chat, payouts and refunds">
+    <Build Include="Social\Tables\ChatMessage.sql" />
+    <Build Include="Social\Tables\ChatReadMarker.sql" />
+    <Build Include="Social\Stored Procedures\GetChatAccess.sql" />
+    <Build Include="Social\Stored Procedures\QueryChatMessages.sql" />
+    <Build Include="Social\Stored Procedures\QueryChatUnread.sql" />
+    <Build Include="Pay\Tables\Payout.sql" />
+    <Build Include="Pay\User Defined Types\RefundRequestList.sql" />
+    <Build Include="Pay\User Defined Types\RefundResultList.sql" />
+    <Build Include="Pay\Stored Procedures\AddRefunds.sql" />
+    <Build Include="Pay\Stored Procedures\SetRefundResults.sql" />
+    <Build Include="Pay\Stored Procedures\SetDuePayouts.sql" />
+    <Build Include="Pay\Stored Procedures\QueryHostPayouts.sql" />
+    <Build Include="Pay\Stored Procedures\GetBookingCancellation.sql" />
+    <Build Include="Pay\Stored Procedures\SetBookingCancelled.sql" />
+    <Build Include="Main\Stored Procedures\SetTripsCancelled.sql" />
+    <Build Include="Main\Stored Procedures\SetTripsCompleted.sql" />
+    <Build Include="Main\User Defined Types\NotificationList.sql" />
+    <Build Include="Main\Stored Procedures\AddNotifications.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Social">
+    <Build Include="Social\Tables\Post.sql" />
+    <Build Include="Social\Tables\Media.sql" />
+    <Build Include="Social\Tables\Comment.sql" />
+    <Build Include="Social\Tables\Like.sql" />
+    <Build Include="Social\Tables\Follow.sql" />
+    <Build Include="Social\Tables\Review.sql" />
+    <Build Include="Social\Tables\RatingSummary.sql" />
+    <Build Include="Social\Stored Procedures\QueryPosts.sql" />
+    <Build Include="Social\Stored Procedures\AddPost.sql" />
+    <Build Include="Social\Stored Procedures\AddReview.sql" />
+    <Build Include="Social\Stored Procedures\QueryReviewable.sql" />
+    <Build Include="Social\Stored Procedures\GetPublicProfile.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Safety desk">
+    <Build Include="Safety\Tables\SosEvent.sql" />
+    <Build Include="Safety\Tables\CheckIn.sql" />
+    <Build Include="Safety\Tables\DestinationAlert.sql" />
+    <Build Include="Safety\Tables\Report.sql" />
+    <Build Include="Safety\Tables\EmergencyPoint.sql" />
+    <Build Include="Safety\Stored Procedures\AddSosEvent.sql" />
+    <Build Include="Safety\Stored Procedures\SetEmergencyPoint.sql" />
+    <Build Include="Safety\Stored Procedures\QueryEmergencyPoints.sql" />
+    <Build Include="Safety\Stored Procedures\QuerySosBoard.sql" />
+    <Build Include="Safety\Stored Procedures\SetCheckInsMissed.sql" />
+    <Build Include="Safety\Stored Procedures\SetDestinationStatus.sql" />
+    <Build Include="Safety\Stored Procedures\QueryReports.sql" />
+    <Build Include="Safety\Stored Procedures\GetDashboardCounts.sql" />
   </ItemGroup>
   <ItemGroup Label="Deployment scripts">
     <PreDeploy Include="Script.PreDeployment.sql" />
@@ -65,5 +191,15 @@
     <Folder Include="Main\User Defined Types\" />
     <Folder Include="Main\Tables\" />
     <Folder Include="Main\Stored Procedures\" />
+    <Folder Include="Safety\" />
+    <Folder Include="Safety\Tables\" />
+    <Folder Include="Pay\" />
+    <Folder Include="Pay\Tables\" />
+    <Folder Include="Pay\Stored Procedures\" />
+    <Folder Include="Social\" />
+    <Folder Include="Social\Tables\" />
+    <Folder Include="Social\Stored Procedures\" />
+    <Folder Include="Pay\User Defined Types\" />
+    <Folder Include="Safety\Stored Procedures\" />
   </ItemGroup>
 </Project>

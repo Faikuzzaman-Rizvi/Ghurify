@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "gen:api": "openapi-typescript http://localhost:5199/openapi/v1.json -o src/api/schema.d.ts"
+    "gen:api": "openapi-typescript http://localhost:5199/openapi/v1.json -o src/api/schema.d.ts",
+    "test:e2e": "node e2e/prepare.mjs && playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -23,6 +24,7 @@
     "i18next": "^26.4.2",
     "i18next-browser-languagedetector": "^8.2.1",
     "leaflet": "^1.9.4",
+    "lucide-react": "^1.52.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.89.0",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

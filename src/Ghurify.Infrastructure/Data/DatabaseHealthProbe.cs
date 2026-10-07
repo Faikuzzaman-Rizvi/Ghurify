@@ -31,9 +31,11 @@ public sealed class DatabaseHealthProbe(
             var result = await connection.ExecuteScalarAsync<int>(command);
             return result == 1;
         }
-        catch (OperationCanceledException)
+        catch (Exception) when (cancellationToken.IsCancellationRequested)
         {
-            throw;
+            // The caller went away mid-probe (SQL Server reports that as a SqlException): not a
+            // database problem, so no warning.
+            throw new OperationCanceledException(cancellationToken);
         }
         catch (Exception ex)
         {

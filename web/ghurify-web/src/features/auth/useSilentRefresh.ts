@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { asNumber } from '@/api/client';
-import { authApi } from './authApi';
+import { refreshSession } from './authApi';
 import { useAuthStore } from './authStore';
 
 /**
@@ -26,7 +26,7 @@ export function useSilentRefresh(): void {
 
     async function refresh(): Promise<void> {
       try {
-        const session = await authApi.refresh();
+        const session = await refreshSession();
 
         if (cancelled) {
           return;

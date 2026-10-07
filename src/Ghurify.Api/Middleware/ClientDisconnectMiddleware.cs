@@ -35,7 +35,12 @@ public sealed class ClientDisconnectMiddleware(RequestDelegate next, ILogger<Cli
         {
             await next(context);
         }
-        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+        // Not only OperationCanceledException: SQL Server reports a cancelled command as a
+        // SqlException ("the batch is aborted"). Once the caller is gone, whatever failed did so
+        // because they left, and there is nobody to report it to.
+#pragma warning disable CA1031 // Deliberately broad, and only while the request is already aborted.
+        catch (Exception) when (context.RequestAborted.IsCancellationRequested)
+#pragma warning restore CA1031
         {
             // Debug, not warning: on a busy site this is constant and completely normal.
             logger.LogDebug(

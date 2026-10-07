@@ -11,4 +11,10 @@ public enum UserStatus : byte
 
     /// <summary>Closed by the user. Kept so trips and payments stay attributable.</summary>
     Deactivated = 3,
+
+    /// <summary>
+    /// Registered, but the email address is not confirmed yet. Cannot sign in until the code
+    /// sent at sign-up is entered (or a password reset proves the address).
+    /// </summary>
+    PendingEmail = 4,
 }

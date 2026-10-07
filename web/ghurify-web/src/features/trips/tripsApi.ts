@@ -25,6 +25,7 @@ export interface TripFilters {
   sort?: TripSort | undefined;
   page?: number | undefined;
   pageSize?: number | undefined;
+  verifiedHostsOnly?: boolean | undefined;
 }
 
 function toQueryString(filters: TripFilters): string {

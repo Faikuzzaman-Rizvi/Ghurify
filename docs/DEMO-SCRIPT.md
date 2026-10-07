@@ -15,10 +15,13 @@ database with the demo trips loaded.
    demo trips are dated relative to the day they were loaded, so reload them on a fresh database
    if the showcase is weeks later.
 
-2. **Sign-in codes.** Decide where the six-digit code will appear:
+2. **Accounts.** Every demo account (`@demo.ghurify.app`, loaded with `-- demo`) signs in with
+   the password `Ghurify-demo-2026`; for example `admin@demo.ghurify.app` (Admin) and
+   `safety@demo.ghurify.app` (safety desk). A new account needs the six-digit code once, to
+   confirm its email address, and "Forgot password?" sends one too. Decide where it will appear:
    - With `Email__UserName` and `Email__Password` filled in `.env` (a Gmail App Password), the
      code is emailed to the real address. The API's startup log says
-     `Sign-in codes will be emailed through smtp.gmail.com:587`.
+     `Account emails (confirmation and password reset codes) will be sent through smtp.gmail.com:587`.
    - With them blank, Development prints the code in the API console instead.
    - Restart the API after editing `.env`.
 
@@ -40,7 +43,7 @@ database with the demo trips loaded.
 | 6 | Open **Sajek sunrise weekend** | "Before anyone commits: seats left, the day-by-day plan, and **where every taka goes**. The lines add up exactly to the price, with no hidden fees." |
 | 7 | Point at the ticket card's **escrow** note | "Payments will go into escrow and be released to the host in stages." |
 | 8 | Click the 📍 destination chip → destination page with the map | "Every destination has its own page and map." |
-| 9 | **Sign in**: enter an email, read the code, enter it | "No passwords. A six-digit code, rate-limited, hashed in the database, and locked after five wrong tries." |
+| 9 | **Create an account**: name, email, password, then the code from the email | "The email is confirmed once with a code. After that it is just email and password: salted slow hashes, and five wrong passwords pause sign-in for that address, whether or not it has an account." |
 | 10 | Back on a trip, click **Request to join** | Honest answer: "Join requests and escrow payments are the next release." |
 | 11 | Scroll to the footer: **API healthy** | "Live check: browser → API → SQL Server." |
 

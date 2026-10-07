@@ -22,27 +22,43 @@ export function GroupBadge({ groupType }: { groupType: GroupType }) {
   );
 }
 
-/** Seats left, turning urgent when only a few remain. */
-export function SeatsBadge({ seatsLeft }: { seatsLeft: number }) {
+/**
+ * Seats left, turning urgent when only a few remain. `onPhoto` gives it a solid background
+ * so it stays legible over a picture.
+ */
+export function SeatsBadge({
+  seatsLeft,
+  onPhoto = false,
+}: {
+  seatsLeft: number;
+  onPhoto?: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const language = toLanguage(i18n.language);
 
   if (seatsLeft <= 0) {
     return (
-      <span className="rounded-full bg-deep/10 px-3 py-1 text-xs font-semibold text-deep/70">
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+          onPhoto ? 'bg-white/90 text-deep' : 'bg-deep/10 text-deep/70'
+        }`}
+      >
         {t('trips.full')}
       </span>
     );
   }
 
   const urgent = seatsLeft <= 3;
+  const style = onPhoto
+    ? urgent
+      ? 'bg-jamdani text-white'
+      : 'bg-white/90 text-hill'
+    : urgent
+      ? 'bg-jamdani/10 text-jamdani'
+      : 'bg-hill/10 text-hill';
 
   return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        urgent ? 'bg-jamdani/10 text-jamdani' : 'bg-hill/10 text-hill'
-      }`}
-    >
+    <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${style}`}>
       {/* `count` picks the plural form; `n` is the same number written in the reader's script. */}
       {t('trips.seatsLeft', { count: seatsLeft, n: formatCount(seatsLeft, language) })}
     </span>

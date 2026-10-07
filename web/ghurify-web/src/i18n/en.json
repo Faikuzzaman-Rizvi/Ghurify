@@ -20,7 +20,14 @@
     "loading": "Loading...",
     "empty": "Nothing to show yet",
     "error": "Something went wrong",
-    "retry": "Try again"
+    "retry": "Try again",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "close": "Close"
   },
   "nav": {
     "home": "Ghurify home",
@@ -28,11 +35,20 @@
     "destinations": "Destinations",
     "safety": "Safety",
     "tour": "Take the tour",
-    "main": "Main"
+    "main": "Main",
+    "myTrips": "My trips",
+    "hosting": "Hosting",
+    "admin": "Admin",
+    "stories": "Stories",
+    "openMenu": "Open menu",
+    "menu": "Menu",
+    "accountMenu": "Your account menu",
+    "signedInAs": "Signed in as",
+    "yourAccount": "Your account"
   },
   "home": {
     "eyebrow": "Group trips across Bangladesh",
-    "title": "Find your people. Explore Bangladesh.",
+    "title": "Find your people. <accent>Explore</accent> Bangladesh.",
     "subtitle": "Join small-group trips hosted by verified locals, see exactly where your money goes, and travel with safety built in.",
     "searchTitle": "Where to next?",
     "destinationLabel": "Destination",
@@ -47,12 +63,12 @@
       "sos": "SOS on every trip",
       "women": "Women-only trips"
     },
-    "destinationsTitle": "Where Bangladesh takes you",
+    "destinationsTitle": "Where Bangladesh <accent>takes you</accent>",
     "destinationsSubtitle": "From cloud-wrapped hills to the longest beach on earth. Every destination shows its live safety status.",
-    "tripsTitle": "Trips leaving soon",
+    "tripsTitle": "Trips leaving <accent>soon</accent>",
     "tripsSubtitle": "Small groups, transparent costs, real hosts.",
     "seeAll": "See all trips",
-    "howTitle": "How Ghurify works",
+    "howTitle": "How Ghurify <accent>works</accent>",
     "steps": {
       "find": {
         "title": "Find a trip",
@@ -71,7 +87,7 @@
         "body": "Chat with your group, check in on the road, and review the trip when you are home."
       }
     },
-    "safetyTitle": "Safety is the promise",
+    "safetyTitle": "Safety is the <accent>promise</accent>",
     "safetySubtitle": "Everything on Ghurify is built around getting you there and back safely.",
     "safety": {
       "verified": {
@@ -97,10 +113,40 @@
     },
     "ctaTitle": "Got a trip in mind?",
     "ctaBody": "Hosting opens soon for verified locals. Sign in today and be first in line.",
-    "ctaButton": "Sign in with email"
+    "ctaButton": "Sign in with email",
+    "heroLabel": "Welcome",
+    "heroPlace": {
+      "sajek": "Sajek Valley, Rangamati",
+      "saint-martins": "Saint Martin's Island, Cox's Bazar",
+      "sylhet": "Ratargul swamp forest, Sylhet",
+      "tanguar-haor": "Tanguar Haor, Sunamganj"
+    },
+    "showSlide": "Show {{place}}",
+    "playSlides": "Play the photos",
+    "pauseSlides": "Pause the photos",
+    "why": {
+      "eyebrow": "Travel together, safely",
+      "title": "Small groups. <accent>Real</accent> people. Safe trips.",
+      "body": "Ghurify joins travellers with verified local hosts for small-group trips across Bangladesh. You see every taka of the price before you go, your money waits in escrow until the trip runs, and help is one tap away on the road.",
+      "howSafe": "How we keep you safe",
+      "badge": "Travel together · Travel safe · Ghurify · "
+    },
+    "destinationsEyebrow": "Top destinations",
+    "tripsEyebrow": "Choose your trip",
+    "numbers": {
+      "label": "Ghurify in numbers",
+      "destinations": "Destinations",
+      "trips": "Upcoming trips",
+      "escrow": "Payments in escrow",
+      "sos": "SOS on every trip",
+      "sosValue": "24/7"
+    },
+    "howEyebrow": "Four simple steps",
+    "safetyEyebrow": "Our promise",
+    "ctaEyebrow": "Ready when you are"
   },
   "trips": {
-    "exploreTitle": "Explore trips",
+    "exploreTitle": "Explore <accent>trips</accent>",
     "exploreSubtitle": "Every live trip across Bangladesh, with the full cost breakdown up front.",
     "results_one": "{{n}} trip",
     "results_other": "{{n}} trips",
@@ -129,7 +175,15 @@
     "days_other": "{{n}} days",
     "hostedBy": "Hosted by {{name}}",
     "aHost": "a Ghurify host",
-    "loadError": "We could not load trips. Check your connection and try again."
+    "loadError": "We could not load trips. Check your connection and try again.",
+    "verifiedHostsOnly": "Only hosts with a verified ID and selfie",
+    "exploreEyebrow": "Choose your trip",
+    "resultsHeading": "Trips",
+    "filtersButton": "Filters",
+    "showResults": "Show trips",
+    "showCount_one": "Show {{n}} trip",
+    "showCount_other": "Show {{n}} trips",
+    "pageNumber": "Page {{n}}"
   },
   "trip": {
     "back": "All trips",
@@ -157,7 +211,22 @@
       "verified": "Host identity checked before publishing",
       "sos": "SOS and daily check-ins during the trip",
       "escrow": "Money held in escrow until the trip runs"
-    }
+    },
+    "groupMix": "Going so far: {{women}} women, {{men}} men, {{others}} others",
+    "refunds": {
+      "title": "If plans change",
+      "early": "Cancel 14 or more days before departure: full refund of the trip price.",
+      "middle": "Cancel 7 to 13 days before: half the trip price back.",
+      "late": "Cancel within 7 days of departure: no refund, because the host has already paid for your place.",
+      "host": "If the host cancels, you get everything back, fees included.",
+      "closure": "If the safety desk closes the destination, you get everything back, fees included."
+    },
+    "duration": "Duration",
+    "breadcrumb": "Breadcrumb",
+    "from": "From",
+    "expandAll": "Open all days",
+    "collapseAll": "Close all days",
+    "reserveCta": "Join this trip"
   },
   "destination": {
     "upcoming_one": "{{n}} upcoming trip",
@@ -174,7 +243,12 @@
       "Open": "Open",
       "Caution": "Caution",
       "Closed": "Closed"
-    }
+    },
+    "explore": "Explore",
+    "kindLabel": "Landscape",
+    "divisionLabel": "Division",
+    "upcomingLabel": "Upcoming trips",
+    "fromLabel": "Trips from"
   },
   "groupType": {
     "Open": "Open group",
@@ -238,15 +312,22 @@
         "body": "Switch the language at any time. Your choice is remembered."
       },
       "account": {
-        "title": "Sign in with your email",
-        "body": "No password to remember: we email you a six-digit code."
+        "title": "Your account",
+        "body": "Sign in with your email and password. We email a code only once, to confirm your address."
       }
     }
   },
   "footer": {
     "tagline": "Small-group trips across Bangladesh, with safety built in.",
     "rights": "© {{year}} Ghurify. Made for travellers in Bangladesh.",
-    "explore": "Explore"
+    "explore": "Explore",
+    "travellers": "For travellers",
+    "hostATrip": "Host a trip",
+    "promise": {
+      "verified": "Every host checks their national ID",
+      "escrow": "Money held safely until the trip runs",
+      "sos": "One tap reaches the safety desk"
+    }
   },
   "notFound": {
     "title": "Lost on the trail?",
@@ -255,32 +336,1120 @@
   },
   "auth": {
     "title": "Sign in to Ghurify",
-    "subtitle": "We will email you a six-digit code. No password needed.",
+    "subtitle": "Welcome back. Sign in with your email and password.",
     "emailLabel": "Email address",
-    "emailHint": "We will send your sign-in code here",
+    "emailHint": "This is your sign-in address for good. We send one code here to confirm it.",
     "emailInvalid": "Enter a valid email address, for example rizvi@example.com.",
-    "sendCode": "Send code",
     "codeLabel": "Six-digit code",
     "codeSentTo": "We sent a code to {{email}}.",
     "codeInvalid": "Enter the six-digit code.",
-    "codeRejected": "That code is not valid. Request a new one and try again.",
-    "verify": "Verify and sign in",
     "resend": "Send a new code",
     "resendIn": "Send a new code in {{seconds}}s",
     "changeEmail": "Use a different address",
-    "tooManyRequests": "Too many codes requested. Please wait a few minutes.",
-    "accountUnavailable": "This account cannot sign in. Contact support.",
     "checkInbox": "If you cannot find it, check your spam folder.",
     "signOut": "Sign out",
     "signedInAs": "Signed in as {{email}}",
     "signIn": "Sign in",
     "sideTitle": "Your next trip starts here",
-    "sideBody": "Sign in to request seats, chat with your group and get safety alerts for your trips."
+    "sideBody": "Sign in to request seats, chat with your group and get safety alerts for your trips.",
+    "passwordLabel": "Password",
+    "newPasswordLabel": "New password",
+    "passwordHint": "At least 10 characters. A short phrase like “monsoon tea garden walk” is strong and easy to remember.",
+    "passwordRequired": "Enter your password.",
+    "passwordTooShort": "Use at least 10 characters.",
+    "passwordTooLong": "Use at most 128 characters.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "New to Ghurify?",
+    "createAccount": "Create an account",
+    "haveAccount": "Already have an account?",
+    "legacyHint": "Used to sign in with an emailed code? Choose a password with “Forgot password?”.",
+    "sendNewCode": "Send me a new code",
+    "nameLabel": "Your full name",
+    "nameHint": "As on your ID. Hosts and fellow travellers see it.",
+    "nameInvalid": "Enter your name (2 to 100 characters).",
+    "backToSignIn": "Back to sign in",
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Join verified travellers and hosts across Bangladesh.",
+      "submit": "Create account"
+    },
+    "confirm": {
+      "title": "Confirm your email",
+      "submit": "Confirm and continue"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "Enter your account's email address. We will send you a code to choose a new password.",
+      "submit": "Send reset code"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "sentTo": "If {{email}} has a Ghurify account, a reset code is on its way.",
+      "submit": "Save password and sign in"
+    }
   },
   "account": {
     "title": "Your account",
     "emailLabel": "Email address",
     "nameLabel": "Name",
-    "noName": "Not set yet"
+    "noName": "Not set yet",
+    "loadError": "We could not load your profile.",
+    "memberSince": "on Ghurify since {{date}}",
+    "eyebrow": "Your account",
+    "completeness": "Profile complete",
+    "completenessHint": "Hosts look at profiles before they accept a request. A full one gets you in faster.",
+    "quickLinks": "Shortcuts",
+    "password": {
+      "title": "Password",
+      "lead": "Changing it signs you out on every other device.",
+      "current": "Current password",
+      "submit": "Change password",
+      "changed": "Password changed. Your other devices were signed out."
+    },
+    "avatar": {
+      "label": "Profile picture",
+      "add": "Add a profile picture",
+      "change": "Change profile picture",
+      "remove": "Remove picture"
+    }
+  },
+  "errors": {
+    "invalid": "Please check the details and try again.",
+    "signedOut": "Your session has ended. Sign in again.",
+    "forbidden": "You are not allowed to do this.",
+    "forbiddenHint": "This area is for people with a different role.",
+    "notFound": "We could not find that.",
+    "conflict": "That clashes with something that changed. Refresh and try again.",
+    "tooMany": "Too many attempts. Please wait a little and try again.",
+    "phone_in_use": "This phone number is already used by another account.",
+    "emergency_contact_is_self": "Your emergency contact must be someone else's number.",
+    "gender_locked": "Your gender is fixed after identity verification. Contact support to correct it.",
+    "invalid_nid": "Enter the 10, 13 or 17 digit number from your national ID card.",
+    "already_verified": "You are already verified at this level.",
+    "verification_pending": "A check is already in progress. We will let you know the result.",
+    "profile_incomplete": "Add your full name and gender to your profile before verifying.",
+    "nid_in_use": "This ID is already verified on another account.",
+    "phone_verification_unavailable": "Phone verification is not available yet. Choose a national ID check.",
+    "reason_required": "Write the reason (up to 300 characters).",
+    "verification_settled": "This check has already been decided.",
+    "price_mismatch": "The price per person must equal the sum of the cost breakdown.",
+    "start_not_in_future": "A trip must start tomorrow or later.",
+    "end_before_start": "The trip cannot end before it starts.",
+    "trip_too_long": "A trip can last at most 30 days.",
+    "itinerary_out_of_range": "Each itinerary day must be a different day within the trip's dates.",
+    "itinerary_incomplete": "Plan every day of the trip before publishing.",
+    "costs_missing": "Add the cost breakdown before publishing.",
+    "women_only_host": "Only verified women hosts can run women-only trips.",
+    "host_not_verified": "Complete the national ID and selfie check before publishing.",
+    "destination_closed": "This destination is closed by the safety desk. Trips there cannot be published.",
+    "destination_unknown": "Choose one of the listed destinations.",
+    "trip_not_found": "This trip does not exist or is no longer available.",
+    "trip_not_draft": "Only a draft can be published.",
+    "trip_not_editable": "A cancelled or completed trip cannot be changed.",
+    "seats_below_taken": "You cannot offer fewer seats than travellers have already taken.",
+    "terms_locked": "Travellers have already booked at this price and on these dates, so they cannot change.",
+    "own_trip": "You host this trip.",
+    "trip_full": "This trip has no seats left.",
+    "already_requested": "You have already asked to join this trip.",
+    "request_not_found": "There is no such request.",
+    "request_not_pending": "This request has already been answered.",
+    "request_closed": "This request is already closed.",
+    "booking_paid": "You have paid for this seat. Cancel the booking to get a refund.",
+    "message_too_long": "Keep your message under 500 characters.",
+    "idempotency_key_required": "Something went wrong starting the payment. Please try again.",
+    "idempotency_key_reused": "Something went wrong starting the payment. Please try again.",
+    "phone_required": "Add your mobile number to your profile before paying.",
+    "booking_not_found": "There is no such booking.",
+    "booking_already_paid": "This booking is already paid.",
+    "booking_not_payable": "The time to pay for this seat has run out.",
+    "payment_attempt_closed": "That payment attempt is over. Please try again.",
+    "gateway_unavailable": "The payment service is not answering. Please try again in a moment.",
+    "chat_not_found": "This chat is for the people on the trip.",
+    "message_length": "Write between 1 and 2000 characters.",
+    "booking_not_cancellable": "Only a paid booking can be cancelled, and only before the trip starts.",
+    "trip_not_cancellable": "This trip has already ended or been cancelled.",
+    "payout_not_waiting": "This payout is not waiting for approval.",
+    "storage_unavailable": "Photo uploads are not available right now.",
+    "media_type": "Upload a JPEG, PNG or WebP photo, or an MP4 or MOV video.",
+    "media_too_large": "This file is too large.",
+    "media_not_found": "That upload could not be found.",
+    "media_not_usable": "One of the photos could not be attached. Remove it and try again.",
+    "post_length": "Write up to 2000 characters, or add a photo.",
+    "too_many_media": "Add up to 10 photos or videos.",
+    "post_not_found": "This story is no longer available.",
+    "comment_length": "Write between 1 and 1000 characters.",
+    "comment_not_found": "This comment is no longer available.",
+    "follow_self": "You cannot follow yourself.",
+    "user_not_found": "We could not find this person.",
+    "rating_range": "Choose a rating from 1 to 5.",
+    "review_length": "Keep the review under 1000 characters.",
+    "trip_not_completed": "Reviews open once the trip is over.",
+    "reviewee_not_on_trip": "You can only review people who were on this trip.",
+    "already_reviewed": "You have already reviewed this person for this trip.",
+    "guide_reviews_unavailable": "Guide reviews open when guides can be booked on trips.",
+    "sos_position": "Your location could not be read. Try again, or call 999.",
+    "sos_not_found": "This SOS is already closed.",
+    "sos_status": "That change is not possible.",
+    "checkin_label": "Name the check-in in up to 150 characters.",
+    "checkin_in_past": "A check-in must be in the future.",
+    "checkin_not_found": "This check-in is no longer waiting.",
+    "checkin_note": "Keep the note under 300 characters.",
+    "destination_status": "Choose Open, Caution or Closed.",
+    "destination_note_required": "Explain the warning in both Bangla and English.",
+    "destination_note_length": "Keep each note under 300 characters.",
+    "destination_not_found": "There is no such destination.",
+    "report_invalid": "Choose what you are reporting and why.",
+    "report_length": "Keep the details under 1000 characters.",
+    "report_not_found": "This report has already been decided.",
+    "report_action": "That action does not fit this report.",
+    "resolution_required": "Write what was decided and why.",
+    "nothing_to_refund": "This booking has nothing in escrow to refund.",
+    "invalid_credentials": "The email or password is wrong.",
+    "sign_in_paused": "Too many wrong passwords. Try again in {{minutes}} minutes, or reset your password.",
+    "email_not_confirmed": "Confirm your email address first. We can send you a new code.",
+    "password_reset_required": "Choose a new password to continue.",
+    "password_too_short": "Use at least 10 characters.",
+    "password_too_common": "That password is too common or too close to your email. Choose another.",
+    "current_password_wrong": "Your current password is not right.",
+    "invalid_code": "That code is not valid. Request a new one and try again.",
+    "too_many_codes": "Too many codes sent to this address. Please wait a few minutes.",
+    "email_not_sent": "We could not send the email just now. Please try again shortly.",
+    "account_not_active": "This account cannot sign in. Contact support.",
+    "invalid_email": "Enter a valid email address, for example rizvi@example.com.",
+    "invalid_name": "Enter your name (2 to 100 characters).",
+    "session_expired": "Your session has ended. Sign in again.",
+    "documents_missing": "Add all the photos this check needs.",
+    "documents_not_ready": "Some photos were not uploaded properly. Upload them again, then submit.",
+    "documents_wrong_kind": "Some photos are for a different kind of ID. Remove them and try again.",
+    "invalid_document_number": "Enter the number exactly as it appears on the document.",
+    "invalid_id_type": "Choose a national ID, passport or driving licence.",
+    "document_not_found": "That photo is no longer waiting. Add it again.",
+    "too_many_documents": "Too many photos waiting. Remove the ones you do not need.",
+    "upload_missing": "The photo did not arrive. Please try again.",
+    "upload_not_image": "That file is not a photo we can read. Use a JPEG, PNG or WebP image.",
+    "user_status": "Choose active, suspended or closed.",
+    "own_account": "You cannot change your own account here.",
+    "target_is_admin": "Remove the admin role before suspending or closing this account.",
+    "cannot_revoke_own_admin": "You cannot remove your own admin role.",
+    "invalid_role": "That role cannot be changed.",
+    "lookup_required": "Enter a booking number or a payment reference.",
+    "destination_slug": "Use 3 to 60 lower-case letters, digits and dashes, e.g. sajek-valley.",
+    "destination_kind": "Choose what kind of place it is.",
+    "destination_text": "Fill in the name, division and summary in both languages.",
+    "destination_position": "Give both latitude and longitude inside Bangladesh, or leave both empty.",
+    "point_kind": "Choose police, hospital or tourist police.",
+    "point_name": "Give the name in both languages.",
+    "point_phone": "Write the phone number with digits only, for example 01320-000000.",
+    "point_position": "The position must be inside Bangladesh.",
+    "point_not_found": "That emergency point no longer exists."
+  },
+  "roles": {
+    "Traveler": "Traveller",
+    "Host": "Host",
+    "Creator": "Creator",
+    "Celebrity": "Celebrity",
+    "Guide": "Guide",
+    "Operator": "Operator",
+    "Partner": "Partner",
+    "Moderator": "Moderator",
+    "SafetyDesk": "Safety desk",
+    "Admin": "Admin"
+  },
+  "gender": {
+    "Female": "Female",
+    "Male": "Male",
+    "Other": "Other",
+    "Unspecified": "Prefer not to say"
+  },
+  "profile": {
+    "title": "Your profile",
+    "name": "Full name (as on your ID)",
+    "gender": "Gender",
+    "genderHint": "Needed to join women-only trips.",
+    "genderLocked": "Fixed after identity verification.",
+    "genderUnset": "Choose",
+    "phone": "Mobile number",
+    "phoneHint": "Used for SOS alerts and payouts. Never shown to other travellers.",
+    "homeDistrict": "Home district",
+    "bio": "About you",
+    "emergencyTitle": "Emergency contact",
+    "emergencyName": "Name",
+    "emergencyPhone": "Mobile number",
+    "emergencyHint": "We call this person if you send an SOS.",
+    "saved": "Profile saved.",
+    "invalid": {
+      "name": "Your name must be between 2 and 100 characters.",
+      "phone": "Enter a Bangladeshi mobile number, for example 01712345678.",
+      "bio": "Keep this under 500 characters.",
+      "contactPhone": "Add a phone number for your emergency contact."
+    },
+    "lead": "What hosts and the safety desk see. Your phone and emergency contact stay private.",
+    "sectionPersonal": "Personal details",
+    "bioLabel": "A few lines about you",
+    "bioHint": "How you like to travel, what you enjoy. Up to 500 characters.",
+    "unsaved": "You have unsaved changes.",
+    "emergencyLead": "Who we call if you send an SOS on a trip. Use someone who can pick up any time."
+  },
+  "verification": {
+    "title": "Identity verification",
+    "why": "Verified travellers can join trips; verified hosts can publish them. It keeps every group safe.",
+    "intro": "Show us a photo ID once. Our team checks it, usually within a day.",
+    "start": "Verify my identity",
+    "upgrade": "Add the selfie check",
+    "complete": "You are fully verified.",
+    "pending": "Your check is being reviewed. We will let you know the result.",
+    "approved": "You are verified.",
+    "rejected": "Your check was not approved.",
+    "level": "Check",
+    "levels": {
+      "Phone": "Phone number",
+      "Nid": "National ID",
+      "NidSelfie": "National ID and selfie (needed to host)"
+    },
+    "dob": "Date of birth",
+    "dobInvalid": "Enter your date of birth.",
+    "privacy": "We never store your ID number, only a scrambled fingerprint of it, so one ID verifies one account. Your ID photos are kept privately, seen only by our verification team, and deleted 30 days after the decision.",
+    "submit": "Check my ID",
+    "checking": "Checking...",
+    "done": "Back to my account",
+    "completeProfileFirst": "Add your full name and gender first.",
+    "badge": {
+      "Phone": "Phone verified",
+      "Nid": "ID verified",
+      "NidSelfie": "ID + selfie verified"
+    },
+    "badgeHint": {
+      "Phone": "Phone number confirmed",
+      "Nid": "Photo ID checked by the Ghurify team",
+      "NidSelfie": "Photo ID checked and a selfie holding it matched"
+    },
+    "status": {
+      "Pending": "Pending",
+      "Approved": "Approved",
+      "Rejected": "Rejected"
+    },
+    "stepDone": "done",
+    "stepTodo": "not yet",
+    "formTitle": "Verify your identity",
+    "formLead": "Tell us which ID you have, then add clear photos of it.",
+    "whyTitle": "Why we ask",
+    "privacyTitle": "Your ID stays private",
+    "idType": "ID document",
+    "idTypes": {
+      "Nid": "National ID card",
+      "Passport": "Passport",
+      "DrivingLicence": "Driving licence"
+    },
+    "number": {
+      "Nid": "National ID number",
+      "Passport": "Passport number",
+      "DrivingLicence": "Driving licence number"
+    },
+    "numberHint": {
+      "Nid": "10, 13 or 17 digits, as printed on your card.",
+      "Passport": "As printed on the photo page, for example EB0123456.",
+      "DrivingLicence": "As printed on the licence, for example DK0123456C00001."
+    },
+    "numberInvalid": {
+      "Nid": "Enter the 10, 13 or 17 digit number from your national ID card.",
+      "Passport": "Enter the passport number exactly as printed.",
+      "DrivingLicence": "Enter the licence number exactly as printed."
+    },
+    "kinds": {
+      "NidFront": "Front of the NID",
+      "NidBack": "Back of the NID",
+      "PassportPhotoPage": "Passport photo page",
+      "DrivingLicenceFront": "Front of the licence",
+      "DrivingLicenceBack": "Back of the licence",
+      "Selfie": "Selfie holding your ID",
+      "ProfessionalLicence": "Guide or operator licence"
+    },
+    "kindHints": {
+      "NidFront": "The side with your photo. All four corners in view, no glare.",
+      "NidBack": "The side with the barcode.",
+      "PassportPhotoPage": "The page with your photo and details, fully open.",
+      "DrivingLicenceFront": "The side with your photo.",
+      "DrivingLicenceBack": "The other side.",
+      "Selfie": "Hold the same ID next to your face, both clearly visible.",
+      "ProfessionalLicence": "For guides and tour operators."
+    },
+    "photos": {
+      "title": "Photos of your ID",
+      "lead": "Use good light and keep the whole card in the frame. Photos are resized on your phone before upload.",
+      "optional": "optional",
+      "add": "Take or choose photo",
+      "replace": "Replace",
+      "remove": "Remove photo: {{kind}}",
+      "accepted": "Photo accepted",
+      "uploading": "Uploading {{percent}}%",
+      "stillNeeded": "Still needed: {{list}}."
+    }
+  },
+  "hosting": {
+    "title": "Hosting",
+    "pitch": "Lead your own trips, share the costs openly, and get paid through escrow.",
+    "become": "Become a host",
+    "needsSelfie": "To publish trips, complete the national ID and selfie check.",
+    "myTrips": "My hosted trips",
+    "ready": "You are verified to publish trips. Plan one, share the costs openly, and go."
+  },
+  "admin": {
+    "title": "Admin",
+    "noName": "No name yet",
+    "nav": {
+      "label": "Admin sections",
+      "dashboard": "Overview",
+      "verifications": "Verifications",
+      "reports": "Reports",
+      "disputes": "Disputes",
+      "destinations": "Destination alerts",
+      "sos": "SOS board",
+      "payouts": "Payouts",
+      "users": "People",
+      "trips": "Trips",
+      "bookings": "Bookings & payments",
+      "points": "Emergency points",
+      "audit": "Audit log"
+    },
+    "verifications": {
+      "title": "Verification queue",
+      "filter": "Status",
+      "empty": "Nothing waiting here.",
+      "reason": "Reason (shown to the person if rejected)",
+      "approve": "Approve",
+      "reject": "Reject",
+      "photoCount_one": "{{count}} photo",
+      "photoCount_other": "{{count}} photos",
+      "showPhotos": "View ID photos",
+      "hidePhotos": "Hide photos",
+      "photoDeleted": "Deleted after the decision",
+      "photoNotice": "Links expire in 5 minutes. Every viewing is recorded in the audit log."
+    },
+    "dashboard": {
+      "title": "Overview",
+      "openSos": "Open SOS alerts",
+      "missedCheckIns": "Missed check-ins today",
+      "openReports": "Open reports",
+      "openDisputes": "Open disputes",
+      "pendingVerifications": "Verifications waiting",
+      "payoutsAwaitingApproval": "Payouts to send",
+      "refundsInFlight": "Refunds in progress",
+      "closedDestinations": "Closed destinations",
+      "cautionDestinations": "Destinations on caution",
+      "liveTrips": "Live trips",
+      "bookingsConfirmed": "Bookings confirmed today",
+      "lead": "What needs a person right now. Refreshes every minute."
+    },
+    "reports": {
+      "title": "Reports",
+      "disputesTitle": "Disputes",
+      "empty": "No open reports.",
+      "targetUser": "Person #{{id}}",
+      "targetTrip": "Trip #{{id}}",
+      "targetPost": "Story #{{id}}",
+      "targetBooking": "Booking #{{id}}",
+      "by": "Reported by {{name}}",
+      "resolution": "What you decided and why (saved to the audit log)",
+      "reasons": {
+        "Harassment": "Harassment",
+        "Fraud": "Fraud or scam",
+        "Unsafe": "Unsafe",
+        "Inappropriate": "Inappropriate content",
+        "Payment": "Payment problem",
+        "Other": "Something else"
+      },
+      "actions": {
+        "Dismiss": "Dismiss",
+        "HidePost": "Hide the story",
+        "SuspendUser": "Suspend the person",
+        "RefundBooking": "Refund in full",
+        "Resolve": "Mark handled"
+      }
+    },
+    "destinations": {
+      "title": "Destination alerts",
+      "change": "Change status",
+      "dialogTitle": "Safety status for {{name}}",
+      "status": "Status",
+      "noteEn": "Note in English",
+      "noteBn": "Note in Bangla",
+      "notesHint": "Caution and Closed need a note in both languages.",
+      "closeWarning": "I understand: closing cancels every upcoming trip here and refunds every traveller in full. It cannot be undone.",
+      "add": "Add destination",
+      "editDetails": "Edit details",
+      "editTitle": "Edit destination",
+      "slug": "Web address",
+      "slugHint": "Lower-case letters, digits and dashes, e.g. nafakhum-falls. Cannot be changed later.",
+      "kind": "Kind of place",
+      "nameEn": "Name in English",
+      "nameBn": "Name in Bangla",
+      "divisionEn": "Division in English",
+      "divisionBn": "Division in Bangla",
+      "summaryEn": "Summary in English",
+      "summaryBn": "Summary in Bangla"
+    },
+    "sos": {
+      "title": "SOS board",
+      "live": {
+        "connecting": "Connecting…",
+        "live": "Live",
+        "offline": "Offline: refreshing every 30 seconds"
+      },
+      "showResolved": "Show resolved",
+      "empty": "No open SOS. All quiet.",
+      "missedTitle": "Missed check-ins",
+      "noMissed": "No missed check-ins today.",
+      "status": {
+        "Open": "Open",
+        "Acknowledged": "Acknowledged",
+        "Resolved": "Resolved"
+      },
+      "raisedAt": "Raised {{time}}",
+      "lastSeen": "last position {{time}}",
+      "traveller": "Traveller",
+      "host": "Host {{name}}",
+      "map": "Open map",
+      "acknowledge": "Acknowledge",
+      "resolve": "Resolve"
+    },
+    "payouts": {
+      "title": "Payouts",
+      "filter": "Payout status",
+      "empty": "Nothing to send right now.",
+      "fees": "+ {{amount}} fees to the platform",
+      "approve": "Mark as sent",
+      "status": {
+        "Released": "Waiting to be sent",
+        "Paid": "Sent"
+      }
+    },
+    "reason": {
+      "label": "Reason",
+      "hint": "Saved in the audit log. Write what happened and why."
+    },
+    "users": {
+      "title": "People",
+      "search": "Search",
+      "searchHint": "Email, phone number or name",
+      "status": "Account status",
+      "allStatuses": "All statuses",
+      "statuses": {
+        "Active": "Active",
+        "Suspended": "Suspended",
+        "Deactivated": "Closed",
+        "PendingEmail": "Email not confirmed"
+      },
+      "empty": "No one matches that search.",
+      "joined": "Joined {{date}}",
+      "noPassword": "No password set yet",
+      "mustReset": "Must choose a new password",
+      "actions": "Account actions",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "close": "Close account",
+      "requireReset": "Require a new password",
+      "removePicture": "Remove profile picture",
+      "roles": "Roles",
+      "checks": "Identity checks",
+      "noChecks": "No identity checks yet.",
+      "reports": "Reports about them: {{open}} open, {{total}} in total.",
+      "hostedTrips": "Trips hosted",
+      "noTrips": "No trips hosted.",
+      "bookings": "Bookings",
+      "noBookings": "No bookings.",
+      "confirm": {
+        "Active": "Reactivate {{name}}?",
+        "Suspended": "Suspend {{name}}?",
+        "Deactivated": "Close {{name}}'s account?",
+        "password": "Require a new password for {{name}}?",
+        "signsOut": "They are signed out on every device straight away.",
+        "button": {
+          "Active": "Reactivate",
+          "Suspended": "Suspend",
+          "Deactivated": "Close account"
+        }
+      }
+    },
+    "trips": {
+      "title": "Trips",
+      "search": "Search",
+      "searchHint": "Trip number, title, host or destination",
+      "status": "Trip status",
+      "allStatuses": "All statuses",
+      "empty": "No trips match that search.",
+      "seats": "{{taken}} of {{seats}} seats taken",
+      "cancel": "Cancel trip",
+      "confirmTitle": "Cancel “{{title}}”?",
+      "confirmText": "Every paid traveller is refunded in full, and everyone on the trip is told. This cannot be undone."
+    },
+    "bookings": {
+      "title": "Bookings & payments",
+      "retryRefunds": "Retry failed refunds now",
+      "retried_one": "{{count}} refund retried.",
+      "retried_other": "{{count}} refunds retried.",
+      "lookup": "Find",
+      "lookupHint": "Booking number or payment reference",
+      "booking": "Booking #{{id}}",
+      "traveller": "Traveller",
+      "host": "Host",
+      "ledger": {
+        "held": "Paid into escrow",
+        "released": "Released to host",
+        "refunded": "Refunded",
+        "inEscrow": "Still in escrow"
+      },
+      "payments": "Payments",
+      "noPayments": "No payment attempts.",
+      "refunds": "Refunds",
+      "noRefunds": "No refunds.",
+      "attempts_one": "{{count}} attempt",
+      "attempts_other": "{{count}} attempts",
+      "paymentStatus": {
+        "Created": "Started",
+        "Pending": "Waiting for the gateway",
+        "Succeeded": "Paid",
+        "Failed": "Failed",
+        "Expired": "Expired"
+      },
+      "refundStatus": {
+        "Pending": "Being sent",
+        "Succeeded": "Refunded",
+        "Failed": "Failed"
+      },
+      "refundReason": {
+        "TravelerCancelled": "Traveller cancelled",
+        "HostCancelled": "Host cancelled",
+        "DestinationClosed": "Destination closed",
+        "LatePayment": "Paid after the hold ended",
+        "DuplicatePayment": "Paid twice",
+        "AmountMismatch": "Wrong amount charged",
+        "Admin": "Admin decision"
+      }
+    },
+    "points": {
+      "title": "Emergency points",
+      "unchecked_one": "{{count}} not checked yet",
+      "unchecked_other": "{{count}} not checked yet",
+      "add": "Add emergency point",
+      "editTitle": "Edit emergency point",
+      "edit": "Edit",
+      "empty": "No emergency points yet.",
+      "kinds": {
+        "1": "Police",
+        "2": "Hospital",
+        "3": "Tourist police"
+      },
+      "noPhone": "No phone number",
+      "checked": "Checked by {{name}}",
+      "notChecked": "Not checked",
+      "kind": "Kind",
+      "destination": "Near destination",
+      "noDestination": "None",
+      "name": "Name in English",
+      "nameBn": "Name in Bangla",
+      "phone": "Phone number",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "confirmChecked": "I have confirmed the name, phone number and position are correct."
+    },
+    "audit": {
+      "title": "Audit log",
+      "entityType": "Record type",
+      "allTypes": "All types",
+      "entityId": "Record number",
+      "filter": "Show",
+      "empty": "Nothing recorded yet."
+    },
+    "groups": {
+      "overview": "Overview",
+      "safety": "Safety",
+      "trust": "Trust and safety",
+      "operations": "Operations",
+      "system": "System"
+    },
+    "portal": {
+      "title": "Ghurify admin",
+      "backToSite": "View site",
+      "waiting": "waiting"
+    }
+  },
+  "tripStatus": {
+    "Draft": "Draft",
+    "Published": "Live",
+    "Full": "Full",
+    "Cancelled": "Cancelled",
+    "Completed": "Completed"
+  },
+  "hostTrips": {
+    "title": "Your hosted trips",
+    "subtitle": "Drafts, live trips and the requests waiting for you.",
+    "new": "New trip",
+    "empty": "You have not created a trip yet.",
+    "emptyHint": "Plan the dates, share the costs openly, and publish once you are verified.",
+    "seats": "{{taken}} of {{total}} seats taken",
+    "pending_one": "{{n}} request waiting for you",
+    "pending_other": "{{n}} requests waiting for you",
+    "edit": "Edit",
+    "requests": "Requests",
+    "cancel": "Cancel trip",
+    "cancelConfirm": "Cancel this trip? Every traveller who paid gets a full refund, fees included.",
+    "titleAccent": "Your hosted <accent>trips</accent>",
+    "filter": "Show trips",
+    "tabs": {
+      "all": "All",
+      "live": "Live",
+      "drafts": "Drafts",
+      "past": "Past"
+    },
+    "noneInTab": "No trips here yet.",
+    "stats": {
+      "total": "Trips",
+      "live": "Live now",
+      "requests": "Requests waiting",
+      "seats": "Seats filled"
+    }
+  },
+  "wizard": {
+    "newTitle": "Create a trip",
+    "editTitle": "Edit your trip",
+    "backToTrips": "Your hosted trips",
+    "steps": "Steps",
+    "step": {
+      "basics": "Basics",
+      "costs": "Costs",
+      "itinerary": "Days",
+      "review": "Review"
+    },
+    "destination": "Destination",
+    "chooseDestination": "Choose a destination",
+    "title": "Trip title",
+    "summary": "What the trip is like",
+    "summaryHint": "Who it suits, the pace, where you stay. 20 to 1000 characters.",
+    "startDate": "First day",
+    "endDate": "Last day",
+    "meetingPoint": "Meeting point",
+    "seats": "Seats",
+    "groupType": "Who can join",
+    "groupTypeHint": "Women-only trips can be run only by verified women hosts.",
+    "costsHint": "Break the price down line by line. Travellers see every line, and the price is exactly their total.",
+    "category": "Category",
+    "costDescription": "What it covers",
+    "amount": "Per person (Tk)",
+    "addLine": "Add a cost line",
+    "removeLine": "Remove line {{n}}",
+    "datesFirst": "Choose the trip dates first; a plan appears for each day.",
+    "dayTitle": "Title",
+    "dayDetails": "Plan for the day",
+    "difficulty": "How hard",
+    "saveDraft": "Save draft",
+    "saveChanges": "Save changes",
+    "publish": "Publish",
+    "publishNeedsVerification": "You can save a draft now. To publish, complete the national ID and selfie check.",
+    "invalid": {
+      "destination": "Choose a destination.",
+      "title": "The title must be between 5 and 150 characters.",
+      "summary": "Describe the trip in 20 to 1000 characters.",
+      "date": "Choose a date.",
+      "future": "A trip must start tomorrow or later.",
+      "endBeforeStart": "The trip cannot end before it starts.",
+      "tooLong": "A trip can last at most 30 days.",
+      "meetingPoint": "Say where the group meets.",
+      "seats": "Offer between 1 and 50 seats.",
+      "amount": "Enter an amount of zero or more.",
+      "costs": "Add between 1 and 20 cost lines.",
+      "description": "Keep this under 150 characters.",
+      "dayTitle": "Give the day a title.",
+      "dayDetails": "Describe the plan for the day."
+    },
+    "lead": "Four short steps. Save a draft at any time; publish once you are verified.",
+    "stepOf": "Step {{n}} of {{total}}",
+    "stepLead": {
+      "basics": "Where, when, and who the trip is for.",
+      "costs": "Every taka of the price, line by line. Travellers see exactly this.",
+      "itinerary": "One entry per day: what happens and how hard it is.",
+      "review": "Check everything before you save or publish."
+    },
+    "preview": "Live preview",
+    "previewNoPlace": "Choose a destination",
+    "previewNoTitle": "Your trip title",
+    "previewHint": "This is how your trip card will look to travellers."
+  },
+  "join": {
+    "title": "Ask to join this trip",
+    "intro": "The host sees your name, your verification and your note before deciding.",
+    "message": "A note for the host (optional)",
+    "messageHint": "Who you are travelling with, any needs. Up to 500 characters.",
+    "send": "Send request",
+    "sent": "Request sent.",
+    "next": "When the host approves, your seat is held for 30 minutes so you can pay into escrow.",
+    "verifyFirst": "Verify your national ID before asking to join."
+  },
+  "requests": {
+    "title": "Join requests",
+    "empty": "No requests yet.",
+    "emptyHint": "When someone asks to join, they appear here and you get a notification.",
+    "approve": "Approve and hold a seat",
+    "decline": "Decline",
+    "status": {
+      "Pending": "Waiting for you",
+      "Approved": "Approved",
+      "Declined": "Declined",
+      "Expired": "Hold expired",
+      "Cancelled": "Withdrawn"
+    },
+    "counts": {
+      "waiting": "Waiting for you",
+      "approved": "Approved"
+    }
+  },
+  "bookings": {
+    "payWithin": "Pay within {{time}}",
+    "holdExpired": "Hold expired",
+    "payNow": "Pay {{amount}}",
+    "status": {
+      "Held": "Seat held",
+      "Confirmed": "Paid",
+      "Cancelled": "Released",
+      "Refunded": "Refunded"
+    }
+  },
+  "myTrips": {
+    "title": "My trips",
+    "subtitle": "Your requests, seats waiting for payment, and trips you have paid for.",
+    "empty": "You have not asked to join a trip yet.",
+    "emptyHint": "Find a trip you like and send the host a request.",
+    "withdraw": "Withdraw",
+    "eyebrow": "Your journeys",
+    "titleAccent": "My <accent>trips</accent>",
+    "filter": "Show trips",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "past": "Past"
+    },
+    "noneHere": "Nothing here yet.",
+    "safeTitle": "Travelling with Ghurify",
+    "safe": {
+      "escrow": "Your payment waits in escrow until the trip runs.",
+      "sos": "Every trip has SOS and check-ins, reaching the safety desk.",
+      "refund": "If the host cancels or the destination closes, you get everything back."
+    },
+    "progress": "Booking progress",
+    "journey": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "paid": "Paid",
+      "travelled": "Travelled"
+    }
+  },
+  "chat": {
+    "open": "Open group chat",
+    "title": "Group chat",
+    "trip": "Trip",
+    "messages": "Messages",
+    "pinned": "Pinned announcements",
+    "older": "Show older messages",
+    "empty": "No messages yet. Say hello to the group.",
+    "loadError": "We could not load the chat.",
+    "write": "Write a message",
+    "placeholder": "Write to the group...",
+    "send": "Send",
+    "pin": "Pin as an announcement",
+    "someone": "Someone",
+    "unread_one": "{{count}} new",
+    "unread_other": "{{count}} new",
+    "notMember": "This chat is for the people on the trip.",
+    "notMemberHint": "You join the group chat once the host approves your request.",
+    "maskedWarning": "Phone and wallet numbers are hidden until everyone in the group has paid. Keep payments inside Ghurify so your money stays protected.",
+    "maskedNote": "A number was hidden here",
+    "connection": {
+      "connecting": "Connecting",
+      "live": "Live",
+      "reconnecting": "Reconnecting...",
+      "offline": "Offline"
+    },
+    "announcement": "Announcement"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Nothing new.",
+    "label_one": "Notifications, {{n}} unread",
+    "label_other": "Notifications, {{n}} unread",
+    "kinds": {
+      "default": "You have an update.",
+      "join_request.new": "New request to join {{tripTitle}}.",
+      "join_request.approved": "You are approved! Pay within 30 minutes to keep your seat.",
+      "join_request.declined": "Your request was not accepted this time.",
+      "join_request.cancelled": "A traveller withdrew their request.",
+      "booking.hold_expired": "A seat hold on {{tripTitle}} ran out before payment.",
+      "booking.confirmed": "Payment received. You are going!",
+      "booking.traveler_confirmed": "A traveller paid for their seat.",
+      "booking.refunded": "Your refund is on its way.",
+      "trip.cancelled": "A trip you booked was cancelled. You will be refunded in full.",
+      "payout.released": "A payout was released to you.",
+      "destination.closed": "A destination on your trip was closed for safety. You will be refunded in full.",
+      "safety.checkin_missed": "A traveller missed a safety check-in.",
+      "review.invite": "How was your trip? Leave a review.",
+      "safety.sos": "Someone on your trip sent an SOS. The safety desk has been alerted."
+    }
+  },
+  "checkout": {
+    "title": "Pay into escrow",
+    "price": "Trip price",
+    "fee": "Service fee",
+    "total": "Total",
+    "escrow": "Your money is held in escrow. The host is paid in stages: part shortly before departure, the rest once the trip has started. If the trip is cancelled you are refunded by the rules on the trip page.",
+    "pay": "Pay {{amount}}",
+    "redirecting": "Taking you to the payment page...",
+    "alreadyPaid": "This seat is already paid for.",
+    "notPayable": "The time to pay for this seat has run out.",
+    "eyebrow": "Secure checkout",
+    "yourTrip": "Your trip",
+    "nextTitle": "What happens next",
+    "next": {
+      "pay": "You pay on the secure payment page. Your seat is held until the timer runs out.",
+      "held": "Your money is held in escrow, not paid to the host.",
+      "released": "The host is paid in stages: part before departure, the rest once the trip starts."
+    }
+  },
+  "sandbox": {
+    "badge": "Sandbox",
+    "title": "Test payment",
+    "intro": "This is the test payment page used before real payments are switched on. No money moves.",
+    "pay": "Pay successfully",
+    "fail": "Make the payment fail"
+  },
+  "paymentResult": {
+    "tryAgain": "Try paying again",
+    "paid": {
+      "title": "You are going!",
+      "body": "Your payment is safe in escrow and your seat is confirmed. Say hello to the group."
+    },
+    "failed": {
+      "title": "The payment did not go through",
+      "body": "No money was taken. If your seat is still held you can try again."
+    },
+    "waiting": {
+      "title": "Confirming your payment",
+      "body": "We are checking with the payment service. This usually takes a few seconds."
+    }
+  },
+  "payouts": {
+    "title": "Payouts",
+    "subtitle": "Escrow pays you in stages: part a few days before departure, the rest once the trip starts.",
+    "empty": "No payouts yet.",
+    "emptyHint": "Your first payout is released a few days before your first paid trip leaves.",
+    "total": "Released to you",
+    "stage": {
+      "BeforeDeparture": "Before departure",
+      "AfterStart": "After the trip started"
+    },
+    "status": {
+      "Released": "Released, being sent",
+      "Paid": "Sent to you"
+    },
+    "titleAccent": "Your <accent>payouts</accent>",
+    "figures": {
+      "total": "Released to you",
+      "paid": "Sent to your account",
+      "sending": "On the way"
+    },
+    "history": "Payout history",
+    "howTitle": "How payouts work",
+    "how": {
+      "BeforeDeparture": "Part of each traveller’s payment is released a few days before departure, so you can book transport and stays.",
+      "AfterStart": "The rest is released once the trip has started and travellers have checked in."
+    }
+  },
+  "cancel": {
+    "open": "Cancel my booking",
+    "title": "Cancel this booking?",
+    "days_one": "The trip starts in {{n}} day.",
+    "days_other": "The trip starts in {{n}} days.",
+    "keep": "Keep my seat",
+    "confirm": "Cancel booking",
+    "rule": {
+      "full": "You will get the trip price back: {{refund}}. The service fee is not refunded.",
+      "half": "You will get half the trip price back: {{refund}}.",
+      "none": "It is less than 7 days to departure, so there is no refund.",
+      "not_cancellable": "This booking can no longer be cancelled."
+    }
+  },
+  "refunds": {
+    "title": "Refunds",
+    "reason": {
+      "TravelerCancelled": "You cancelled",
+      "HostCancelled": "Host cancelled",
+      "DestinationClosed": "Destination closed",
+      "LatePayment": "Paid after the seat was gone",
+      "DuplicatePayment": "Paid twice",
+      "AmountMismatch": "Payment amount problem",
+      "Admin": "Support decision"
+    },
+    "status": {
+      "Pending": "On its way",
+      "Succeeded": "Sent",
+      "Failed": "Retrying"
+    }
+  },
+  "reviews": {
+    "write": "Write a review",
+    "title": "Review your trip",
+    "nobody": "There is no one to review here.",
+    "nobodyHint": "Reviews open once the trip is over, for the people who were on it.",
+    "ofHost": "How was {{name}} as a host?",
+    "ofTraveller": "How was {{name}} as a travel companion?",
+    "rating": "Rating",
+    "body": "Your review (optional)",
+    "submit": "Submit review",
+    "done": "Thank you. Your review of {{name}} is posted.",
+    "lead": "Your rating helps the next group choose well. Be honest and fair.",
+    "scale": {
+      "1": "Poor",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very good",
+      "5": "Excellent"
+    }
+  },
+  "feed": {
+    "title": "Stories",
+    "subtitle": "Trips told by the people who took them.",
+    "signInToShare": "to share your own stories.",
+    "empty": "No stories yet.",
+    "emptyHint": "Follow travellers and hosts, or share a story from your last trip.",
+    "loadError": "We could not load stories.",
+    "more": "Show more",
+    "comments": "Comments",
+    "noComments": "No comments yet.",
+    "addComment": "Write a comment",
+    "photoAlt": "Photo shared by {{name}}",
+    "composer": {
+      "label": "Share a story",
+      "placeholder": "Where did you go? What should others know?",
+      "destination": "About a destination",
+      "noDestination": "None",
+      "addMedia": "Add photos or videos",
+      "uploads": "Uploads",
+      "progress": "Uploading {{name}}",
+      "privacy": "We remove the location hidden in your photos before anyone sees them.",
+      "post": "Post"
+    },
+    "eyebrow": "Traveller stories",
+    "titleAccent": "Trip <accent>stories</accent>",
+    "guidelinesTitle": "Sharing well",
+    "guidelines": {
+      "kind": "Be kind. Hosts and travellers are real people.",
+      "private": "Do not post phone numbers, addresses or anyone’s face without asking.",
+      "real": "Share what you saw. Honest stories help others travel safely."
+    },
+    "placesTitle": "Where people are going"
+  },
+  "people": {
+    "notFound": "We could not find this person.",
+    "followers_one": "{{count}} follower",
+    "followers_other": "{{count}} followers",
+    "following_one": "{{count}} following",
+    "following_other": "{{count}} following",
+    "hostRating_one": "{{rating}} ★ as host ({{count}} review)",
+    "hostRating_other": "{{rating}} ★ as host ({{count}} reviews)",
+    "follow": "Follow",
+    "unfollow": "Following",
+    "hostedTrips": "Trips hosted",
+    "reviews": "Reviews",
+    "noReviews": "No reviews yet.",
+    "noStories": "No stories yet.",
+    "rating": "{{rating}} out of 5",
+    "statFollowers": "Followers",
+    "statFollowing": "Following",
+    "statTrips": "Trips hosted",
+    "about": "About"
+  },
+  "safety": {
+    "open": "Safety",
+    "title": "Trip safety",
+    "subtitle": "Your SOS button and the group's check-ins.",
+    "backToTrip": "Back to the trip",
+    "sos": {
+      "title": "SOS",
+      "explain": "In danger? Send an SOS. The Ghurify safety desk sees your location at once, your emergency contact gets a text, and your host is told.",
+      "button": "Send SOS",
+      "sent": "SOS sent. The safety desk can see where you are.",
+      "contactTexted": "Your emergency contact has been texted.",
+      "contactNotTexted": "We could not text your emergency contact. The safety desk will call them.",
+      "nearestHelp": "Nearest help",
+      "distance": "about {{km}} km away",
+      "map": "Map",
+      "helpApproximate": "Locations are approximate. In an emergency, call 999.",
+      "imSafe": "I'm safe now",
+      "markedSafe": "Marked safe",
+      "call999": "Call 999 (police, fire, ambulance)",
+      "confirmTitle": "Send an SOS?",
+      "confirmText": "We will share your current location with the safety desk. Allow location access when your phone asks.",
+      "message": "What is happening? (optional)",
+      "send": "Send SOS now",
+      "sending": "Finding your location…",
+      "noPosition": "We could not get your location. Turn on location for this site, or call 999."
+    },
+    "checkIns": {
+      "title": "Check-ins",
+      "explain": "At each check-in, anyone in the group taps \"We're safe\". If nobody does within 30 minutes, the safety desk is alerted.",
+      "empty": "No check-ins planned.",
+      "emptyHost": "Add one for each risky stretch: a trek, a boat crossing, a late arrival.",
+      "due": "Due {{time}}",
+      "status": {
+        "Scheduled": "Waiting",
+        "Done": "Safe",
+        "Missed": "Missed"
+      },
+      "done": "We're safe",
+      "scheduleTitle": "Add a check-in",
+      "label": "What to check in on",
+      "dueAt": "When (Dhaka time)",
+      "schedule": "Add check-in"
+    }
+  },
+  "report": {
+    "title": {
+      "User": "Report this person",
+      "Post": "Report this story",
+      "Trip": "Report this trip"
+    },
+    "open": {
+      "User": "Report",
+      "Post": "Report",
+      "Trip": "Report this trip",
+      "Dispute": "Problem with this booking?"
+    },
+    "disputeTitle": "Raise a dispute",
+    "reason": "Reason",
+    "details": "Details",
+    "detailsHint": "What happened? The person will not be told who reported them.",
+    "disputeHint": "Tell us what went wrong. An admin will review the booking and may refund you.",
+    "send": "Send",
+    "sent": "Thank you. Our moderators will look into it.",
+    "disputeSent": "Your dispute has been sent. An admin will review it and get back to you."
+  },
+  "credits": {
+    "link": "Photo credits",
+    "eyebrow": "Thank you",
+    "title": "Photo <accent>credits</accent>",
+    "body": "The photos on Ghurify come from photographers who shared their work on Wikimedia Commons under Creative Commons licences.",
+    "by": "By {{author}}",
+    "source": "View the original",
+    "newTab": "(opens in a new tab)"
+  },
+  "photo": {
+    "sajek": "Cottages above a sea of clouds in Sajek Valley",
+    "bandarban": "Forested hills of Bandarban",
+    "coxs-bazar": "Wooden fishing boats on the beach at Cox's Bazar",
+    "saint-martins": "Boats in the clear bay of Saint Martin's Island",
+    "sylhet": "A boat gliding through Ratargul swamp forest near Sylhet",
+    "sreemangal": "Shade trees over a tea garden in Sreemangal",
+    "tanguar-haor": "A houseboat crossing Tanguar Haor",
+    "sundarbans": "A boat in a misty mangrove creek in the Sundarbans",
+    "kuakata": "Sunset over boats on Kuakata beach",
+    "rangamati": "The hanging bridge over Kaptai Lake in Rangamati"
   }
 }

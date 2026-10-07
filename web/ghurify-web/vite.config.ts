@@ -4,6 +4,10 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
+// The API the dev server forwards to. GHURIFY_API_URL lets the end-to-end run point at its own
+// isolated API (see e2e/README.md) while everyday development keeps the default.
+const apiTarget = process.env.GHURIFY_API_URL ?? 'http://localhost:5199';
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -19,11 +23,11 @@ export default defineConfig({
     // so local development needs no CORS exception and no base-URL switching.
     proxy: {
       '/api': {
-        target: 'http://localhost:5199',
+        target: apiTarget,
         changeOrigin: true,
       },
       '/hubs': {
-        target: 'http://localhost:5199',
+        target: apiTarget,
         changeOrigin: true,
         ws: true,
       },
@@ -34,5 +38,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    // Screens typed into with user-event are slow when every test file runs in parallel; 5 s
+    // (the default) made them flaky, not wrong.
+    testTimeout: 20_000,
   },
 });

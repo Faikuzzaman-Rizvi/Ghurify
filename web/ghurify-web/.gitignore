@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# End-to-end runs
+e2e/.mail
+test-results
+playwright-report
+blob-report

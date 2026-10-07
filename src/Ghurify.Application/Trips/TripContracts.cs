@@ -1,3 +1,4 @@
+using Ghurify.Domain.Identity;
 using Ghurify.Domain.Trips;
 
 namespace Ghurify.Application.Trips;
@@ -20,7 +21,8 @@ public sealed record SearchTripsQuery(
     int? MinSeats = null,
     TripSort Sort = TripSort.Soonest,
     int Page = 1,
-    int PageSize = SearchTripsQuery.DefaultPageSize)
+    int PageSize = SearchTripsQuery.DefaultPageSize,
+    bool VerifiedHostsOnly = false)
 {
     public const int DefaultPageSize = 12;
     public const int MaxPageSize = 48;
@@ -40,7 +42,8 @@ public sealed record TripSearchCriteria(
     bool IncludeWomenOnly,
     TripSort Sort,
     int Offset,
-    int PageSize);
+    int PageSize,
+    bool VerifiedHostsOnly = false);
 
 /// <summary>One trip card in search results.</summary>
 public sealed record TripSummary(
@@ -54,7 +57,8 @@ public sealed record TripSummary(
     decimal PricePerPerson,
     GroupType GroupType,
     TripStatus Status,
-    string? HostName);
+    string? HostName,
+    VerificationLevel? HostVerifiedLevel = null);
 
 /// <summary>Where a trip goes, as much as a card or page needs.</summary>
 public sealed record TripDestination(
@@ -85,10 +89,14 @@ public sealed record TripDetail(
     TripStatus Status,
     TripHost Host,
     IReadOnlyList<TripCostLine> CostItems,
-    IReadOnlyList<TripItineraryDay> Itinerary);
+    IReadOnlyList<TripItineraryDay> Itinerary,
+    TripGroupMix? GroupMix = null);
+
+/// <summary>Who holds a seat, by gender: counts only, never names.</summary>
+public sealed record TripGroupMix(int Women, int Men, int Others);
 
 /// <summary>The host as a traveller sees them. Never the host's contact details.</summary>
-public sealed record TripHost(long Id, string? DisplayName, DateOnly MemberSince);
+public sealed record TripHost(long Id, string? DisplayName, DateOnly MemberSince, VerificationLevel? VerifiedLevel = null);
 
 /// <summary>One line of the cost breakdown.</summary>
 public sealed record TripCostLine(CostCategory Category, string? Description, decimal Amount);

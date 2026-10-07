@@ -8,7 +8,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" />
     <PackageReference Include="Dapper" />
+    <PackageReference Include="Hangfire.Core" />
+    <PackageReference Include="Hangfire.SqlServer" />
+    <PackageReference Include="Hangfire.NetCore" />
+    <!-- Lifts Hangfire's vulnerable transitive Newtonsoft.Json; see Directory.Packages.props. -->
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="MailKit" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="Microsoft.Data.SqlClient" />

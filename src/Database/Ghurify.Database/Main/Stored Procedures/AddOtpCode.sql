@@ -7,6 +7,7 @@
 CREATE PROCEDURE [Main].[AddOtpCode]
     @Email         NVARCHAR (256),
     @CodeHash      VARBINARY (32),
+    @Purpose       TINYINT,
     @ExpiresOn     DATETIME2 (0),
     @WindowStart   DATETIME2 (0),
     @MaxPerWindow  TINYINT,
@@ -37,17 +38,19 @@ BEGIN
         RETURN;
     END;
 
-    -- Any earlier live code for this address is retired, so only the newest one can be used.
+    -- Any earlier live code for this address and purpose is retired, so only the newest one
+    -- can be used. The send limit above counts every purpose: it caps mail to one inbox.
     UPDATE [Main].[OtpCode]
     SET    [ConsumedOn] = SYSUTCDATETIME(),
            [UpdatedOn]  = SYSUTCDATETIME()
     WHERE  [Email] = @Email
+      AND  [Purpose] = @Purpose
       AND  [ConsumedOn] IS NULL
       AND  [LockedOn] IS NULL
       AND  [Archived] = 0;
 
-    INSERT INTO [Main].[OtpCode] ([Email], [CodeHash], [ExpiresOn])
-    VALUES (@Email, @CodeHash, @ExpiresOn);
+    INSERT INTO [Main].[OtpCode] ([Email], [CodeHash], [Purpose], [ExpiresOn])
+    VALUES (@Email, @CodeHash, @Purpose, @ExpiresOn);
 
     SET @Id = SCOPE_IDENTITY();
 

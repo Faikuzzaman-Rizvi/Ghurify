@@ -12,9 +12,10 @@
 -- The guard below is what makes this safe to leave in the repository forever. It only does
 -- anything while [Main].[User] still lacks an [Email] column, which is true exactly once,
 -- on the deploy that introduces it. On every later run the column exists and this is a
--- no-op, so it can never delete a real account.
+-- no-op, so it can never delete a real account. On a brand-new database there is no table at
+-- all yet, which is also a no-op (the first check below).
 
-IF COL_LENGTH('Main.User', 'Email') IS NULL
+IF OBJECT_ID(N'[Main].[User]', N'U') IS NOT NULL AND COL_LENGTH('Main.User', 'Email') IS NULL
 BEGIN
     PRINT 'Pre-schema: moving sign-in to email. Removing pre-migration accounts that have no address.';
 

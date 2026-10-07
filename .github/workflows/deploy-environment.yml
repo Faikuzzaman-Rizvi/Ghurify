@@ -1,0 +1,128 @@
+name: Deploy to an environment
+
+# Called by deploy.yml once per environment. Needs, in the GitHub environment:
+#
+#   secrets   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID   (OIDC, no passwords)
+#             DATABASE_CONNECTION_STRING                                 (for DbUp and SqlPackage)
+#             STATIC_WEB_APPS_TOKEN                                       (the web app's deploy token)
+#   variables API_APP_NAME, JOBS_APP_NAME, RESOURCE_GROUP, API_BASE_URL (https://api.ghurify.app)
+#
+# The API and the jobs worker are the same artifact. The worker App Service has
+# Jobs__RunServer=true and the API App Service has Jobs__RunServer=false, so background jobs run
+# on exactly one machine and API scale-out never runs them twice.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      GHURIFY_DB: ${{ secrets.DATABASE_CONNECTION_STRING }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: artifacts
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install SqlPackage
+        run: dotnet tool install --global microsoft.sqlpackage
+
+      - name: Sign in to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 1. Intentional data changes that must happen before the schema moves.
+      - name: DbUp pre-schema scripts
+        run: dotnet artifacts/dbup/Ghurify.DatabaseUpdate.dll pre
+
+      # 2. The schema. The report is kept with the run, so a reviewer can see what changed.
+      - name: Schema deploy report
+        run: >-
+          sqlpackage /Action:DeployReport
+          /SourceFile:artifacts/dacpac/Ghurify.Database.dacpac
+          /TargetConnectionString:"$GHURIFY_DB"
+          /OutputPath:deploy-report.xml
+          /p:BlockOnPossibleDataLoss=true
+          /p:DropObjectsNotInSource=false
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: schema-report-${{ inputs.environment }}
+          path: deploy-report.xml
+
+      - name: Publish the schema (dacpac)
+        run: >-
+          sqlpackage /Action:Publish
+          /SourceFile:artifacts/dacpac/Ghurify.Database.dacpac
+          /TargetConnectionString:"$GHURIFY_DB"
+          /p:BlockOnPossibleDataLoss=true
+          /p:DropObjectsNotInSource=false
+
+      # 3. Seed and data fixes that need the new schema. Never the demo stage.
+      - name: DbUp data scripts
+        run: dotnet artifacts/dbup/Ghurify.DatabaseUpdate.dll
+
+      # 4. The jobs worker first, so the jobs that new code queues have a worker that knows them.
+      - name: Deploy the jobs worker
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.JOBS_APP_NAME }}
+          package: artifacts/api
+
+      # 5. The API.
+      - name: Deploy the API
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.API_APP_NAME }}
+          package: artifacts/api
+
+      - name: Smoke test (readiness)
+        run: >-
+          curl --fail --silent --show-error
+          --retry 12 --retry-delay 10 --retry-all-errors
+          "${{ vars.API_BASE_URL }}/api/v1/health/ready"
+
+      # 6. The web app, built for this environment's API.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/ghurify-web/package-lock.json
+
+      - name: Build the web app
+        working-directory: web/ghurify-web
+        env:
+          VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy the web app
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.STATIC_WEB_APPS_TOKEN }}
+          action: upload
+          app_location: web/ghurify-web/dist
+          skip_app_build: true

@@ -1,21 +1,63 @@
 import { useMutation } from '@tanstack/react-query';
-import { authApi } from './authApi';
+import {
+  authApi,
+  type ChangePasswordCommand,
+  type RegisterCommand,
+  type ResetPasswordCommand,
+} from './authApi';
 import { useAuthStore } from './authStore';
 
-/** Asks the API to send a code. */
-export function useRequestOtp() {
-  return useMutation({
-    mutationFn: (email: string) => authApi.requestOtp(email),
-  });
+/** Creates an account; a code is emailed to confirm the address. */
+export function useRegister() {
+  return useMutation({ mutationFn: (command: RegisterCommand) => authApi.register(command) });
 }
 
-/** Exchanges the code for a session and stores it. */
-export function useVerifyOtp() {
+/** Confirms the address with the emailed code, which also signs in. */
+export function useConfirmEmail() {
   const signIn = useAuthStore((state) => state.signIn);
 
   return useMutation({
     mutationFn: ({ email, code }: { email: string; code: string }) =>
-      authApi.verifyOtp(email, code),
+      authApi.confirmEmail(email, code),
+    onSuccess: (session) => signIn(session),
+  });
+}
+
+export function useResendCode() {
+  return useMutation({ mutationFn: (email: string) => authApi.resendCode(email) });
+}
+
+/** Email and password. No code. */
+export function useSignIn() {
+  const signIn = useAuthStore((state) => state.signIn);
+
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      authApi.signIn(email, password),
+    onSuccess: (session) => signIn(session),
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({ mutationFn: (email: string) => authApi.forgotPassword(email) });
+}
+
+/** A new password with the emailed code; every other device is signed out, this one signed in. */
+export function useResetPassword() {
+  const signIn = useAuthStore((state) => state.signIn);
+
+  return useMutation({
+    mutationFn: (command: ResetPasswordCommand) => authApi.resetPassword(command),
+    onSuccess: (session) => signIn(session),
+  });
+}
+
+/** Changes the password; the API ends other sessions and hands this one a fresh token. */
+export function useChangePassword() {
+  const signIn = useAuthStore((state) => state.signIn);
+
+  return useMutation({
+    mutationFn: (command: ChangePasswordCommand) => authApi.changePassword(command),
     onSuccess: (session) => signIn(session),
   });
 }

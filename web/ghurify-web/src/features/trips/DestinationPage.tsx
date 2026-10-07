@@ -2,10 +2,19 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import {
+  ArrowRight,
+  Compass,
+  Landmark,
+  Tent,
+  TriangleAlert,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react';
 import { ApiError, asNumber } from '@/api/client';
-import { Scenery } from '@/components/Scenery';
 import { CardSkeletons, EmptyState, ErrorState } from '@/components/States';
-import { toLanguage } from '@/lib/format';
+import { PageBanner } from '@/components/ui/PageBanner';
+import { formatCount, formatMoney, toLanguage } from '@/lib/format';
 import { StatusBadge } from './TripBadges';
 import { TripCard } from './TripCard';
 import type { DestinationSummary } from './tripsApi';
@@ -19,13 +28,13 @@ export function DestinationPage() {
 
   if (isError && error instanceof ApiError && error.status === 404) {
     return (
-      <div className="mx-auto max-w-3xl px-4 pt-16">
+      <div className="container-page max-w-3xl py-16">
         <EmptyState
           title={t('destination.notFound')}
           action={
             <Link
               to="/"
-              className="mt-2 rounded-full bg-hill px-4 py-2 text-sm font-medium text-white"
+              className="mt-2 rounded-full bg-hill px-5 py-2.5 text-sm font-semibold text-white"
             >
               {t('notFound.home')}
             </Link>
@@ -37,16 +46,16 @@ export function DestinationPage() {
 
   if (isPending) {
     return (
-      <div role="status" className="mx-auto max-w-6xl px-4 pt-8">
+      <div role="status">
         <span className="sr-only">{t('common.loading')}</span>
-        <div aria-hidden="true" className="h-72 animate-pulse rounded-4xl bg-hill/10" />
+        <div aria-hidden="true" className="h-120 animate-pulse bg-hill/15" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-3xl px-4 pt-16">
+      <div className="container-page max-w-3xl py-16">
         <ErrorState message={t('common.error')} onRetry={() => void refetch()} />
       </div>
     );
@@ -63,48 +72,64 @@ function DestinationView({ destination }: { destination: DestinationSummary }) {
   const division = language === 'bn' ? destination.divisionBn : destination.division;
   const note = language === 'bn' ? destination.statusNoteBn : destination.statusNote;
   const trips = useTripSearch({ destination: destination.slug, pageSize: 12 });
+  const upcoming = asNumber(destination.upcomingTrips);
 
   const latitude = destination.latitude === null ? null : asNumber(destination.latitude);
   const longitude = destination.longitude === null ? null : asNumber(destination.longitude);
 
+  const facts: { icon: LucideIcon; label: string; value: string }[] = [
+    { icon: Compass, label: t('destination.kindLabel'), value: t(`kind.${destination.kind}`) },
+    { icon: Landmark, label: t('destination.divisionLabel'), value: division },
+    {
+      icon: Tent,
+      label: t('destination.upcomingLabel'),
+      value: formatCount(upcoming, language),
+    },
+    ...(destination.fromPrice !== null
+      ? [
+          {
+            icon: Wallet,
+            label: t('destination.fromLabel'),
+            value: formatMoney(destination.fromPrice, language),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <article>
-      <header className="relative isolate overflow-hidden">
-        <Scenery kind={destination.kind} className="absolute inset-0 -z-10 h-full w-full" />
-        <div className="absolute inset-0 -z-10 bg-linear-to-t from-deep/85 via-deep/25 to-transparent" />
-        <div className="mx-auto max-w-6xl px-4 pb-10 pt-28 text-white sm:pt-40">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={destination.status} />
-            <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-semibold backdrop-blur">
-              {t(`kind.${destination.kind}`)} · {t('destination.division', { division })}
-            </span>
-          </div>
-          <h1 className="mt-3 text-4xl font-extrabold sm:text-6xl">{name}</h1>
-          <p className="mt-2 max-w-2xl text-lg text-white/90">{summary}</p>
+      <PageBanner
+        slug={destination.slug}
+        kind={destination.kind}
+        tall
+        eyebrow={`${t(`kind.${destination.kind}`)} · ${t('destination.division', { division })}`}
+        title={name}
+      >
+        <div className="mt-4">
+          <StatusBadge status={destination.status} />
         </div>
-      </header>
+        <p className="mt-4 max-w-2xl text-lg text-white/90">{summary}</p>
+      </PageBanner>
 
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-8 lg:grid-cols-[1fr_380px]">
-        <section>
+      <div className="container-page grid gap-10 py-12 lg:grid-cols-[1fr_22rem] lg:gap-12 lg:py-16">
+        <section className="min-w-0">
           {destination.status !== 'Open' && note && (
             <aside
               role="note"
-              className="mb-6 flex gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-600/30"
+              className="mb-8 flex gap-3 rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-600/30"
             >
-              <span aria-hidden="true" className="text-xl">
-                ⚠️
-              </span>
+              <TriangleAlert aria-hidden="true" className="h-6 w-6 shrink-0 text-amber-700" />
               <div>
                 <p className="font-semibold text-amber-900">{t('trip.caution', { place: name })}</p>
-                <p className="text-sm text-amber-900/80">{note}</p>
+                <p className="mt-1 text-sm text-amber-900/80">{note}</p>
               </div>
             </aside>
           )}
 
-          <h2 className="text-2xl font-bold text-deep">
+          <h2 className="text-2xl font-semibold sm:text-3xl">
             {t('destination.tripsHere', { place: name })}
           </h2>
-          <div className="mt-4 grid gap-6 sm:grid-cols-2">
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
             {trips.isPending ? (
               <CardSkeletons count={2} tall />
             ) : trips.isError ? (
@@ -117,10 +142,10 @@ function DestinationView({ destination }: { destination: DestinationSummary }) {
           </div>
         </section>
 
-        {latitude !== null && longitude !== null && (
-          <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="flex flex-col gap-5 lg:sticky lg:top-24 lg:self-start">
+          {latitude !== null && longitude !== null && (
             <div
-              className="h-80 overflow-hidden rounded-3xl shadow-md ring-1 ring-hill/10"
+              className="h-72 overflow-hidden rounded-2xl shadow-md ring-1 ring-hill/10"
               role="img"
               aria-label={t('destination.map', { place: name })}
             >
@@ -150,8 +175,32 @@ function DestinationView({ destination }: { destination: DestinationSummary }) {
                 </CircleMarker>
               </MapContainer>
             </div>
-          </aside>
-        )}
+          )}
+
+          <div className="overflow-hidden rounded-2xl bg-mist">
+            <h2 className="bg-hill px-5 py-4 text-lg font-semibold text-white!">
+              {t('destination.about', { place: name })}
+            </h2>
+            <dl className="divide-y divide-hill/10 px-5">
+              {facts.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center gap-3 py-3.5">
+                  <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-hill" />
+                  <dt className="flex-1 text-sm text-deep/60">{label}</dt>
+                  <dd className="text-right font-semibold text-deep">{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="p-5 pt-2">
+              <Link
+                to={`/trips?destination=${destination.slug}`}
+                className="flex items-center justify-center gap-2 rounded-full bg-turmeric px-5 py-3 font-semibold text-night transition hover:bg-dusk"
+              >
+                {t('destination.viewTrips')}
+                <ArrowRight aria-hidden="true" className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </aside>
       </div>
     </article>
   );

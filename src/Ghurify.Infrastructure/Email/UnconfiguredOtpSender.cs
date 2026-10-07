@@ -12,9 +12,14 @@ namespace Ghurify.Infrastructure.Email;
 /// </summary>
 public sealed class UnconfiguredOtpSender : IOtpSender
 {
-    public Task SendOtpAsync(EmailAddress email, string code, CancellationToken cancellationToken) =>
-        throw new NotSupportedException(
-            "No email sender is configured. Set Email:UserName and Email:Password before running "
+    public Task SendOtpAsync(EmailAddress email, string code, OtpPurpose purpose, CancellationToken cancellationToken) =>
+        throw NotConfigured();
+
+    public Task SendNoticeAsync(EmailAddress email, AccountNotice notice, CancellationToken cancellationToken) =>
+        throw NotConfigured();
+
+    private static NotSupportedException NotConfigured() =>
+        new("No email sender is configured. Set Email:UserName and Email:Password before running "
             + "outside Development. The development sender must never be used there, because it "
             + "writes the one-time code to the log.");
 }

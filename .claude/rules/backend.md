@@ -41,6 +41,9 @@ paths:
     the environment is Development AND no SMTP credentials are present; everywhere else
     `IOtpSender` resolves to real SMTP, or to a sender that throws.
     `OtpSenderRegistrationTests` fails the build if that ever changes.
+  - The same exception covers `PickupDirectoryOtpSender`, which writes account emails to files in
+    `Email:PickupDirectory` for the end-to-end tests: Development only, no SMTP credentials, and the
+    directory set. The same test guards it.
 
 ## Payments and money (high-risk area: plan first, test hard)
 

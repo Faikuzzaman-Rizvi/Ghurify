@@ -13,9 +13,11 @@ Sprint prompts: docs/PROMPTS.md
 - Backend: ASP.NET Core Web API, .NET 10, C# latest, nullable enabled, warnings as errors
 - Data access: **Dapper + stored procedures**. No EF Core, no ORM, no EF migrations.
 - Database: SQL Server 2022. **Schema in SSDT (dacpac). Data changes in DbUp.** See .claude/rules/database.md
-- Auth: custom email-OTP sign-in (a six-digit code emailed over SMTP), JWT (15 min) + rotating
-  refresh tokens. No ASP.NET Core Identity (its default store needs EF Core). Email is the
-  sign-in identity; phone is optional on the profile, for SOS, chat masking and payouts.
+- Auth: email + password (PBKDF2-SHA256, built into .NET), JWT (15 min) + rotating refresh
+  tokens. A six-digit code is emailed over SMTP only to confirm the address at registration and
+  to reset a forgotten password; never to sign in. No ASP.NET Core Identity (its default store
+  needs EF Core). Email is the permanent sign-in identity; phone is optional on the profile, for
+  SOS, chat masking and payouts.
 - Real-time: SignalR. Background work: Hangfire (SQL Server storage, own `HangFire` schema).
 - Validation: FluentValidation. Logging: Serilog. API docs: built-in OpenAPI.
 - Cache: Redis. Files: Azure Blob Storage (Azurite locally). Email: SMTP via MailKit.

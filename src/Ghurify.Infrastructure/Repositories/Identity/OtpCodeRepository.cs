@@ -15,6 +15,7 @@ public sealed class OtpCodeRepository(IDbConnectionFactory connectionFactory) : 
 {
     public async Task<OtpSendOutcome> AddAsync(
         EmailAddress email,
+        OtpPurpose purpose,
         byte[] codeHash,
         DateTimeOffset expiresOn,
         DateTimeOffset windowStart,
@@ -26,6 +27,7 @@ public sealed class OtpCodeRepository(IDbConnectionFactory connectionFactory) : 
         var parameters = new DynamicParameters();
         parameters.Add("@Email", email.Value, DbType.String, size: 256);
         parameters.Add("@CodeHash", codeHash, DbType.Binary, size: 32);
+        parameters.Add("@Purpose", (byte)purpose, DbType.Byte);
         parameters.Add("@ExpiresOn", expiresOn.UtcDateTime, DbType.DateTime2);
         parameters.Add("@WindowStart", windowStart.UtcDateTime, DbType.DateTime2);
         parameters.Add("@MaxPerWindow", maxPerWindow, DbType.Byte);
@@ -43,7 +45,7 @@ public sealed class OtpCodeRepository(IDbConnectionFactory connectionFactory) : 
             : OtpSendOutcome.RateLimited;
     }
 
-    public async Task<OtpCode?> FindLatestAsync(EmailAddress email, CancellationToken cancellationToken)
+    public async Task<OtpCode?> FindLatestAsync(EmailAddress email, OtpPurpose purpose, CancellationToken cancellationToken)
     {
         await using var connection = await connectionFactory.OpenAsync(cancellationToken);
 
@@ -54,10 +56,11 @@ public sealed class OtpCodeRepository(IDbConnectionFactory connectionFactory) : 
                      [Id], [Email], [CodeHash], [ExpiresOn], [Attempts], [ConsumedOn], [LockedOn]
             FROM     [Main].[OtpCode]
             WHERE    [Email] = @Email
+              AND    [Purpose] = @Purpose
               AND    [Archived] = 0
             ORDER BY [Id] DESC;
             """,
-            new { Email = email.Value },
+            new { Email = email.Value, Purpose = (byte)purpose },
             cancellationToken: cancellationToken));
 
         return row is null ? null : ToDomain(row);

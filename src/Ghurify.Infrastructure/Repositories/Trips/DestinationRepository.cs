@@ -45,6 +45,23 @@ public sealed class DestinationRepository(IDbConnectionFactory connectionFactory
             row.FromPrice))];
     }
 
+    public async Task<DestinationRef?> FindBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        await using var connection = await connectionFactory.OpenAsync(cancellationToken);
+
+        var row = await connection.QuerySingleOrDefaultAsync<(long Id, string Slug, byte Status)>(new CommandDefinition(
+            """
+            SELECT [Id], [Slug], [Status]
+            FROM   [Main].[Destination]
+            WHERE  [Slug] = @Slug
+              AND  [Archived] = 0;
+            """,
+            new { Slug = new DbString { Value = slug, IsAnsi = true, Length = 60 } },
+            cancellationToken: cancellationToken));
+
+        return row.Id == 0 ? null : new DestinationRef(row.Id, row.Slug, (DestinationStatus)row.Status);
+    }
+
     private sealed record DestinationRow(
         long Id,
         string Slug,

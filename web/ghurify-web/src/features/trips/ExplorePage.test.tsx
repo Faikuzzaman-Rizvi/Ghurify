@@ -63,7 +63,8 @@ describe('ExplorePage', () => {
     renderScreen(<ExplorePage />, { at: '/trips' });
     await screen.findByRole('link', { name: 'Sajek sunrise weekend' });
 
-    await user.selectOptions(screen.getByLabelText('Sort by'), 'PriceLowToHigh');
+    await user.click(screen.getByLabelText('Sort by'));
+    await user.click(screen.getByRole('option', { name: 'Price: low to high' }));
 
     await waitFor(() =>
       expect(requestedTripUrls(fetchMock)).toContain(

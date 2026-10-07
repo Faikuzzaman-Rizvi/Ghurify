@@ -1,15 +1,21 @@
 @import 'tailwindcss';
 
 /*
-  Design tokens from the implementation plan, plus a few travel tones for scenery.
-  Use the generated utilities (bg-hill, text-turmeric, font-display, ...) rather than raw hex
-  values anywhere in the app.
+  Design tokens. Layout and type follow a photo-led travel style (eyebrow labels, two-tone
+  headings, tall photo cards); the colours stay Ghurify's: deep green where such sites use
+  navy, turmeric where they use a bright accent. Use the generated utilities (bg-hill,
+  text-ochre, font-display, ...) rather than raw hex values anywhere in the app.
 */
 @theme {
   --color-hill: #245c43;
   --color-deep: #173f2e;
+  /* The darkest surface: footer and the safety band. */
+  --color-night: #0f2a1f;
   --color-turmeric: #d99a12;
+  /* Turmeric dark enough for text on white (4.9:1). Plain turmeric is for fills only. */
+  --color-ochre: #9a6500;
   --color-jamdani: #a3305c;
+  /* Alternate section background, a cool grey with a hint of green. */
   --color-mist: #f1f5f2;
 
   /* Scenery: river, sky and sand. */
@@ -18,18 +24,22 @@
   --color-sand: #fbf3e1;
   --color-dusk: #f2c46d;
 
-  /* Bangla-first: Hind Siliguri carries both scripts, so Bangla and English
-     sit on the same baseline instead of falling back to a system font. */
+  /* Body: Barlow for Latin; Bangla falls through to Hind Siliguri glyph by glyph, so mixed
+     text never drops to a system font. */
   --font-sans:
-    'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    Roboto, sans-serif;
+    'Barlow', 'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
 
-  /* Headings: rounded and warm, and it also has a full Bangla set. */
-  --font-display: 'Baloo Da 2', 'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, sans-serif;
+  /* Headings: Poppins for Latin, Baloo Da 2 for Bangla. */
+  --font-display:
+    'Poppins', 'Baloo Da 2', 'Hind Siliguri', 'Noto Sans Bengali', ui-sans-serif, sans-serif;
 
   --animate-float: float 7s ease-in-out infinite;
   --animate-drift: drift 40s linear infinite;
-  --animate-rise: rise 0.5s ease-out both;
+  --animate-rise: rise 0.6s ease-out both;
+  --animate-spin-slow: spin 18s linear infinite;
+  --animate-fade-in: fade-in 1.2s ease-out both;
+  --animate-ken-burns: ken-burns 9s ease-out both;
 
   @keyframes float {
     0%,
@@ -53,11 +63,30 @@
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(16px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* The hero photo's slow push-in while a slide is showing. */
+  @keyframes ken-burns {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
     }
   }
 }
@@ -69,23 +98,76 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Bangla glyphs sit small beside Latin ones at the same size; a slightly larger base keeps
+   both languages equally readable. */
+html:lang(bn) {
+  font-size: 106.25%;
+}
+
 body {
-  @apply bg-sand text-deep antialiased;
+  @apply bg-white text-deep/80 antialiased;
   margin: 0;
   min-height: 100vh;
 }
 
 h1,
 h2,
-h3 {
-  @apply font-display;
+h3,
+h4 {
+  @apply font-display text-deep;
   line-height: 1.2;
 }
 
-/* Visible focus everywhere: keyboard users must always see where they are. */
-:focus-visible {
-  outline: 2px solid var(--color-turmeric);
-  outline-offset: 2px;
+/* Visible focus everywhere: keyboard users must always see where they are. In the base layer
+   so a component can deliberately restyle it (e.g. a heading that only receives focus from
+   script). */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-turmeric);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Vertical rhythm for full-width bands. */
+  .section {
+    @apply py-18 sm:py-24 lg:py-28;
+  }
+
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* The small spaced-out line above a heading. */
+  .eyebrow {
+    @apply text-xs font-medium uppercase text-ochre;
+    letter-spacing: 0.32em;
+  }
+
+  /* Letter-spacing pulls Bangla conjuncts and vowel signs apart; Bangla gets weight instead. */
+  :lang(bn) .eyebrow {
+    @apply text-sm font-semibold;
+    letter-spacing: 0;
+  }
+
+  /* The hero's outlined word. Bangla strokes are too fine to outline, so it gets colour. */
+  .hero-outline {
+    color: transparent;
+    -webkit-text-stroke: 2px #fff;
+  }
+
+  :lang(bn) .hero-outline {
+    color: var(--color-dusk);
+    -webkit-text-stroke: 0;
+  }
+
+  /* Photo cards: the picture eases in and darkens a little on hover (the transition is on the
+     image itself, see Photo). */
+  .group:hover .photo-zoom,
+  .group:focus-within .photo-zoom {
+    transform: scale(1.08);
+    filter: brightness(0.75);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

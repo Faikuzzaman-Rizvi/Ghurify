@@ -35,7 +35,9 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
             type="button"
             onClick={() => setLanguage(code)}
             aria-pressed={language === code}
-            aria-label={compact ? t(labelKey[code]) : undefined}
+            // The accessible name starts with the visible text, so voice control ("click EN")
+            // matches what is on screen.
+            aria-label={compact ? `${shortLabel[code]} (${t(labelKey[code])})` : undefined}
             className={`rounded-full px-3 py-1 text-sm transition ${
               language === code ? 'bg-hill text-white' : 'text-deep hover:bg-hill/10'
             }`}

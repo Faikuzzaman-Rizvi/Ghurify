@@ -24,7 +24,8 @@ public sealed class SearchTripsHandler(ITripRepository trips, TripViewer viewer)
             IncludeWomenOnly: await viewer.IncludesWomenOnlyAsync(viewerId, cancellationToken),
             Sort: query.Sort,
             Offset: (query.Page - 1) * query.PageSize,
-            PageSize: query.PageSize);
+            PageSize: query.PageSize,
+            VerifiedHostsOnly: query.VerifiedHostsOnly);
 
         var page = await trips.SearchAsync(criteria, cancellationToken);
 

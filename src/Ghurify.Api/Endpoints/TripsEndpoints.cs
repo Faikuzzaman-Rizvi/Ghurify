@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FluentValidation;
+using Ghurify.Api.Authorization;
 using Ghurify.Application.Trips;
 using Ghurify.Domain.Trips;
 using Microsoft.AspNetCore.Mvc;
@@ -7,9 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ghurify.Api.Endpoints;
 
 /// <summary>
-/// Trip discovery: search, a trip's page, and destinations. Anonymous on purpose, because people
-/// browse before they sign up. A bearer token is still read when one is sent, since who is
-/// asking decides whether women-only trips are shown.
+/// Trips and destinations. Discovery (search, a trip's page, destinations) is anonymous on
+/// purpose, because people browse before they sign up; a bearer token is still read when one is
+/// sent, since who is asking decides whether women-only trips are shown, and lets a host see their
+/// own draft. Writing trips needs the Host role, and publishing the VerifiedHost policy.
 /// </summary>
 public static class TripsEndpoints
 {
@@ -32,6 +34,53 @@ public static class TripsEndpoints
             .WithSummary("A live trip with its cost breakdown and day-by-day plan.")
             .Produces<TripDetail>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
+
+        // Writes live in their own group: the reads above are anonymous, and AllowAnonymous on a
+        // group would silently override any authorization added to an endpoint inside it.
+        var hosting = app.MapGroup("/api/v1/trips")
+            .WithTags("Trips")
+            .RequireAuthorization(Policies.Host);
+
+        hosting.MapPost("/", CreateTripAsync)
+            .WithName("CreateTrip")
+            .WithSummary("Saves a new trip as a draft.")
+            .Produces<TripCreated>(StatusCodes.Status201Created)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        hosting.MapPut("/{id:long}", UpdateTripAsync)
+            .WithName("UpdateTrip")
+            .WithSummary("Saves changes to one of your own trips.")
+            .Produces<TripDetail>()
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        hosting.MapPost("/{id:long}/publish", PublishTripAsync)
+            .WithName("PublishTrip")
+            .WithSummary("Publishes one of your own drafts. Needs the VerifiedHost policy.")
+            .RequireAuthorization(Policies.VerifiedHost)
+            .Produces<TripDetail>()
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        hosting.MapPost("/{id:long}/cancel", CancelTripAsync)
+            .WithName("CancelTrip")
+            .WithSummary("Cancels one of your trips. Every paid traveller is refunded in full, fee included.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
+        app.MapGet("/api/v1/me/trips", ListMyHostedTripsAsync)
+            .WithTags("Trips")
+            .WithName("ListMyHostedTrips")
+            .WithSummary("Every trip you host, drafts included.")
+            .RequireAuthorization(Policies.Host)
+            .Produces<IReadOnlyList<HostTripSummary>>();
 
         var destinations = app.MapGroup("/api/v1/destinations")
             .WithTags("Destinations")
@@ -67,7 +116,8 @@ public static class TripsEndpoints
             request.MinSeats,
             request.Sort ?? TripSort.Soonest,
             request.Page ?? 1,
-            request.PageSize ?? SearchTripsQuery.DefaultPageSize);
+            request.PageSize ?? SearchTripsQuery.DefaultPageSize,
+            request.VerifiedHostsOnly ?? false);
 
         var validation = await validator.ValidateAsync(query, cancellationToken);
         if (!validation.IsValid)
@@ -88,6 +138,59 @@ public static class TripsEndpoints
 
         return trip is null ? TripNotFound() : Results.Ok(trip);
     }
+
+    private static async Task<IResult> CreateTripAsync(
+        SaveTripCommand command,
+        ClaimsPrincipal principal,
+        [FromServices] CreateTripHandler handler,
+        [FromServices] IValidator<SaveTripCommand> validator,
+        CancellationToken cancellationToken)
+    {
+        if (await ApiResults.ValidateAsync(validator, command, cancellationToken) is { } invalid)
+        {
+            return invalid;
+        }
+
+        return ApiResults.From(
+            await handler.HandleAsync(principal.RequireUserId(), command, cancellationToken),
+            created => Results.Created($"/api/v1/trips/{created.Id}", created));
+    }
+
+    private static async Task<IResult> UpdateTripAsync(
+        long id,
+        SaveTripCommand command,
+        ClaimsPrincipal principal,
+        [FromServices] UpdateTripHandler handler,
+        [FromServices] IValidator<SaveTripCommand> validator,
+        CancellationToken cancellationToken)
+    {
+        if (await ApiResults.ValidateAsync(validator, command, cancellationToken) is { } invalid)
+        {
+            return invalid;
+        }
+
+        return ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), id, command, cancellationToken));
+    }
+
+    private static async Task<IResult> PublishTripAsync(
+        long id,
+        ClaimsPrincipal principal,
+        [FromServices] PublishTripHandler handler,
+        CancellationToken cancellationToken) =>
+        ApiResults.Ok(await handler.HandleAsync(principal.RequireUserId(), id, cancellationToken));
+
+    private static async Task<IResult> CancelTripAsync(
+        long id,
+        ClaimsPrincipal principal,
+        [FromServices] CancelTripHandler handler,
+        CancellationToken cancellationToken) =>
+        ApiResults.NoContent(await handler.HandleAsync(principal.RequireUserId(), id, cancellationToken));
+
+    private static async Task<IResult> ListMyHostedTripsAsync(
+        ClaimsPrincipal principal,
+        [FromServices] ListHostTripsHandler handler,
+        CancellationToken cancellationToken) =>
+        Results.Ok(await handler.HandleAsync(principal.RequireUserId(), cancellationToken));
 
     private static async Task<IResult> ListDestinationsAsync(
         ClaimsPrincipal principal,
@@ -130,5 +233,6 @@ public static class TripsEndpoints
         int? MinSeats,
         TripSort? Sort,
         int? Page,
-        int? PageSize);
+        int? PageSize,
+        bool? VerifiedHostsOnly);
 }

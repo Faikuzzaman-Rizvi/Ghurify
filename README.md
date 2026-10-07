@@ -14,9 +14,15 @@ React + ASP.NET Core + SQL Server. See [CLAUDE.md](CLAUDE.md) for the working ru
 | Sprint | Feature | State |
 | --- | --- | --- |
 | 1 | Bootstrap: solution, SSDT + DbUp, CI, health check | done |
-| 2 | Email-OTP sign-in, JWT + rotating refresh cookie | done |
-| 4–5 (read side) | Destinations (10 seeded, with safety status), trip search, trip page with cost breakdown and itinerary | done |
-| 4 (write side) | Trip wizard: create, edit, publish | next, needs Sprint 3 host verification |
+| 2 | Email + password sign-in (code only to confirm the address and reset a password), JWT + rotating refresh cookie | done |
+| 3 | Profiles, roles, identity verification with ID photos (NID, passport or driving licence, selfie), profile pictures | done |
+| 4–5 | Trips: wizard, publish, search with filters, trip and destination pages | done |
+| 6–7 | Join requests and seat holds, escrow payments (sandbox + SSLCommerz), refunds, staged payouts, group chat | done |
+| 8 | Stories with photos and video, likes, comments, follows, reviews | done |
+| 9 | Safety (SOS, check-ins, destination closures, reports, disputes) and the admin portal (people, trips, bookings and payments, verifications, destinations, emergency points, payouts, audit log) | done |
+| 10 | Beta hardening: security fixes, k6 load script, Playwright end-to-end journey ([report](docs/BETA-HARDENING.md)) | done (load test not yet run) |
+| 11 | Deploy pipeline (staging, then approved production), readiness checks, [runbook](docs/RUNBOOK.md), [go-live checklist](docs/GO-LIVE-CHECKLIST.md) | done |
+| — | Guides and local partners (marketplace) | not started |
 
 The web app has a travel-style landing page, an explore page with filters, trip and destination
 pages (with a map), Bangla and English throughout, and a guided tour (**Take the tour** in the

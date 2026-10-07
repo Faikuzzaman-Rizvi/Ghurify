@@ -2,19 +2,76 @@ using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Identity;
 
-/// <summary>Reads and writes accounts.</summary>
+/// <summary>Reads accounts.</summary>
 public interface IUserRepository
 {
-    /// <summary>
-    /// Returns the account for an address, creating it if this is the first sign-in.
-    /// Atomic: two simultaneous first logins produce one account, not a duplicate-key error.
-    /// </summary>
-    Task<User> GetOrAddByEmailAsync(EmailAddress email, CancellationToken cancellationToken);
-
     Task<User?> FindByIdAsync(long userId, CancellationToken cancellationToken);
 }
 
-/// <summary>Stores and checks one-time sign-in codes.</summary>
+/// <summary>Accounts and their passwords.</summary>
+public interface ICredentialRepository
+{
+    /// <summary>
+    /// Registers an account waiting for email confirmation, or replaces the name and password of
+    /// one that is still waiting. Changes nothing for an account that already exists in any
+    /// other state, and says so, so the caller can answer the same way regardless.
+    /// </summary>
+    Task<(RegistrationOutcome Outcome, long UserId)> AddPendingUserAsync(
+        EmailAddress email,
+        string displayName,
+        PasswordHash password,
+        CancellationToken cancellationToken);
+
+    /// <summary>The account for an address with its password hash, or null if there is none.</summary>
+    Task<UserCredential?> FindByEmailAsync(EmailAddress email, CancellationToken cancellationToken);
+
+    /// <summary>The same, by account id.</summary>
+    Task<UserCredential?> FindByIdAsync(long userId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the password. Also confirms a pending account (the code that allowed this was sent
+    /// to its address) and, with <paramref name="revokeSessions"/>, signs out every device.
+    /// </summary>
+    Task SetPasswordAsync(long userId, PasswordHash password, bool revokeSessions, CancellationToken cancellationToken);
+
+    /// <summary>Marks a pending account's email confirmed, making it Active.</summary>
+    Task ConfirmEmailAsync(long userId, CancellationToken cancellationToken);
+}
+
+/// <summary>Slow, salted password hashing.</summary>
+public interface IPasswordHasher
+{
+    PasswordHash Hash(string password);
+
+    /// <summary>Constant-time check of a password against a stored hash.</summary>
+    bool Verify(string password, PasswordHash stored);
+
+    /// <summary>
+    /// Does the same work as <see cref="Verify"/> against nothing, so an address with no
+    /// account takes as long to refuse as a wrong password does.
+    /// </summary>
+    void VerifyAgainstNothing(string password);
+
+    /// <summary>Whether a stored hash is weaker than today's settings and should be redone.</summary>
+    bool NeedsRehash(PasswordHash stored);
+}
+
+/// <summary>
+/// Pauses sign-in for an address after repeated wrong passwords. Keyed on the address, not the
+/// account, so it behaves the same for addresses that have no account.
+/// </summary>
+public interface ISignInThrottle
+{
+    /// <summary>When sign-in for this address may be tried again, or null if it may now.</summary>
+    Task<DateTimeOffset?> PausedUntilAsync(EmailAddress email, CancellationToken cancellationToken);
+
+    /// <summary>Counts a wrong password. Returns when sign-in is paused until, if it now is.</summary>
+    Task<DateTimeOffset?> RegisterFailureAsync(EmailAddress email, CancellationToken cancellationToken);
+
+    Task ClearAsync(EmailAddress email, CancellationToken cancellationToken);
+}
+
+/// <summary>Stores and checks emailed one-time codes.</summary>
 public interface IOtpCodeRepository
 {
     /// <summary>
@@ -24,14 +81,15 @@ public interface IOtpCodeRepository
     /// </summary>
     Task<OtpSendOutcome> AddAsync(
         EmailAddress email,
+        OtpPurpose purpose,
         byte[] codeHash,
         DateTimeOffset expiresOn,
         DateTimeOffset windowStart,
         byte maxPerWindow,
         CancellationToken cancellationToken);
 
-    /// <summary>The newest code for an address, whatever its state, or null if there is none.</summary>
-    Task<OtpCode?> FindLatestAsync(EmailAddress email, CancellationToken cancellationToken);
+    /// <summary>The newest code for an address and purpose, whatever its state, or null.</summary>
+    Task<OtpCode?> FindLatestAsync(EmailAddress email, OtpPurpose purpose, CancellationToken cancellationToken);
 
     /// <summary>
     /// Records one wrong guess and locks the code if that reaches the limit.
@@ -73,10 +131,42 @@ public interface IRefreshTokenRepository
     Task<int> RevokeFamilyAsync(Guid familyId, DateTimeOffset now, CancellationToken cancellationToken);
 }
 
-/// <summary>Delivers the one-time code to the person signing in.</summary>
+/// <summary>Sends the account emails: one-time codes, and notices about the account itself.</summary>
 public interface IOtpSender
 {
-    Task SendOtpAsync(EmailAddress email, string code, CancellationToken cancellationToken);
+    Task SendOtpAsync(EmailAddress email, string code, OtpPurpose purpose, CancellationToken cancellationToken);
+
+    Task SendNoticeAsync(EmailAddress email, AccountNotice notice, CancellationToken cancellationToken);
+}
+
+/// <summary>Emails about an account that carry no code.</summary>
+public enum AccountNotice
+{
+    /// <summary>
+    /// Someone tried to register with an address that already has an account. The owner is
+    /// told, rather than the person registering, so registration never reveals who is signed up.
+    /// </summary>
+    AlreadyRegistered = 1,
+
+    /// <summary>The password was changed or reset. Tells the owner if it was not them.</summary>
+    PasswordChanged = 2,
+}
+
+/// <summary>A stored password: the hash, its salt, and the work factor it was made with.</summary>
+public sealed record PasswordHash(byte[] Hash, byte[] Salt, int Iterations);
+
+/// <summary>An account and, if it has set one, its password.</summary>
+public sealed record UserCredential(User User, PasswordHash? Password, bool MustReset);
+
+public enum RegistrationOutcome
+{
+    Created = 0,
+
+    /// <summary>The address was already waiting for confirmation; its name and password were replaced.</summary>
+    ReplacedPending = 1,
+
+    /// <summary>The address already has a confirmed account. Nothing was changed.</summary>
+    AlreadyRegistered = 2,
 }
 
 /// <summary>Mints access tokens.</summary>

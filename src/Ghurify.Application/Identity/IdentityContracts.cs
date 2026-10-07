@@ -1,13 +1,25 @@
 namespace Ghurify.Application.Identity;
 
-/// <summary>Request a sign-in code for an email address.</summary>
-public sealed record RequestOtpCommand(string Email);
+/// <summary>Create an account. The email is confirmed with a code before it can be used.</summary>
+public sealed record RegisterCommand(string Email, string Password, string DisplayName);
 
-/// <summary>What the caller is told after asking for a code.</summary>
-public sealed record RequestOtpResult(int ExpiresInSeconds, int ResendAfterSeconds);
+/// <summary>Confirm the email address of a new account with the code that was sent to it.</summary>
+public sealed record ConfirmEmailCommand(string Email, string Code);
 
-/// <summary>Exchange a code for a session.</summary>
-public sealed record VerifyOtpCommand(string Email, string Code);
+/// <summary>Ask for a code to be sent again, or for a password-reset code.</summary>
+public sealed record EmailOnlyCommand(string Email);
+
+/// <summary>Sign in with the permanent email address and password.</summary>
+public sealed record SignInCommand(string Email, string Password);
+
+/// <summary>Choose a new password with a reset code.</summary>
+public sealed record ResetPasswordCommand(string Email, string Code, string NewPassword);
+
+/// <summary>Change the password while signed in.</summary>
+public sealed record ChangePasswordCommand(string CurrentPassword, string NewPassword);
+
+/// <summary>What the caller is told after a code was (or, by design, may have been) sent.</summary>
+public sealed record CodeSentResult(int ExpiresInSeconds, int ResendAfterSeconds);
 
 /// <summary>A signed-in session.</summary>
 public sealed record SessionResult(
@@ -51,6 +63,33 @@ public enum IdentityError
     /// delivery failed, rather than being left to wait for an email that is never coming.
     /// </summary>
     DeliveryFailed = 6,
+
+    /// <summary>
+    /// Wrong email or wrong password. One value for both: telling them apart would reveal
+    /// which addresses have accounts.
+    /// </summary>
+    InvalidCredentials = 7,
+
+    /// <summary>Too many wrong passwords for this address; sign-in is paused for a while.</summary>
+    SignInPaused = 8,
+
+    /// <summary>The password is right, but the address was never confirmed.</summary>
+    EmailNotConfirmed = 9,
+
+    /// <summary>Shorter than the minimum, or longer than the maximum.</summary>
+    PasswordTooShort = 10,
+
+    /// <summary>One of the passwords attackers try first, or just the email address.</summary>
+    PasswordTooCommon = 11,
+
+    /// <summary>The name is missing or too long.</summary>
+    InvalidName = 12,
+
+    /// <summary>Changing the password while signed in: the current password was wrong.</summary>
+    CurrentPasswordWrong = 13,
+
+    /// <summary>An admin asked for a new password: sign-in must go through a reset first.</summary>
+    PasswordResetRequired = 14,
 }
 
 /// <summary>
@@ -68,6 +107,9 @@ public readonly record struct IdentityResult<T>
     public T? Value { get; }
 
     public IdentityError Error { get; }
+
+    /// <summary>For <see cref="IdentityError.SignInPaused"/>: when to try again.</summary>
+    public DateTimeOffset? RetryAfter { get; init; }
 
     public bool Succeeded => Error == IdentityError.None;
 }

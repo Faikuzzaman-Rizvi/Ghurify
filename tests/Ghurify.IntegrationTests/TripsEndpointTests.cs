@@ -140,6 +140,101 @@ public sealed class TripsEndpointTests(SqlServerFixture database)
     }
 
     [Fact]
+    public async Task Search_ByGroupType_ReturnsOnlyThatKindOfGroup()
+    {
+        await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var client = api.CreateClient();
+
+        var page = await SearchAsync(client, "?destination=kuakata&groupType=WomenOnly&pageSize=48");
+
+        Assert.Contains(page.Items, trip => trip.Id == seed.WomenOnlyId);
+        Assert.DoesNotContain(page.Items, trip => trip.Id == seed.PublishedId);
+        Assert.All(page.Items, trip => Assert.Equal("WomenOnly", trip.GroupType));
+    }
+
+    [Fact]
+    public async Task Search_ByDateRange_LeavesOutTripsStartingOutsideIt()
+    {
+        await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var client = api.CreateClient();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(6));
+
+        // The seeded trips start 20 days from now.
+        var tooLate = await SearchAsync(client, $"?destination=kuakata&from={Iso(today.AddDays(25))}&pageSize=48");
+        var tooEarly = await SearchAsync(client, $"?destination=kuakata&to={Iso(today.AddDays(18))}&pageSize=48");
+        var around = await SearchAsync(client, $"?destination=kuakata&from={Iso(today.AddDays(15))}&to={Iso(today.AddDays(25))}&pageSize=48");
+
+        Assert.DoesNotContain(tooLate.Items, trip => trip.Id == seed.PublishedId);
+        Assert.DoesNotContain(tooEarly.Items, trip => trip.Id == seed.PublishedId);
+        Assert.Contains(around.Items, trip => trip.Id == seed.PublishedId);
+    }
+
+    [Fact]
+    public async Task Search_ByMinSeats_LeavesOutTripsWithFewerSeatsLeft()
+    {
+        await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var client = api.CreateClient();
+
+        // 15 seats, 3 taken: 12 left.
+        var enough = await SearchAsync(client, "?destination=kuakata&minSeats=12&pageSize=48");
+        var tooMany = await SearchAsync(client, "?destination=kuakata&minSeats=13&pageSize=48");
+
+        Assert.Contains(enough.Items, trip => trip.Id == seed.PublishedId);
+        Assert.DoesNotContain(tooMany.Items, trip => trip.Id == seed.PublishedId);
+    }
+
+    [Fact]
+    public async Task Search_SortedByPriceHighToLow_PutsTheDearerTripFirst()
+    {
+        await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var client = api.CreateClient();
+
+        var page = await SearchAsync(client, "?destination=kuakata&sort=PriceHighToLow&pageSize=48");
+        var ids = page.Items.Select(trip => trip.Id).ToList();
+
+        Assert.True(ids.IndexOf(seed.WomenOnlyId) < ids.IndexOf(seed.PublishedId));
+        Assert.Equal(page.Items.Select(trip => trip.PricePerPerson).OrderByDescending(price => price), page.Items.Select(trip => trip.PricePerPerson));
+    }
+
+    [Fact]
+    public async Task Search_Paging_ReturnsTheRequestedSliceAndTheTotal()
+    {
+        await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var client = api.CreateClient();
+
+        var first = await SearchAsync(client, "?destination=kuakata&sort=PriceLowToHigh&pageSize=1&page=1");
+        var second = await SearchAsync(client, "?destination=kuakata&sort=PriceLowToHigh&pageSize=1&page=2");
+
+        Assert.Single(first.Items);
+        Assert.Single(second.Items);
+        Assert.NotEqual(first.Items[0].Id, second.Items[0].Id);
+        Assert.True(first.TotalCount >= 2);
+        Assert.Equal(2, second.Page);
+    }
+
+    [Fact]
+    public async Task Search_VerifiedHostsOnly_LeavesOutTripsByUnverifiedHosts()
+    {
+        await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);
+        await using var api = new GhurifyApiFactory(database.ConnectionString);
+        using var client = api.CreateClient();
+
+        // The seeded host never passed an identity check.
+        var all = await SearchAsync(client, "?destination=kuakata&pageSize=48");
+        var verified = await SearchAsync(client, "?destination=kuakata&verifiedHostsOnly=true&pageSize=48");
+
+        Assert.Contains(all.Items, trip => trip.Id == seed.PublishedId);
+        Assert.DoesNotContain(verified.Items, trip => trip.Id == seed.PublishedId);
+    }
+
+    private static string Iso(DateOnly date) => date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+
+    [Fact]
     public async Task GetTrip_ForADraft_Returns404LikeATripThatDoesNotExist()
     {
         await using var seed = await SeededTrips.CreateAsync(database.ConnectionString);

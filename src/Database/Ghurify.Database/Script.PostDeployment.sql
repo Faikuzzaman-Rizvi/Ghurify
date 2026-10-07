@@ -78,3 +78,40 @@ FROM
 WHERE NOT EXISTS (SELECT 1 FROM [Main].[Destination] AS [d] WHERE [d].[Slug] = [seed].[Slug]);
 
 PRINT 'Post-deployment: destinations seeded (insert-if-missing).';
+
+-- Police stations and hospitals near each destination, for "nearest help" on the SOS screen.
+-- Insert-if-missing by code; the safety desk owns the rows after that. Positions are the local
+-- upazila or district town and are APPROXIMATE: the safety desk must confirm each one (and add
+-- phone numbers) before launch. The SOS screen always offers the national emergency number 999.
+-- Kind: 1 Police, 2 Hospital, 3 Tourist police.
+INSERT INTO [Safety].[EmergencyPoint] ([Code], [DestinationId], [Kind], [Name], [NameBn], [Location])
+SELECT [seed].[Code], [d].[Id], [seed].[Kind], [seed].[Name], [seed].[NameBn],
+       geography::Point([seed].[Latitude], [seed].[Longitude], 4326)
+FROM
+(
+    VALUES
+    ('sajek-police',         'sajek',         1, N'Baghaichhari Police Station',             N'বাঘাইছড়ি থানা',                     23.2333, 92.1667),
+    ('sajek-hospital',       'sajek',         2, N'Baghaichhari Upazila Health Complex',     N'বাঘাইছড়ি উপজেলা স্বাস্থ্য কমপ্লেক্স', 23.2340, 92.1680),
+    ('bandarban-police',     'bandarban',     1, N'Bandarban Sadar Police Station',          N'বান্দরবান সদর থানা',                 22.1953, 92.2184),
+    ('bandarban-hospital',   'bandarban',     2, N'Bandarban District Sadar Hospital',       N'বান্দরবান জেলা সদর হাসপাতাল',         22.1960, 92.2200),
+    ('coxs-tourist-police',  'coxs-bazar',    3, N'Tourist Police, Cox''s Bazar Zone',       N'ট্যুরিস্ট পুলিশ, কক্সবাজার জোন',         21.4272, 92.0058),
+    ('coxs-hospital',        'coxs-bazar',    2, N'Cox''s Bazar District Sadar Hospital',    N'কক্সবাজার জেলা সদর হাসপাতাল',         21.4440, 91.9800),
+    ('saint-martins-police', 'saint-martins', 1, N'Saint Martin''s Police Outpost',          N'সেন্ট মার্টিন পুলিশ ফাঁড়ি',              20.6237, 92.3234),
+    ('teknaf-hospital',      'saint-martins', 2, N'Teknaf Upazila Health Complex',           N'টেকনাফ উপজেলা স্বাস্থ্য কমপ্লেক্স',      20.8640, 92.3010),
+    ('sylhet-police',        'sylhet',        1, N'Gowainghat Police Station',               N'গোয়াইনঘাট থানা',                      25.1000, 91.9330),
+    ('sylhet-hospital',      'sylhet',        2, N'Sylhet MAG Osmani Medical College Hospital', N'সিলেট এম এ জি ওসমানী মেডিকেল কলেজ হাসপাতাল', 24.9000, 91.8530),
+    ('sreemangal-police',    'sreemangal',    1, N'Sreemangal Police Station',               N'শ্রীমঙ্গল থানা',                       24.3065, 91.7296),
+    ('sreemangal-hospital',  'sreemangal',    2, N'Sreemangal Upazila Health Complex',       N'শ্রীমঙ্গল উপজেলা স্বাস্থ্য কমপ্লেক্স',    24.3070, 91.7310),
+    ('tanguar-police',       'tanguar-haor',  1, N'Tahirpur Police Station',                 N'তাহিরপুর থানা',                        25.0830, 91.1670),
+    ('tanguar-hospital',     'tanguar-haor',  2, N'Tahirpur Upazila Health Complex',         N'তাহিরপুর উপজেলা স্বাস্থ্য কমপ্লেক্স',     25.0840, 91.1690),
+    ('sundarbans-police',    'sundarbans',    1, N'Mongla Police Station',                   N'মোংলা থানা',                            22.4800, 89.6000),
+    ('sundarbans-hospital',  'sundarbans',    2, N'Mongla Upazila Health Complex',           N'মোংলা উপজেলা স্বাস্থ্য কমপ্লেক্স',       22.4810, 89.6010),
+    ('kuakata-tourist-police','kuakata',      3, N'Tourist Police, Kuakata',                 N'ট্যুরিস্ট পুলিশ, কুয়াকাটা',               21.8167, 90.1167),
+    ('kuakata-hospital',     'kuakata',       2, N'Kalapara Upazila Health Complex',         N'কলাপাড়া উপজেলা স্বাস্থ্য কমপ্লেক্স',      21.9900, 90.2400),
+    ('rangamati-police',     'rangamati',     1, N'Rangamati Kotwali Police Station',        N'রাঙ্গামাটি কোতোয়ালী থানা',               22.6533, 92.1750),
+    ('rangamati-hospital',   'rangamati',     2, N'Rangamati General Hospital',              N'রাঙ্গামাটি জেনারেল হাসপাতাল',            22.6540, 92.1770)
+) AS [seed] ([Code], [Slug], [Kind], [Name], [NameBn], [Latitude], [Longitude])
+JOIN [Main].[Destination] AS [d] ON [d].[Slug] = [seed].[Slug]
+WHERE NOT EXISTS (SELECT 1 FROM [Safety].[EmergencyPoint] AS [e] WHERE [e].[Code] = [seed].[Code]);
+
+PRINT 'Post-deployment: emergency points seeded (insert-if-missing).';

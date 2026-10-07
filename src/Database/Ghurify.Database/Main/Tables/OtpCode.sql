@@ -1,4 +1,5 @@
--- One-time codes for email sign-in.
+-- One-time codes sent by email: to confirm the address when an account is created, and to
+-- reset a forgotten password. Sign-in itself uses the password, never a code.
 --
 -- The code itself is never stored: only an HMAC-SHA256 of it, keyed with a server-side
 -- pepper, so a database leak does not hand out working sign-in codes.
@@ -10,6 +11,9 @@ CREATE TABLE [Main].[OtpCode]
     -- Rizvi@Example.com is found when the same person types rizvi@example.com.
     [Email]       NVARCHAR (256)  NOT NULL,
     [CodeHash]    VARBINARY (32)  NOT NULL,
+    -- 1 Confirm the email address at sign-up, 2 Reset the password. A code only ever works
+    -- for the purpose it was sent for.
+    [Purpose]     TINYINT         CONSTRAINT [DF_OtpCode_Purpose] DEFAULT ((1)) NOT NULL,
     [ExpiresOn]   DATETIME2 (0)   NOT NULL,
     [Attempts]    TINYINT         CONSTRAINT [DF_OtpCode_Attempts] DEFAULT ((0)) NOT NULL,
     -- Set when the code is used successfully. A consumed code can never be used again.
@@ -23,6 +27,7 @@ CREATE TABLE [Main].[OtpCode]
     [UpdatedId]   BIGINT          NULL,
 
     CONSTRAINT [PK_OtpCode] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [CK_OtpCode_Purpose] CHECK ([Purpose] BETWEEN 1 AND 2),
     -- The explicit collation matters: the database default is case-insensitive, under which
     -- [Email] = LOWER([Email]) is true for anything and enforces nothing.
     CONSTRAINT [CK_OtpCode_Email] CHECK ([Email] LIKE '%_@_%._%'
@@ -34,5 +39,5 @@ GO
 -- window, and finding the newest live code for that address.
 CREATE NONCLUSTERED INDEX [IX_OtpCode_Email_Created]
     ON [Main].[OtpCode] ([Email] ASC, [Created] DESC)
-    INCLUDE ([ExpiresOn], [ConsumedOn], [LockedOn], [Attempts]);
+    INCLUDE ([Purpose], [ExpiresOn], [ConsumedOn], [LockedOn], [Attempts]);
 GO

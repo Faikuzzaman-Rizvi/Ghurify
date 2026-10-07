@@ -49,6 +49,12 @@ public sealed class EmailOptions
     [Range(1, 120)]
     public int TimeoutSeconds { get; set; } = 20;
 
+    /// <summary>
+    /// Development only, for the end-to-end tests: with no SMTP account, write account emails as
+    /// files here instead of to the console. Ignored in every other environment.
+    /// </summary>
+    public string? PickupDirectory { get; set; }
+
     /// <summary>True when there is enough configuration to actually send mail.</summary>
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(Host)

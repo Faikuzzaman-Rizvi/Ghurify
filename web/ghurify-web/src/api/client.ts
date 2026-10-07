@@ -38,12 +38,24 @@ export function asNumber(value: number | string): number {
 export class ApiError extends Error {
   readonly status: number;
   readonly detail: string | undefined;
+  /** Stable machine-readable reason (`nid_in_use`, `seat_taken`) for translated messages. */
+  readonly code: string | undefined;
+  /** For a pause (too many attempts): how long until trying again makes sense. */
+  readonly retryAfterSeconds: number | undefined;
 
-  constructor(message: string, status: number, detail?: string) {
+  constructor(
+    message: string,
+    status: number,
+    detail?: string,
+    code?: string,
+    retryAfterSeconds?: number,
+  ) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.detail = detail;
+    this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -51,17 +63,33 @@ interface ProblemDetails {
   title?: string;
   detail?: string;
   status?: number;
+  code?: string;
+  retryAfterSeconds?: number;
   errors?: Record<string, string[]>;
 }
 
 interface RequestOptions {
   signal?: AbortSignal;
+  /** Extra headers, e.g. an idempotency key on payment calls. */
+  headers?: Record<string, string>;
   /** Send the bearer token. Off for the sign-in endpoints, which have no token yet. */
   authenticated?: boolean;
 }
 
 export async function apiGet<T>(path: string, options: RequestOptions = {}): Promise<T> {
   return request<T>('GET', path, undefined, options);
+}
+
+export async function apiPut<T>(
+  path: string,
+  body?: unknown,
+  options: RequestOptions = {},
+): Promise<T> {
+  return request<T>('PUT', path, body, options);
+}
+
+export async function apiDelete<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return request<T>('DELETE', path, undefined, options);
 }
 
 export async function apiPost<T>(
@@ -76,9 +104,9 @@ async function request<T>(
   method: string,
   path: string,
   body: unknown,
-  { signal, authenticated = true }: RequestOptions,
+  { signal, authenticated = true, headers: extraHeaders }: RequestOptions,
 ): Promise<T> {
-  const headers: Record<string, string> = { Accept: 'application/json' };
+  const headers: Record<string, string> = { Accept: 'application/json', ...extraHeaders };
 
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
@@ -123,6 +151,8 @@ async function toApiError(response: Response): Promise<ApiError> {
       problem.title ?? response.statusText,
       response.status,
       firstFieldError ?? problem.detail ?? '',
+      problem.code,
+      problem.retryAfterSeconds,
     );
   } catch {
     return new ApiError(response.statusText || 'Request failed', response.status);

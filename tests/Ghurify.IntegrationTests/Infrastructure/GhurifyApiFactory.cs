@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -14,6 +15,28 @@ public sealed class GhurifyApiFactory(
     string connectionString,
     string otpPepper = "integration-test-otp-pepper-32-chars-min") : WebApplicationFactory<Program>
 {
+    /// <summary>
+    /// Replaces services after the API has registered its own, for the few tests that need a test
+    /// double (in-memory blob storage). Everything else stays real.
+    /// </summary>
+    public Action<Microsoft.Extensions.DependencyInjection.IServiceCollection>? ReplaceServices { get; init; }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        if (ReplaceServices is not null)
+        {
+            builder.ConfigureTestServices(services => ReplaceServices(services));
+        }
+    }
+
+    /// <summary>Signs fake e-KYC callbacks in tests.</summary>
+    public const string CallbackSecret = "integration-test-ekyc-callback-secret-32";
+
+    /// <summary>The password hash work factor in tests: the minimum allowed, so the suite stays fast.</summary>
+    public const int PasswordIterations = 10_000;
+
     protected override IHost CreateHost(IHostBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -26,6 +49,9 @@ public sealed class GhurifyApiFactory(
         builder.ConfigureHostConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
+                // The developer's .env must never reach the test host: it names their own
+                // database and mail account, and is loaded after (so would win over) these.
+                ["DotEnv:Enabled"] = "false",
                 ["Database:ConnectionString"] = connectionString,
                 ["Cors:AllowedOrigins:0"] = "http://localhost:5173",
                 // Blank on purpose, and it must stay that way. Without credentials the host
@@ -40,6 +66,15 @@ public sealed class GhurifyApiFactory(
                 ["Identity:JwtIssuer"] = "ghurify",
                 ["Identity:JwtAudience"] = "ghurify-web",
                 ["Identity:AccessTokenMinutes"] = "15",
+                ["Identity:PasswordIterations"] = "10000",
+                ["Verification:NidPepper"] = "integration-test-nid-pepper-32-chars-minimum",
+                ["Verification:CallbackSecret"] = CallbackSecret,
+                ["Ekyc:Provider"] = "fake",
+                // No scheduler in tests: queued jobs run inline, and tests run recurring jobs
+                // themselves, so nothing happens on a timer behind a test's back.
+                ["Jobs:Enabled"] = "false",
+                // No Azurite in the test run: tests that need media swap in an in-memory store.
+                ["Storage:ConnectionString"] = string.Empty,
             }));
 
         return base.CreateHost(builder);
@@ -55,4 +90,8 @@ public sealed class GhurifyApiFactory(
     /// </summary>
     public HttpClient CreateClientWithoutCookieJar() =>
         CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+
+    /// <summary>An anonymous client that reports redirects instead of following them.</summary>
+    public HttpClient CreateClientWithoutRedirects() =>
+        CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false, AllowAutoRedirect = false });
 }

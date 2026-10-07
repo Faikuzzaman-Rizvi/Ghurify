@@ -10,20 +10,6 @@ namespace Ghurify.Infrastructure.Repositories.Identity;
 /// <summary>Accounts.</summary>
 public sealed class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepository
 {
-    public async Task<User> GetOrAddByEmailAsync(EmailAddress email, CancellationToken cancellationToken)
-    {
-        await using var connection = await connectionFactory.OpenAsync(cancellationToken);
-
-        // Procedure: the existence check and the insert have to be one atomic step.
-        var row = await connection.QuerySingleAsync<UserRow>(new CommandDefinition(
-            Procedures.Main.GetOrAddUserByEmail,
-            new { Email = email.Value },
-            commandType: CommandType.StoredProcedure,
-            cancellationToken: cancellationToken));
-
-        return ToDomain(row);
-    }
-
     public async Task<User?> FindByIdAsync(long userId, CancellationToken cancellationToken)
     {
         await using var connection = await connectionFactory.OpenAsync(cancellationToken);
@@ -41,7 +27,7 @@ public sealed class UserRepository(IDbConnectionFactory connectionFactory) : IUs
         return row is null ? null : ToDomain(row);
     }
 
-    private static User ToDomain(UserRow row) => new(
+    internal static User ToDomain(UserRow row) => new(
         row.Id,
         EmailAddress.FromStorage(row.Email),
         // Optional: collected later on the profile, for SOS and payouts.
@@ -51,7 +37,7 @@ public sealed class UserRepository(IDbConnectionFactory connectionFactory) : IUs
         (UserStatus)row.Status,
         new DateTimeOffset(row.Created, TimeSpan.Zero));
 
-    private sealed record UserRow(
+    internal sealed record UserRow(
         long Id,
         string Email,
         string? Phone,

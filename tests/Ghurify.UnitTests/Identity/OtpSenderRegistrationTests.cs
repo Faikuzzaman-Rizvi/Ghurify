@@ -40,7 +40,7 @@ public sealed class OtpSenderRegistrationTests
         // arrive, while every dashboard showed it as healthy.
         await Assert.ThrowsAsync<NotSupportedException>(() =>
             sender.SendOtpAsync(
-                Email.Parse("rizvi@example.com"), "123456", TestContext.Current.CancellationToken));
+                Email.Parse("rizvi@example.com"), "123456", Domain.Identity.OtpPurpose.SignUp, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -94,7 +94,24 @@ public sealed class OtpSenderRegistrationTests
         Assert.False(provider.GetRequiredService<IOptions<EmailOptions>>().Value.IsMailCatcher);
     }
 
-    private static ServiceProvider BuildProvider(bool isDevelopment, bool smtpConfigured, string? host = null)
+    [Fact]
+    public void APickupDirectory_IsUsedOnlyInDevelopment_AndNeverWhenSmtpIsConfigured()
+    {
+        using (var development = BuildProvider(isDevelopment: true, smtpConfigured: false, pickup: "e2e-mail"))
+        {
+            Assert.IsType<PickupDirectoryOtpSender>(development.GetRequiredService<IOtpSender>());
+        }
+
+        using (var production = BuildProvider(isDevelopment: false, smtpConfigured: false, pickup: "e2e-mail"))
+        {
+            Assert.IsType<UnconfiguredOtpSender>(production.GetRequiredService<IOtpSender>());
+        }
+
+        using var withSmtp = BuildProvider(isDevelopment: true, smtpConfigured: true, pickup: "e2e-mail");
+        Assert.IsType<SmtpOtpSender>(withSmtp.GetRequiredService<IOtpSender>());
+    }
+
+    private static ServiceProvider BuildProvider(bool isDevelopment, bool smtpConfigured, string? host = null, string? pickup = null)
     {
         var settings = new Dictionary<string, string?>
         {
@@ -102,6 +119,11 @@ public sealed class OtpSenderRegistrationTests
             ["Identity:OtpPepper"] = new string('p', 32),
             ["Identity:JwtSigningKey"] = new string('k', 32),
         };
+
+        if (pickup is not null)
+        {
+            settings["Email:PickupDirectory"] = pickup;
+        }
 
         if (smtpConfigured)
         {

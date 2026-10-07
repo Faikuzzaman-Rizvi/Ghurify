@@ -4,6 +4,330 @@
  */
 
 export interface paths {
+    "/api/v1/auth/password/change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Changes the password, signs out every other device, and starts a fresh session here. */
+        post: operations["ChangePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every trip you host, drafts included. */
+        get: operations["ListMyHostedTrips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Redirects to the user's profile picture, or 404 if they have none. */
+        get: operations["GetAvatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/verification/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** e-KYC provider callback. Signed with HMAC-SHA256 in X-Ekyc-Signature. */
+        post: operations["VerificationCallback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every request for one of your trips, pending first. */
+        get: operations["ListTripJoinRequests"];
+        put?: never;
+        /** Asks to join a live trip. Needs a verified national ID. */
+        post: operations["RequestToJoin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your requests and bookings, newest trip first. */
+        get: operations["ListMyBookings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bookings/{id}/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your booking's price, service fee and total, before paying. */
+        get: operations["GetCheckout"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bookings/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Starts paying for your held booking. Send an Idempotency-Key header; returns the gateway URL. */
+        post: operations["StartPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/webhooks/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Gateway IPN. Verified by signature and server-to-server validation; idempotent. */
+        post: operations["PaymentWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/return/{provider}/{outcome}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Where the gateway sends the traveller back. Settles like the IPN, then redirects to the web app. */
+        get: operations["PaymentReturn"];
+        put?: never;
+        /** Where the gateway sends the traveller back. Settles like the IPN, then redirects to the web app. */
+        post: operations["PaymentReturn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bookings/{id}/cancellation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What cancelling your paid booking now would refund, by the refund rules. */
+        get: operations["GetCancellationQuote"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bookings/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels your paid booking before the trip; refunds by days before departure. */
+        post: operations["CancelBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Payouts released to you, by trip and stage. */
+        get: operations["ListMyPayouts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your refunds and where each stands. */
+        get: operations["ListMyRefunds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every trip chat you are in, with unread counts. */
+        get: operations["ListMyChats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stories from people you follow, your own, and destination stories, newest first. */
+        get: operations["GetFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/comments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["DeleteComment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/check-ins/{id}/done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Says the group is safe at this check-in. */
+        post: operations["CompleteCheckIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reports a person, a story or a trip, or raises a dispute about a booking. */
+        post: operations["FileReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -21,7 +345,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/otp": {
+    "/api/v1/auth/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -30,15 +354,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Emails a one-time sign-in code. */
-        post: operations["RequestOtp"];
+        /** Creates an account and emails a code to confirm the address. */
+        post: operations["Register"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/verify": {
+    "/api/v1/auth/register/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -47,8 +371,76 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Exchanges a one-time code for a session. */
-        post: operations["VerifyOtp"];
+        /** Confirms the address with the emailed code and signs in. */
+        post: operations["ConfirmEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sends the confirmation code again. */
+        post: operations["ResendConfirmationCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sign-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Signs in with email and password. */
+        post: operations["SignIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Emails a password reset code, if the address has an account. */
+        post: operations["ForgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sets a new password with the reset code, signs out everywhere else, and signs in. */
+        post: operations["ResetPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -116,7 +508,8 @@ export interface paths {
         /** Searches live trips, soonest first unless another sort is asked for. */
         get: operations["SearchTrips"];
         put?: never;
-        post?: never;
+        /** Saves a new trip as a draft. */
+        post: operations["CreateTrip"];
         delete?: never;
         options?: never;
         head?: never;
@@ -132,8 +525,43 @@ export interface paths {
         };
         /** A live trip with its cost breakdown and day-by-day plan. */
         get: operations["GetTrip"];
-        put?: never;
+        /** Saves changes to one of your own trips. */
+        put: operations["UpdateTrip"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publishes one of your own drafts. Needs the VerifiedHost policy. */
+        post: operations["PublishTrip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels one of your trips. Every paid traveller is refunded in full, fee included. */
+        post: operations["CancelTrip"];
         delete?: never;
         options?: never;
         head?: never;
@@ -174,14 +602,1381 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in user's profile, roles and verification level. */
+        get: operations["GetMyProfile"];
+        /** Saves the signed-in user's profile. */
+        put: operations["UpdateMyProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/roles/host": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turns on hosting. Publishing still needs the selfie identity check. */
+        post: operations["BecomeHost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in user's identity checks, newest first. */
+        get: operations["GetMyVerifications"];
+        put?: never;
+        /** Starts an identity check with the uploaded ID photos: reviewed by the provider or by an admin. */
+        post: operations["StartVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/verification/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Identity photos uploaded and not yet submitted with a check. */
+        get: operations["ListMyVerificationDocuments"];
+        put?: never;
+        /** A short-lived link to upload one identity photo to private storage. */
+        post: operations["StartVerificationDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/verification/documents/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Checks the uploaded photo and removes its metadata. */
+        post: operations["CompleteVerificationDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/verification/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Deletes a photo that has not been submitted. */
+        delete: operations["RemoveVerificationDocument"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A short-lived link to upload a profile picture. */
+        post: operations["StartAvatarUpload"];
+        /** Removes the profile picture. */
+        delete: operations["RemoveAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Checks the uploaded photo and makes it the profile picture. */
+        post: operations["CompleteAvatarUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/verifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Identity checks in one status, oldest first. */
+        get: operations["QueryVerificationQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/verifications/{id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The ID photos of one check, as links that work for five minutes. Each viewing is audited. */
+        get: operations["GetVerificationDocuments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Removes someone's profile picture (for example, an inappropriate one). Audited. */
+        delete: operations["RemoveUserAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/verifications/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approves or rejects a pending identity check. A rejection needs a reason. */
+        post: operations["ReviewVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grants or revokes a role. */
+        post: operations["ChangeUserRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Payouts in one status; Released ones are waiting to be sent to hosts. */
+        get: operations["QueryPayoutQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/payouts/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirms a released payout has been sent to the host. Audited. */
+        post: operations["ApprovePayout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recent admin and safety-desk actions, newest first. */
+        get: operations["QueryAuditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/join-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approves a request on your trip and holds a seat until the payment deadline. */
+        post: operations["ApproveJoinRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/join-requests/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Declines a pending request on your trip. */
+        post: operations["DeclineJoinRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/join-requests/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraws your own request before paying; an unpaid seat is released. */
+        post: operations["CancelJoinRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your newest notifications and the unread count. */
+        get: operations["ListMyNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marks your notifications read, up to and including the given id. */
+        post: operations["MarkMyNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/sandbox/{reference}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sandbox only: the payment the sandbox page is showing. */
+        get: operations["GetSandboxPayment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/sandbox/{reference}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sandbox only: pays or fails the payment, through the real callback handler. */
+        post: operations["CompleteSandboxPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A page of the trip's chat, newest first, plus pinned announcements. Members only. */
+        get: operations["GetChatHistory"];
+        put?: never;
+        /** Posts to the trip's chat. Numbers are hidden while anyone has not paid. */
+        post: operations["SendChatMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/chat/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marks the chat read up to a message. */
+        post: operations["MarkChatRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A short-lived link to upload one photo or video straight to storage. */
+        post: operations["CreateMediaUploadUrl"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Says the upload finished; the file is checked and its location data stripped. */
+        post: operations["CompleteMediaUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publishes a story with your uploaded photos. */
+        post: operations["CreatePost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Removes your own story. */
+        delete: operations["DeletePost"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posts/{id}/likes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["LikePost"];
+        delete: operations["UnlikePost"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posts/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListComments"];
+        put?: never;
+        post: operations["AddComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A person's public page: ratings, hosted trips and reviews. Never contact details. */
+        get: operations["GetPublicProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListUserPosts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["FollowUser"];
+        delete: operations["UnfollowUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reviews someone you travelled with, after the trip. One per person per trip. */
+        post: operations["AddReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/reviewable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who you can review on this completed trip. */
+        get: operations["ListReviewable"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/sos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Raises an SOS: the safety desk sees it live and your emergency contact is texted. */
+        post: operations["RaiseSos"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}/check-ins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The trip's safety check-ins. For the people on the trip. */
+        get: operations["ListCheckIns"];
+        put?: never;
+        /** Schedules a safety check-in on your own trip. */
+        post: operations["ScheduleCheckIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sos/{id}/location": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sends your current position while your SOS is open. */
+        post: operations["UpdateSosLocation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sos/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Closes an SOS: the person who raised it is safe, or the desk has handled it. */
+        post: operations["ResolveSos"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAdminDashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/sos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetSosBoard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/sos/{id}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AcknowledgeSos"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/check-ins/missed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListMissedCheckIns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/destinations/{slug}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sets a destination Open, Caution or Closed. Closing cancels its trips and refunds everyone. */
+        post: operations["ChangeDestinationStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/reports/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ResolveReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Finds people by email (start), phone (end) or name. */
+        get: operations["SearchUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One person in full: account, roles, identity checks, trips, bookings and reports. */
+        get: operations["GetUserForAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suspends, reactivates or closes an account. Suspending signs them out everywhere. */
+        post: operations["SetUserStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/require-password-reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Makes the password stop working and ends every session; the owner resets it by email. */
+        post: operations["RequirePasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trips in any status, by id, title, host or destination. */
+        get: operations["SearchAllTrips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trips/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels a trip and refunds every paid traveller in full. */
+        post: operations["CancelTripAsAdmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/bookings/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A booking with its payments, refunds and escrow balance, by number or payment reference. */
+        get: operations["LookupBooking"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/refunds/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retries every failed refund now. */
+        post: operations["RetryRefundsNow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/destinations/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Adds a destination, or edits its details in both languages. */
+        put: operations["SaveDestination"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/emergency-points": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Police stations and hospitals shown with an SOS, and whether each was checked. */
+        get: operations["ListEmergencyPoints"];
+        put?: never;
+        /** Adds (no id) or edits an emergency point. */
+        post: operations["SaveEmergencyPoint"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddCommentRequest: {
+            body: null | string;
+        };
+        AddReviewCommand: {
+            /** Format: int64 */
+            revieweeId: number | string;
+            direction: components["schemas"]["ReviewDirection"];
+            /** Format: uint8 */
+            rating: number | string;
+            body: null | string;
+        };
+        AdminBookingDetail: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: int64 */
+            hostId: number | string;
+            hostName: null | string;
+            /** Format: int64 */
+            travellerId: number | string;
+            travellerName: null | string;
+            status: components["schemas"]["BookingStatus"];
+            /** Format: double */
+            amount: number | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            confirmedOn: null | string;
+            /** Format: date-time */
+            cancelledOn: null | string;
+            payments: components["schemas"]["AdminPayment"][];
+            refunds: components["schemas"]["AdminRefund"][];
+            /** Format: double */
+            held: number | string;
+            /** Format: double */
+            released: number | string;
+            /** Format: double */
+            refunded: number | string;
+            /** Format: double */
+            inEscrow?: number | string;
+        };
+        AdminPayment: {
+            /** Format: int64 */
+            id: number | string;
+            provider: string;
+            transactionRef: string;
+            status: components["schemas"]["PaymentStatus"];
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            fee: number | string;
+            /** Format: double */
+            total: number | string;
+            /** Format: double */
+            paidAmount: null | number | string;
+            failureReason: null | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            completedOn: null | string;
+        };
+        AdminReason: {
+            reason: null | string;
+        };
+        AdminRefund: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: double */
+            amount: number | string;
+            reason: components["schemas"]["RefundReason"];
+            status: components["schemas"]["RefundStatus"];
+            reference: string;
+            failureReason: null | string;
+            /** Format: int32 */
+            attempts: number | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            completedOn: null | string;
+        };
+        AdminTripItem: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            /** Format: int64 */
+            hostId: number | string;
+            hostName: null | string;
+            destinationName: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            status: components["schemas"]["TripStatus"];
+            /** Format: int32 */
+            seats: number | string;
+            /** Format: int32 */
+            seatsTaken: number | string;
+            /** Format: double */
+            pricePerPerson: number | string;
+        };
+        AdminTripPage: {
+            items: components["schemas"]["AdminTripItem"][];
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        AdminUserBooking: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            status: components["schemas"]["BookingStatus"];
+            /** Format: double */
+            amount: number | string;
+            /** Format: date-time */
+            created: string;
+        };
+        AdminUserDetail: {
+            /** Format: int64 */
+            id: number | string;
+            email: string;
+            displayName: null | string;
+            phone: null | string;
+            gender: null | components["schemas"]["Gender"];
+            status: components["schemas"]["UserStatus"];
+            /** Format: date-time */
+            created: string;
+            homeDistrict: null | string;
+            emergencyContactName: null | string;
+            emergencyContactPhone: null | string;
+            /** Format: int64 */
+            avatarVersion: null | number | string;
+            hasPassword: boolean;
+            mustResetPassword: boolean;
+            roles: components["schemas"]["Role"][];
+            verifications: components["schemas"]["AdminVerification"][];
+            hostedTrips: components["schemas"]["AdminUserTrip"][];
+            bookings: components["schemas"]["AdminUserBooking"][];
+            /** Format: int32 */
+            openReports: number | string;
+            /** Format: int32 */
+            totalReports: number | string;
+        };
+        AdminUserItem: {
+            /** Format: int64 */
+            id: number | string;
+            email: string;
+            displayName: null | string;
+            phone: null | string;
+            status: components["schemas"]["UserStatus"];
+            /** Format: date-time */
+            created: string;
+            verifiedLevel: null | components["schemas"]["VerificationLevel"];
+            roles: components["schemas"]["Role"][];
+        };
+        AdminUserPage: {
+            items: components["schemas"]["AdminUserItem"][];
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        AdminUserTrip: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            status: components["schemas"]["TripStatus"];
+            /** Format: date */
+            startDate: string;
+            /** Format: int32 */
+            seats: number | string;
+            /** Format: int32 */
+            seatsTaken: number | string;
+        };
+        AdminVerification: {
+            /** Format: int64 */
+            id: number | string;
+            level: components["schemas"]["VerificationLevel"];
+            status: components["schemas"]["VerificationStatus"];
+            idType: components["schemas"]["IdDocumentType"];
+            provider: string;
+            reason: null | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            reviewedOn: null | string;
+            /** Format: int32 */
+            documentCount: number | string;
+        };
+        AuditEntry: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            actorId: number | string;
+            actorName: null | string;
+            action: string;
+            entityType: string;
+            /** Format: int64 */
+            entityId: number | string;
+            note: null | string;
+            /** Format: date-time */
+            created: string;
+        };
+        AvatarUploadRequest: {
+            contentType: string;
+            /** Format: int64 */
+            sizeBytes: number | string;
+        };
+        BookingCheckout: {
+            /** Format: int64 */
+            bookingId: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            hostName: null | string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            fee: number | string;
+            /** Format: double */
+            total: number | string;
+            status: components["schemas"]["BookingStatus"];
+            /** Format: date-time */
+            holdExpiresAt: string;
+            latestPaymentStatus: null | components["schemas"]["PaymentStatus"];
+            latestPaymentFailure: null | string;
+        };
+        /** @enum {unknown} */
+        BookingStatus: "Held" | "Confirmed" | "Cancelled" | "Refunded" | null;
+        CallbackHandled: {
+            /** Format: int64 */
+            bookingId: null | number | string;
+            outcome: string;
+        };
+        CancellationQuote: {
+            /** Format: int64 */
+            bookingId: number | string;
+            canCancel: boolean;
+            /** Format: int32 */
+            daysBeforeDeparture: number | string;
+            /** Format: double */
+            paid: number | string;
+            /** Format: double */
+            refund: number | string;
+            rule: string;
+        };
+        ChangeDestinationStatusCommand: {
+            status: components["schemas"]["DestinationStatus"];
+            note: null | string;
+            noteBn: null | string;
+        };
+        ChangePasswordCommand: {
+            currentPassword: string;
+            newPassword: string;
+        };
+        ChangeRoleRequest: {
+            role: components["schemas"]["Role"];
+            grant: boolean;
+        };
+        ChatHistory: {
+            messages: components["schemas"]["ChatMessageView"][];
+            pinned: components["schemas"]["ChatMessageView"][];
+        };
+        /** @enum {unknown} */
+        ChatMessageKind: "Message" | "Announcement" | "System";
+        ChatMessageSent: {
+            message: components["schemas"]["ChatMessageView"];
+            contactsMasked: boolean;
+        };
+        ChatMessageView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            /** Format: int64 */
+            senderId: number | string;
+            senderName: null | string;
+            kind: components["schemas"]["ChatMessageKind"];
+            body: string;
+            isPinned: boolean;
+            wasMasked: boolean;
+            /** Format: date-time */
+            created: string;
+        };
+        ChatUnread: {
+            /** Format: int64 */
+            tripId: number | string;
+            title: string;
+            /** Format: int32 */
+            unread: number | string;
+        };
+        CheckInDoneRequest: {
+            note: null | string;
+        };
+        CheckInScheduled: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        /** @enum {unknown} */
+        CheckInStatus: "Scheduled" | "Done" | "Missed";
+        CheckInView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            label: string;
+            /** Format: date-time */
+            dueAt: string;
+            status: components["schemas"]["CheckInStatus"];
+            checkedInBy: null | string;
+            /** Format: date-time */
+            checkedInOn: null | string;
+            note: null | string;
+        };
+        CodeSentResponse: {
+            /** Format: int32 */
+            expiresInSeconds: number | string;
+            /** Format: int32 */
+            resendAfterSeconds: number | string;
+        };
+        CommentView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            postId: number | string;
+            /** Format: int64 */
+            authorId: number | string;
+            authorName: null | string;
+            body: string;
+            /** Format: date-time */
+            created: string;
+        };
+        CompleteAvatarCommand: {
+            uploadId: string;
+        };
+        ConfirmEmailCommand: {
+            email: string;
+            code: string;
+        };
         /** @enum {unknown} */
         CostCategory: "Transport" | "Stay" | "Food" | "Fees" | "Guide" | "Buffer";
+        CreatePostCommand: {
+            body: null | string;
+            destinationSlug: null | string;
+            /** Format: int64 */
+            tripId: null | number | string;
+            mediaIds: null | (number | string)[];
+        };
+        DashboardCounts: {
+            /** Format: int32 */
+            pendingVerifications: number | string;
+            /** Format: int32 */
+            openReports: number | string;
+            /** Format: int32 */
+            openDisputes: number | string;
+            /** Format: int32 */
+            openSos: number | string;
+            /** Format: int32 */
+            missedCheckIns: number | string;
+            /** Format: int32 */
+            payoutsAwaitingApproval: number | string;
+            /** Format: int32 */
+            refundsInFlight: number | string;
+            /** Format: int32 */
+            closedDestinations: number | string;
+            /** Format: int32 */
+            cautionDestinations: number | string;
+            /** Format: int32 */
+            liveTrips: number | string;
+            /** Format: int32 */
+            bookingsConfirmed: number | string;
+        };
         /** @enum {unknown} */
         DestinationKind: "Hills" | "Beach" | "Island" | "Forest" | "Wetland" | "TeaGarden" | "Lake" | "River";
+        DestinationRequest: {
+            name: string;
+            nameBn: string;
+            division: string;
+            divisionBn: string;
+            summary: string;
+            summaryBn: string;
+            kind: components["schemas"]["DestinationKind"];
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+        };
+        DestinationSaved: {
+            slug: string;
+            added: boolean;
+        };
         /** @enum {unknown} */
         DestinationStatus: "Open" | "Caution" | "Closed";
         DestinationSummary: {
@@ -207,11 +2002,93 @@ export interface components {
         };
         /** @enum {unknown} */
         Difficulty: "Easy" | "Moderate" | "Challenging";
+        EmailOnlyCommand: {
+            email: string;
+        };
+        EmergencyPointEdit: {
+            /** Format: int64 */
+            id: null | number | string;
+            destinationSlug: null | string;
+            /** Format: uint8 */
+            kind: number | string;
+            name: string;
+            nameBn: string;
+            phone: null | string;
+            /** Format: double */
+            latitude: number | string;
+            /** Format: double */
+            longitude: number | string;
+            checked: boolean;
+        };
+        EmergencyPointSaved: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        EmergencyPointView: {
+            /** Format: int64 */
+            id: number | string;
+            destinationSlug: null | string;
+            destinationName: null | string;
+            /** Format: uint8 */
+            kind: number | string;
+            name: string;
+            nameBn: string;
+            phone: null | string;
+            /** Format: double */
+            latitude: number | string;
+            /** Format: double */
+            longitude: number | string;
+            /** Format: date-time */
+            checkedOn: null | string;
+            checkedBy: null | string;
+        };
+        FileReportCommand: {
+            kind: components["schemas"]["ReportKind"];
+            /** Format: int64 */
+            targetId: number | string;
+            reason: components["schemas"]["ReportReason"];
+            details: null | string;
+        };
+        /** @enum {unknown} */
+        Gender: "Unspecified" | "Female" | "Male" | "Other" | null;
         /** @enum {unknown} */
         GroupType: "Open" | "WomenOnly" | "Students" | "Families";
         HealthResponse: {
             status: string;
             databaseStatus: string;
+        };
+        HelpPoint: {
+            /** Format: uint8 */
+            kind: number | string;
+            name: string;
+            nameBn: string;
+            phone: null | string;
+            /** Format: double */
+            latitude: number | string;
+            /** Format: double */
+            longitude: number | string;
+            /** Format: int32 */
+            distanceMeters: number | string;
+        };
+        HostTripSummary: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            destination: components["schemas"]["TripDestination"];
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** Format: int32 */
+            seats: number | string;
+            /** Format: int32 */
+            seatsTaken: number | string;
+            /** Format: double */
+            pricePerPerson: number | string;
+            groupType: components["schemas"]["GroupType"];
+            status: components["schemas"]["TripStatus"];
+            /** Format: int32 */
+            pendingRequests: number | string;
         };
         HttpValidationProblemDetails: {
             type?: null | string;
@@ -224,6 +2101,186 @@ export interface components {
                 [key: string]: string[];
             };
         };
+        /** @enum {unknown} */
+        IdDocumentType: "Nid" | "Passport" | "DrivingLicence" | null;
+        JoinRequestApproved: {
+            /** Format: int64 */
+            bookingId: number | string;
+            /** Format: date-time */
+            holdExpiresAt: string;
+        };
+        JoinRequestCreated: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        JoinRequestForHost: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            userId: number | string;
+            displayName: null | string;
+            gender: null | components["schemas"]["Gender"];
+            verifiedLevel: null | components["schemas"]["VerificationLevel"];
+            message: null | string;
+            status: components["schemas"]["JoinRequestStatus"];
+            /** Format: date-time */
+            created: string;
+            /** Format: int64 */
+            bookingId: null | number | string;
+            bookingStatus: null | components["schemas"]["BookingStatus"];
+            /** Format: date-time */
+            holdExpiresAt: null | string;
+        };
+        /** @enum {unknown} */
+        JoinRequestStatus: "Pending" | "Approved" | "Declined" | "Expired" | "Cancelled";
+        MarkChatReadRequest: {
+            /** Format: int64 */
+            lastReadId: number | string;
+        };
+        MarkReadRequest: {
+            /** Format: int64 */
+            upToId: number | string;
+        };
+        /** @enum {unknown} */
+        MediaKind: "Image" | "Video";
+        MediaView: {
+            /** Format: int64 */
+            id: number | string;
+            kind: components["schemas"]["MediaKind"];
+            contentType: string;
+            url: string;
+        };
+        MissedCheckIn: {
+            /** Format: int64 */
+            checkInId: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            label: string;
+            /** Format: int64 */
+            hostId: number | string;
+            tripTitle: string;
+        };
+        MyDocumentView: {
+            /** Format: int64 */
+            id: number | string;
+            kind: components["schemas"]["VerificationDocumentKind"];
+            status: components["schemas"]["VerificationDocumentStatus"];
+            failureReason: null | string;
+            /** Format: date-time */
+            created: string;
+        };
+        MyTripBooking: {
+            /** Format: int64 */
+            requestId: number | string;
+            requestStatus: components["schemas"]["JoinRequestStatus"];
+            /** Format: date-time */
+            requestedOn: string;
+            /** Format: int64 */
+            tripId: number | string;
+            title: string;
+            destinationSlug: string;
+            destinationName: string;
+            destinationNameBn: string;
+            destinationKind: components["schemas"]["DestinationKind"];
+            destinationStatus: components["schemas"]["DestinationStatus"];
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            tripStatus: components["schemas"]["TripStatus"];
+            hostName: null | string;
+            /** Format: int64 */
+            bookingId: null | number | string;
+            bookingStatus: null | components["schemas"]["BookingStatus"];
+            /** Format: double */
+            amount: null | number | string;
+            /** Format: date-time */
+            holdExpiresAt: null | string;
+        };
+        NotificationItem: {
+            /** Format: int64 */
+            id: number | string;
+            kind: string;
+            data: null | string;
+            /** Format: date-time */
+            created: string;
+            isRead: boolean;
+        };
+        NotificationPage: {
+            items: components["schemas"]["NotificationItem"][];
+            /** Format: int32 */
+            unreadCount: number | string;
+        };
+        PaymentStarted: {
+            /** Format: int64 */
+            paymentId: number | string;
+            redirectUrl: string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            fee: number | string;
+            /** Format: double */
+            total: number | string;
+        };
+        /** @enum {unknown} */
+        PaymentStatus: "Created" | "Pending" | "Succeeded" | "Failed" | "Expired" | null;
+        /** @enum {unknown} */
+        PayoutStage: "BeforeDeparture" | "AfterStart";
+        /** @enum {unknown} */
+        PayoutStatus: "Released" | "Paid";
+        PayoutView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: int64 */
+            hostId: number | string;
+            hostName: null | string;
+            stage: components["schemas"]["PayoutStage"];
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            platformAmount: number | string;
+            status: components["schemas"]["PayoutStatus"];
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            approvedOn: null | string;
+        };
+        PostCreated: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        PostPage: {
+            items: components["schemas"]["PostView"][];
+            /** Format: int64 */
+            nextBefore: null | number | string;
+        };
+        PostView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            authorId: number | string;
+            authorName: null | string;
+            authorVerifiedLevel: null | components["schemas"]["VerificationLevel"];
+            body: string;
+            destinationSlug: null | string;
+            destinationName: null | string;
+            destinationNameBn: null | string;
+            /** Format: int64 */
+            tripId: null | number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            comments: number | string;
+            likedByMe: boolean;
+            /** Format: date-time */
+            created: string;
+            media: components["schemas"]["MediaView"][];
+        };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -232,14 +2289,236 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
-        RequestOtpRequest: {
-            email: string;
+        ProfileDetails: {
+            /** Format: int64 */
+            userId: number | string;
+            maskedEmail: string;
+            displayName: null | string;
+            gender: null | components["schemas"]["Gender"];
+            phone: null | string;
+            bio: null | string;
+            homeDistrict: null | string;
+            emergencyContactName: null | string;
+            emergencyContactPhone: null | string;
+            roles: components["schemas"]["Role"][];
+            verifiedLevel: null | components["schemas"]["VerificationLevel"];
+            /** Format: date */
+            memberSince: string;
+            /** Format: int64 */
+            avatarVersion?: null | number | string;
         };
-        RequestOtpResponse: {
+        ProfileTrip: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            destinationSlug: string;
+            destinationName: string;
+            destinationNameBn: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            status: components["schemas"]["TripStatus"];
+        };
+        PublicProfile: {
+            /** Format: int64 */
+            userId: number | string;
+            displayName: null | string;
+            bio: null | string;
+            homeDistrict: null | string;
+            /** Format: date */
+            memberSince: string;
+            verifiedLevel: null | components["schemas"]["VerificationLevel"];
+            isHost: boolean;
             /** Format: int32 */
-            expiresInSeconds: number | string;
+            followers: number | string;
             /** Format: int32 */
-            resendAfterSeconds: number | string;
+            following: number | string;
+            followedByMe: boolean;
+            /** Format: int32 */
+            asHostCount: number | string;
+            /** Format: double */
+            asHostAverage: null | number | string;
+            /** Format: int32 */
+            asTravelerCount: number | string;
+            /** Format: double */
+            asTravelerAverage: null | number | string;
+            hostedTrips: components["schemas"]["ProfileTrip"][];
+            reviews: components["schemas"]["ReviewView"][];
+        };
+        RaiseSosCommand: {
+            /** Format: double */
+            latitude: number | string;
+            /** Format: double */
+            longitude: number | string;
+            /** Format: int32 */
+            accuracyMeters: null | number | string;
+            message: null | string;
+        };
+        /** @enum {unknown} */
+        RefundReason: "TravelerCancelled" | "HostCancelled" | "DestinationClosed" | "LatePayment" | "DuplicatePayment" | "AmountMismatch" | "Admin";
+        /** @enum {unknown} */
+        RefundStatus: "Pending" | "Succeeded" | "Failed";
+        RefundView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            bookingId: number | string;
+            tripTitle: string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            shortfall: number | string;
+            reason: components["schemas"]["RefundReason"];
+            status: components["schemas"]["RefundStatus"];
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            completedOn: null | string;
+        };
+        RegisterCommand: {
+            email: string;
+            password: string;
+            displayName: string;
+        };
+        /** @enum {unknown} */
+        ReportAction: "Dismiss" | "HidePost" | "SuspendUser" | "RefundBooking" | "Resolve";
+        ReportFiled: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        /** @enum {unknown} */
+        ReportKind: "User" | "Post" | "Trip" | "Dispute";
+        /** @enum {unknown} */
+        ReportReason: "Harassment" | "Fraud" | "Unsafe" | "Inappropriate" | "Payment" | "Other";
+        /** @enum {unknown} */
+        ReportStatus: "Open" | "Actioned" | "Dismissed";
+        ReportView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            reporterId: number | string;
+            reporterName: null | string;
+            kind: components["schemas"]["ReportKind"];
+            /** Format: int64 */
+            targetId: number | string;
+            reason: components["schemas"]["ReportReason"];
+            details: null | string;
+            status: components["schemas"]["ReportStatus"];
+            resolution: null | string;
+            /** Format: date-time */
+            created: string;
+        };
+        RequestToJoinCommand: {
+            message: null | string;
+        };
+        ResetPasswordCommand: {
+            email: string;
+            code: string;
+            newPassword: string;
+        };
+        ResolveReportCommand: {
+            action: components["schemas"]["ReportAction"];
+            resolution: null | string;
+        };
+        RetriedRefunds: {
+            /** Format: int32 */
+            count: number | string;
+        };
+        Reviewable: {
+            /** Format: int64 */
+            userId: number | string;
+            displayName: null | string;
+            direction: components["schemas"]["ReviewDirection"];
+            alreadyReviewed: boolean;
+        };
+        ReviewAdded: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        /** @enum {unknown} */
+        ReviewDirection: "TravelerToHost" | "HostToTraveler" | "TravelerToGuide";
+        ReviewDocumentView: {
+            /** Format: int64 */
+            id: number | string;
+            kind: components["schemas"]["VerificationDocumentKind"];
+            url: null | string;
+            purged: boolean;
+            /** Format: date-time */
+            created: string;
+        };
+        ReviewVerificationCommand: {
+            approve: boolean;
+            reason: null | string;
+        };
+        ReviewView: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: int64 */
+            reviewerId: number | string;
+            reviewerName: null | string;
+            direction: components["schemas"]["ReviewDirection"];
+            /** Format: uint8 */
+            rating: number | string;
+            body: null | string;
+            /** Format: date-time */
+            created: string;
+        };
+        /** @enum {unknown} */
+        Role: "Traveler" | "Host" | "Creator" | "Celebrity" | "Guide" | "Operator" | "Partner" | "Moderator" | "SafetyDesk" | "Admin";
+        SandboxCompletion: {
+            succeed: boolean;
+        };
+        SandboxPayment: {
+            reference: string;
+            /** Format: int64 */
+            bookingId: number | string;
+            /** Format: double */
+            total: number | string;
+            status: string;
+        };
+        SaveTripCommand: {
+            destinationSlug: string;
+            title: string;
+            summary: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            meetingPoint: string;
+            /** Format: int32 */
+            seats: number | string;
+            /** Format: double */
+            pricePerPerson: number | string;
+            groupType: components["schemas"]["GroupType"];
+            costItems: components["schemas"]["SaveTripCostLine"][];
+            itinerary: components["schemas"]["SaveTripDay"][];
+        };
+        SaveTripCostLine: {
+            category: components["schemas"]["CostCategory"];
+            description: null | string;
+            /** Format: double */
+            amount: number | string;
+        };
+        SaveTripDay: {
+            /** Format: int32 */
+            dayNo: number | string;
+            title: string;
+            details: string;
+            difficulty: components["schemas"]["Difficulty"];
+        };
+        ScheduleCheckInCommand: {
+            label: null | string;
+            /** Format: date-time */
+            dueAt: string;
+        };
+        SendChatMessageCommand: {
+            body: string;
+            /** @default false */
+            pin: boolean;
         };
         SessionResponse: {
             accessToken: string;
@@ -247,17 +2526,80 @@ export interface components {
             expiresInSeconds: number | string;
             user: components["schemas"]["SignedInUserResponse"];
         };
+        SetUserStatusCommand: {
+            status: components["schemas"]["UserStatus"];
+            reason: null | string;
+        };
         SignedInUserResponse: {
             /** Format: int64 */
             id: number | string;
             maskedEmail: string;
             displayName: null | string;
         };
+        SignInCommand: {
+            email: string;
+            password: string;
+        };
+        SosBoardItem: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            userId: number | string;
+            userName: null | string;
+            /** Format: int64 */
+            tripId: number | string;
+            tripTitle: string;
+            /** Format: double */
+            latitude: number | string;
+            /** Format: double */
+            longitude: number | string;
+            message: null | string;
+            status: components["schemas"]["SosStatus"];
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            lastSeenOn: string;
+            userPhone?: null | string;
+            hostName?: null | string;
+            hostPhone?: null | string;
+        };
+        SosLocationRequest: {
+            /** Format: double */
+            latitude: number | string;
+            /** Format: double */
+            longitude: number | string;
+        };
+        SosRaisedView: {
+            /** Format: int64 */
+            sosId: number | string;
+            emergencyContactTexted: boolean;
+            nearestHelp: components["schemas"]["HelpPoint"][];
+        };
+        /** @enum {unknown} */
+        SosStatus: "Open" | "Acknowledged" | "Resolved";
+        StartDocumentUploadCommand: {
+            kind: components["schemas"]["VerificationDocumentKind"];
+            contentType: string;
+            /** Format: int64 */
+            sizeBytes: number | string;
+        };
+        StartVerificationRequest: {
+            level: components["schemas"]["VerificationLevel"];
+            idNumber: string;
+            /** Format: date */
+            dateOfBirth: string;
+            documentIds: null | (number | string)[];
+            idType: null | components["schemas"]["IdDocumentType"];
+        };
         TripCostLine: {
             category: components["schemas"]["CostCategory"];
             description: null | string;
             /** Format: double */
             amount: number | string;
+        };
+        TripCreated: {
+            /** Format: int64 */
+            id: number | string;
         };
         TripDestination: {
             slug: string;
@@ -290,6 +2632,15 @@ export interface components {
             host: components["schemas"]["TripHost"];
             costItems: components["schemas"]["TripCostLine"][];
             itinerary: components["schemas"]["TripItineraryDay"][];
+            groupMix?: null | components["schemas"]["TripGroupMix"];
+        };
+        TripGroupMix: {
+            /** Format: int32 */
+            women: number | string;
+            /** Format: int32 */
+            men: number | string;
+            /** Format: int32 */
+            others: number | string;
         };
         TripHost: {
             /** Format: int64 */
@@ -297,6 +2648,7 @@ export interface components {
             displayName: null | string;
             /** Format: date */
             memberSince: string;
+            verifiedLevel?: null | components["schemas"]["VerificationLevel"];
         };
         TripItineraryDay: {
             /** Format: int32 */
@@ -336,11 +2688,86 @@ export interface components {
             groupType: components["schemas"]["GroupType"];
             status: components["schemas"]["TripStatus"];
             hostName: null | string;
+            hostVerifiedLevel?: null | components["schemas"]["VerificationLevel"];
         };
-        VerifyOtpRequest: {
-            email: string;
-            code: string;
+        UpdateProfileCommand: {
+            displayName: string;
+            gender: null | components["schemas"]["Gender"];
+            phone: null | string;
+            bio: null | string;
+            homeDistrict: null | string;
+            emergencyContactName: null | string;
+            emergencyContactPhone: null | string;
         };
+        UploadLink: {
+            /** Format: int64 */
+            mediaId: number | string;
+            uploadUrl: string;
+            /** Format: date-time */
+            expiresOn: string;
+        };
+        UploadRequest: {
+            contentType: null | string;
+            /** Format: int64 */
+            sizeBytes: number | string;
+        };
+        UploadTicket: {
+            id: string;
+            uploadUrl: string;
+            /** Format: date-time */
+            expiresOn: string;
+        };
+        /** @enum {unknown} */
+        UserStatus: "Active" | "Suspended" | "Deactivated" | "PendingEmail";
+        /** @enum {unknown} */
+        VerificationDocumentKind: "NidFront" | "NidBack" | "PassportPhotoPage" | "DrivingLicenceFront" | "DrivingLicenceBack" | "Selfie" | "ProfessionalLicence";
+        /** @enum {unknown} */
+        VerificationDocumentStatus: "AwaitingUpload" | "Ready" | "Rejected" | "Purged";
+        /** @enum {unknown} */
+        VerificationLevel: "Phone" | "Nid" | "NidSelfie" | null;
+        VerificationQueueItem: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            userId: number | string;
+            displayName: null | string;
+            maskedEmail: string;
+            level: components["schemas"]["VerificationLevel"];
+            status: components["schemas"]["VerificationStatus"];
+            provider: string;
+            providerRef: null | string;
+            reason: null | string;
+            /** Format: date-time */
+            created: string;
+            idType?: components["schemas"]["IdDocumentType"];
+            /**
+             * Format: int32
+             * @default 0
+             */
+            documentCount: number | string;
+        };
+        VerificationQueuePage: {
+            items: components["schemas"]["VerificationQueueItem"][];
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        VerificationRecord: {
+            /** Format: int64 */
+            id: number | string;
+            level: components["schemas"]["VerificationLevel"];
+            status: components["schemas"]["VerificationStatus"];
+            reason: null | string;
+            /** Format: date-time */
+            created: string;
+            /** Format: date-time */
+            reviewedOn: null | string;
+        };
+        /** @enum {unknown} */
+        VerificationStatus: "Pending" | "Approved" | "Rejected";
         WhoAmIResponse: {
             /** Format: int64 */
             userId: number | string;
@@ -356,6 +2783,672 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    ChangePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMyHostedTrips: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostTripSummary"][];
+                };
+            };
+        };
+    };
+    GetAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Found */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    VerificationCallback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListTripJoinRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestForHost"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RequestToJoin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestToJoinCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestCreated"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMyBookings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyTripBooking"][];
+                };
+            };
+        };
+    };
+    GetCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingCheckout"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    StartPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentStarted"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    PaymentWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    PaymentReturn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+                outcome: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description See Other */
+            303: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentReturn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+                outcome: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description See Other */
+            303: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetCancellationQuote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CancellationQuote"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CancelBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CancellationQuote"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMyPayouts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayoutView"][];
+                };
+            };
+        };
+    };
+    ListMyRefunds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundView"][];
+                };
+            };
+        };
+    };
+    ListMyChats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatUnread"][];
+                };
+            };
+        };
+    };
+    GetFeed: {
+        parameters: {
+            query?: {
+                before?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostPage"];
+                };
+            };
+        };
+    };
+    DeleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CompleteCheckIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckInDoneRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    FileReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FileReportCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportFiled"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     GetHealth: {
         parameters: {
             query?: never;
@@ -385,7 +3478,7 @@ export interface operations {
             };
         };
     };
-    RequestOtp: {
+    Register: {
         parameters: {
             query?: never;
             header?: never;
@@ -394,7 +3487,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RequestOtpRequest"];
+                "application/json": components["schemas"]["RegisterCommand"];
             };
         };
         responses: {
@@ -404,7 +3497,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestOtpResponse"];
+                    "application/json": components["schemas"]["CodeSentResponse"];
                 };
             };
             /** @description Bad Request */
@@ -414,6 +3507,15 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Too Many Requests */
@@ -427,7 +3529,7 @@ export interface operations {
             };
         };
     };
-    VerifyOtp: {
+    ConfirmEmail: {
         parameters: {
             query?: never;
             header?: never;
@@ -436,7 +3538,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VerifyOtpRequest"];
+                "application/json": components["schemas"]["ConfirmEmailCommand"];
             };
         };
         responses: {
@@ -460,6 +3562,201 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ResendConfirmationCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailOnlyCommand"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeSentResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SignIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignInCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ForgotPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailOnlyCommand"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeSentResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ResetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -557,6 +3854,7 @@ export interface operations {
                 Sort?: components["schemas"]["TripSort"];
                 Page?: number | string;
                 PageSize?: number | string;
+                VerifiedHostsOnly?: boolean;
             };
             header?: never;
             path?: never;
@@ -584,6 +3882,57 @@ export interface operations {
             };
         };
     };
+    CreateTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveTripCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripCreated"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     GetTrip: {
         parameters: {
             query?: never;
@@ -606,6 +3955,164 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveTripCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripDetail"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    PublishTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripDetail"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CancelTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -653,6 +4160,2269 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DestinationSummary"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileDetails"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    BecomeHost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetMyVerifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationRecord"][];
+                };
+            };
+        };
+    };
+    StartVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartVerificationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationRecord"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMyVerificationDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyDocumentView"][];
+                };
+            };
+        };
+    };
+    StartVerificationDocumentUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartDocumentUploadCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTicket"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CompleteVerificationDocumentUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyDocumentView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveVerificationDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    StartAvatarUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvatarUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTicket"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CompleteAvatarUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteAvatarCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    QueryVerificationQueue: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["VerificationStatus"];
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationQueuePage"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetVerificationDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDocumentView"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveUserAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ReviewVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewVerificationCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ChangeUserRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    QueryPayoutQueue: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["PayoutStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayoutView"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ApprovePayout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    QueryAuditLog: {
+        parameters: {
+            query?: {
+                entityType?: string;
+                entityId?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEntry"][];
+                };
+            };
+        };
+    };
+    ApproveJoinRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestApproved"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    DeclineJoinRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CancelJoinRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMyNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPage"];
+                };
+            };
+        };
+    };
+    MarkMyNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkReadRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetSandboxPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SandboxPayment"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CompleteSandboxPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SandboxCompletion"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallbackHandled"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetChatHistory: {
+        parameters: {
+            query?: {
+                before?: number | string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatHistory"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SendChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendChatMessageCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessageSent"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    MarkChatRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkChatReadRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateMediaUploadUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadLink"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CompleteMediaUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CreatePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePostCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostCreated"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    DeletePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    LikePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UnlikePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentView"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AddComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddCommentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetPublicProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicProfile"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListUserPosts: {
+        parameters: {
+            query?: {
+                before?: number | string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostPage"];
+                };
+            };
+        };
+    };
+    FollowUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UnfollowUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AddReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddReviewCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewAdded"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListReviewable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reviewable"][];
+                };
+            };
+        };
+    };
+    RaiseSos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RaiseSosCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SosRaisedView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListCheckIns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckInView"][];
+                };
+            };
+        };
+    };
+    ScheduleCheckIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduleCheckInCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckInScheduled"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateSosLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SosLocationRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ResolveSos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetAdminDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardCounts"];
+                };
+            };
+        };
+    };
+    GetSosBoard: {
+        parameters: {
+            query?: {
+                includeResolved?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SosBoardItem"][];
+                };
+            };
+        };
+    };
+    AcknowledgeSos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMissedCheckIns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissedCheckIn"][];
+                };
+            };
+        };
+    };
+    ChangeDestinationStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeDestinationStatusCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListReports: {
+        parameters: {
+            query?: {
+                kind?: components["schemas"]["ReportKind"];
+                status?: components["schemas"]["ReportStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportView"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ResolveReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveReportCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SearchUsers: {
+        parameters: {
+            query?: {
+                search?: string;
+                status?: components["schemas"]["UserStatus"];
+                role?: components["schemas"]["Role"];
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserPage"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetUserForAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SetUserStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetUserStatusCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RequirePasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReason"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SearchAllTrips: {
+        parameters: {
+            query?: {
+                search?: string;
+                status?: components["schemas"]["TripStatus"];
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminTripPage"];
+                };
+            };
+        };
+    };
+    CancelTripAsAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReason"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    LookupBooking: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBookingDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RetryRefundsNow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetriedRefunds"];
+                };
+            };
+        };
+    };
+    SaveDestination: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DestinationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DestinationSaved"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListEmergencyPoints: {
+        parameters: {
+            query?: {
+                destination?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmergencyPointView"][];
+                };
+            };
+        };
+    };
+    SaveEmergencyPoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmergencyPointEdit"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmergencyPointSaved"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Not Found */
