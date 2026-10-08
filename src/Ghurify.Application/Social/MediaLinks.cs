@@ -9,6 +9,12 @@ namespace Ghurify.Application.Social;
 /// </summary>
 public sealed class MediaLinks(IMediaStorage storage, IClock clock, IOptions<MediaOptions> options)
 {
+    /// <summary>A short-lived read link for one blob; null when no storage is configured.</summary>
+    public string? Link(string blobName) =>
+        storage.IsConfigured
+            ? storage.CreateReadUrl(blobName, clock.UtcNow.AddMinutes(options.Value.ReadLinkMinutes)).ToString()
+            : null;
+
     public PostPage Sign(PostPage page)
     {
         ArgumentNullException.ThrowIfNull(page);

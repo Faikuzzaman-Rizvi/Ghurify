@@ -21,6 +21,9 @@ CREATE TABLE [Main].[UserProfile]
     [Created]                DATETIME2 (0)   CONSTRAINT [DF_UserProfile_Created] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedOn]              DATETIME2 (7)   CONSTRAINT [DF_UserProfile_UpdatedOn] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedId]              BIGINT          NULL,
+    -- Whether their travel map shows on their public profile. Off unless they turn it on. Last, so
+    -- adding it was a plain ADD COLUMN rather than a rebuild of the table.
+    [ShareTravelMap]         BIT             CONSTRAINT [DF_UserProfile_ShareTravelMap] DEFAULT ((0)) NOT NULL,
 
     CONSTRAINT [PK_UserProfile] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_UserProfile_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),

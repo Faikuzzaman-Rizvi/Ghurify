@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, Map, ReceiptText, Tent, User } from 'lucide-react';
+import { LayoutDashboard, Map, MapPinned, ReceiptText, Tent, User } from 'lucide-react';
 import { useAuthStore } from './authStore';
 import { isStaff } from './profileApi';
 import { useMyProfile } from './useProfile';
@@ -18,6 +18,7 @@ export function useAccountLinks() {
   return [
     { to: '/account', label: t('account.title'), icon: User },
     { to: '/me/trips', label: t('nav.myTrips'), icon: Map },
+    { to: '/me/map', label: t('nav.travelMap'), icon: MapPinned },
     { to: '/me/payments', label: t('nav.payments'), icon: ReceiptText },
     ...(profile?.roles.includes('Host')
       ? [{ to: '/host/trips', label: t('nav.hosting'), icon: Tent }]

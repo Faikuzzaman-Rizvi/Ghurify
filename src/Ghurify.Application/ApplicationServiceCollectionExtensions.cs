@@ -152,6 +152,14 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<TripCancellationService>();
         services.AddScoped<CancelTripHandler>();
         services.AddScoped<CompleteFinishedTripsHandler>();
+        services.AddScoped<GetMyTravelMapHandler>();
+        services.AddScoped<GetSharedTravelMapHandler>();
+        services.AddScoped<AddVisitHandler>();
+        services.AddScoped<EditVisitHandler>();
+        services.AddScoped<RemoveVisitHandler>();
+        services.AddScoped<AddVisitPhotosHandler>();
+        services.AddScoped<RemoveVisitPhotoHandler>();
+        services.AddScoped<SetTravelMapSharingHandler>();
         services.AddScoped<GetCancellationQuoteHandler>();
         services.AddScoped<CancelBookingHandler>();
         services.AddScoped<ReleaseDuePayoutsHandler>();

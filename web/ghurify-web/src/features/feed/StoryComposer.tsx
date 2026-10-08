@@ -25,7 +25,8 @@ interface Upload {
  * Write a story and add photos or videos. Files go straight to storage with a short link, with a
  * progress bar each; the server then strips location data before anyone else sees them.
  */
-export function StoryComposer() {
+/** `initialDestination`: a story about a place, started from that place (the travel map). */
+export function StoryComposer({ initialDestination = '' }: { initialDestination?: string }) {
   const { t, i18n } = useTranslation();
   const language = toLanguage(i18n.language);
   const queryClient = useQueryClient();
@@ -33,7 +34,7 @@ export function StoryComposer() {
   const name = useAuthStore((state) => state.user?.displayName ?? null);
   const userId = useAuthStore((state) => state.user?.id ?? null);
   const [body, setBody] = useState('');
-  const [destination, setDestination] = useState('');
+  const [destination, setDestination] = useState(initialDestination);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
 

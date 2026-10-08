@@ -201,6 +201,21 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: '/me/map',
+            // Loaded on demand with Leaflet, like the destination page.
+            hydrateFallbackElement: <PageLoading />,
+            lazy: async () => {
+              const { TravelMapPage } = await import('@/features/travel/TravelMapPage');
+              return {
+                element: (
+                  <ProtectedRoute>
+                    <TravelMapPage />
+                  </ProtectedRoute>
+                ),
+              };
+            },
+          },
+          {
             path: '/me/trips',
             element: (
               <ProtectedRoute>

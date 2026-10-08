@@ -4,6 +4,7 @@
 -- processing job is checking the file and stripping location metadata), 3 Ready (safe to show),
 -- 4 Failed (rejected; Failure says why). Only Ready media is ever shown to anyone else.
 -- UploadBlob is where the user's raw file lands; ProcessedBlob is the cleaned copy that is served.
+-- A photo goes with a story (PostId) or with one of its owner's travel-map visits (VisitId), never both.
 CREATE TABLE [Social].[Media]
 (
     [Id]             BIGINT          IDENTITY (1, 1) NOT NULL,
@@ -21,10 +22,13 @@ CREATE TABLE [Social].[Media]
     [Created]        DATETIME2 (0)   CONSTRAINT [DF_Media_Created] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedOn]      DATETIME2 (7)   CONSTRAINT [DF_Media_UpdatedOn] DEFAULT (getutcdate()) NOT NULL,
     [UpdatedId]      BIGINT          NULL,
+    [VisitId]        BIGINT          NULL,
 
     CONSTRAINT [PK_Media] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Media_User_OwnerId] FOREIGN KEY ([OwnerId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Media_Post] FOREIGN KEY ([PostId]) REFERENCES [Social].[Post] ([Id]),
+    CONSTRAINT [FK_Media_Visit] FOREIGN KEY ([VisitId]) REFERENCES [Main].[Visit] ([Id]),
+    CONSTRAINT [CK_Media_PostOrVisit] CHECK ([PostId] IS NULL OR [VisitId] IS NULL),
     CONSTRAINT [CK_Media_Kind] CHECK ([Kind] BETWEEN 1 AND 2),
     CONSTRAINT [CK_Media_Status] CHECK ([Status] BETWEEN 1 AND 4)
 );
@@ -39,4 +43,11 @@ CREATE NONCLUSTERED INDEX [IX_Media_PostId]
     ON [Social].[Media] ([PostId] ASC, [Id] ASC)
     INCLUDE ([Kind], [Status], [ProcessedBlob])
     WHERE [PostId] IS NOT NULL;
+GO
+
+-- A visit's photos on the travel map, in upload order.
+CREATE NONCLUSTERED INDEX [IX_Media_VisitId]
+    ON [Social].[Media] ([VisitId] ASC, [Id] ASC)
+    INCLUDE ([OwnerId], [Kind], [Status], [ProcessedBlob], [Archived])
+    WHERE [VisitId] IS NOT NULL;
 GO

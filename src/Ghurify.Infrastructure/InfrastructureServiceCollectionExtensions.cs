@@ -106,6 +106,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IPayoutRepository>(provider => provider.GetRequiredService<PayoutRepository>());
         services.AddScoped<IBookingCancellationRepository>(provider => provider.GetRequiredService<PayoutRepository>());
         services.AddScoped<ITripLifecycleRepository, TripLifecycleRepository>();
+        services.AddScoped<ITravelMapRepository, TravelMapRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
 
         // --- Social and media ---

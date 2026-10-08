@@ -1,6 +1,7 @@
 -- Publishes a story and attaches the author's own uploaded media to it, in one transaction.
--- Media that is not the author's, already on another post, or failed is silently left out: the
--- filter on OwnerId is what stops anyone attaching someone else's photo.
+-- Media that is not the author's, already on another post or on a travel-map visit, or failed
+-- stops the post (nothing is written): the filter on OwnerId is what stops anyone attaching
+-- someone else's photo.
 --
 -- @Result 0 = posted, 1 = a media item could not be attached (nothing written).
 CREATE PROCEDURE [Social].[AddPost]
@@ -29,6 +30,7 @@ BEGIN
         JOIN   @MediaIds        AS [i] ON [i].[Id] = [m].[Id]
         WHERE  [m].[OwnerId] = @AuthorId
           AND  [m].[PostId] IS NULL
+          AND  [m].[VisitId] IS NULL
           AND  [m].[Status] IN (2, 3)
           AND  [m].[Archived] = 0
     );

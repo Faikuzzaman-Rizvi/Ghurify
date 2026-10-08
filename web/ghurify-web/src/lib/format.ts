@@ -62,6 +62,16 @@ export function formatDateRange(start: string, end: string, language: Language):
   return `${format.format(parseDate(start))} – ${format.format(parseDate(end))}`;
 }
 
+/** "12 Mar 2026": a day in someone's travel history, where the year matters. */
+export function formatFullDate(isoDate: string, language: Language): string {
+  return new Intl.DateTimeFormat(locale[language], {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(parseDate(isoDate));
+}
+
 /** "October 2026": for how long someone has been a member. */
 export function formatMonthYear(isoDate: string, language: Language): string {
   return new Intl.DateTimeFormat(locale[language], {

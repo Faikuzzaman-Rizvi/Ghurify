@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/{id}/travel-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Someone's travel map, if they share it: the Ghurify destinations they have been to. */
+        get: operations["GetSharedTravelMap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users/{id}/avatar": {
         parameters: {
             query?: never;
@@ -663,6 +680,109 @@ export interface paths {
         /** One destination by its slug. */
         get: operations["GetDestination"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/travel-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your travel map: every place you have been, your notes and photos, and trips to come. */
+        get: operations["GetMyTravelMap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/travel-map/visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Adds a place you have been: a Ghurify destination, or a named pin anywhere in Bangladesh. */
+        post: operations["AddVisit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/travel-map/visits/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Changes a visit's note, and the date of one you added. */
+        put: operations["EditVisit"];
+        post?: never;
+        /** Takes a visit off your map. */
+        delete: operations["RemoveVisit"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/travel-map/visits/{id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Puts photos you uploaded on one of your visits. Only you see them on your map. */
+        post: operations["AddVisitPhotos"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/travel-map/visits/{id}/photos/{mediaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Takes a photo off one of your visits. */
+        delete: operations["RemoveVisitPhoto"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/travel-map/sharing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Shows or hides your travel map on your public profile. */
+        put: operations["SetTravelMapSharing"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1720,6 +1840,19 @@ export interface components {
             rating: number | string;
             body: null | string;
         };
+        AddVisitCommand: {
+            destinationSlug: null | string;
+            placeName: null | string;
+            division: null | components["schemas"]["Division"];
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+            /** Format: date */
+            visitedOn: string;
+            note: null | string;
+            mediaIds?: null | (number | string)[];
+        };
         AdminBookingDetail: {
             /** Format: int64 */
             id: number | string;
@@ -2153,10 +2286,17 @@ export interface components {
         };
         /** @enum {unknown} */
         Difficulty: "Easy" | "Moderate" | "Challenging";
+        /** @enum {unknown} */
+        Division: "Barishal" | "Chattogram" | "Dhaka" | "Khulna" | "Mymensingh" | "Rajshahi" | "Rangpur" | "Sylhet" | null;
         EditPostCommand: {
             body: null | string;
             destinationSlug: null | string;
             keepMediaIds: null | (number | string)[];
+        };
+        EditVisitCommand: {
+            /** Format: date */
+            visitedOn: null | string;
+            note: null | string;
         };
         EmailOnlyCommand: {
             email: string;
@@ -2537,6 +2677,27 @@ export interface components {
             created: string;
             /** Format: date-time */
             approvedOn: null | string;
+        };
+        PlacePhoto: {
+            /** Format: int64 */
+            mediaId: number | string;
+            /** Format: int64 */
+            postId: null | number | string;
+            /** Format: int64 */
+            visitId: null | number | string;
+            kind: components["schemas"]["MediaKind"];
+            url: string;
+        };
+        PlaceVisit: {
+            /** Format: int64 */
+            id: number | string;
+            source: components["schemas"]["VisitSource"];
+            /** Format: date */
+            visitedOn: string;
+            note: null | string;
+            trip: null | components["schemas"]["VisitTrip"];
+            /** Format: int32 */
+            photosProcessing: number | string;
         };
         PostCreated: {
             /** Format: int64 */
@@ -2927,6 +3088,32 @@ export interface components {
             documentIds: null | (number | string)[];
             idType: null | components["schemas"]["IdDocumentType"];
         };
+        TravelMap: {
+            /** Format: int64 */
+            userId: number | string;
+            displayName: null | string;
+            shared: boolean;
+            summary: components["schemas"]["TravelSummary"];
+            places: components["schemas"]["VisitedPlace"][];
+            upcoming: components["schemas"]["UpcomingTrip"][];
+        };
+        TravelMapSharingCommand: {
+            share: boolean;
+        };
+        TravelSummary: {
+            /** Format: int32 */
+            places: number | string;
+            /** Format: int32 */
+            divisions: number | string;
+            /** Format: int32 */
+            trips: number | string;
+            /** Format: int32 */
+            tripDays: number | string;
+            /** Format: date */
+            firstVisit: null | string;
+            /** Format: date */
+            lastVisit: null | string;
+        };
         TripCostLine: {
             category: components["schemas"]["CostCategory"];
             description: null | string;
@@ -3026,6 +3213,23 @@ export interface components {
             hostName: null | string;
             hostVerifiedLevel?: null | components["schemas"]["VerificationLevel"];
         };
+        UpcomingTrip: {
+            /** Format: int64 */
+            tripId: number | string;
+            title: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            asHost: boolean;
+            destinationSlug: string;
+            destinationName: string;
+            destinationNameBn: string;
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+        };
         UpdateProfileCommand: {
             displayName: string;
             gender: null | components["schemas"]["Gender"];
@@ -3104,6 +3308,42 @@ export interface components {
         };
         /** @enum {unknown} */
         VerificationStatus: "Pending" | "Approved" | "Rejected";
+        VisitCreated: {
+            /** Format: int64 */
+            id: number | string;
+        };
+        VisitedPlace: {
+            key: string;
+            destinationSlug: null | string;
+            name: string;
+            nameBn: null | string;
+            division: null | components["schemas"]["Division"];
+            kind: null | components["schemas"]["DestinationKind"];
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+            /** Format: date */
+            lastVisitedOn: string;
+            visits: components["schemas"]["PlaceVisit"][];
+            photos: components["schemas"]["PlacePhoto"][];
+        };
+        VisitPhotosCommand: {
+            mediaIds: null | (number | string)[];
+        };
+        /** @enum {unknown} */
+        VisitSource: "Trip" | "Added";
+        VisitTrip: {
+            /** Format: int64 */
+            id: number | string;
+            title: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            hostName: null | string;
+            asHost: boolean;
+        };
         WhoAmIResponse: {
             /** Format: int64 */
             userId: number | string;
@@ -3186,6 +3426,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HostTripSummary"][];
+                };
+            };
+        };
+    };
+    GetSharedTravelMap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TravelMap"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
         };
@@ -4626,6 +4897,251 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
+            };
+        };
+    };
+    GetMyTravelMap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TravelMap"];
+                };
+            };
+        };
+    };
+    AddVisit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddVisitCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VisitCreated"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    EditVisit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditVisitCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveVisit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AddVisitPhotos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VisitPhotosCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveVisitPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                mediaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SetTravelMapSharing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TravelMapSharingCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -11,6 +11,7 @@ import {
   HeartPulse,
   LogOut,
   Map,
+  MapPinned,
   NotebookPen,
   ShieldCheck,
   Tent,
@@ -162,6 +163,7 @@ function ProfileSummary({ profile }: { profile: Profile }) {
 
   const links: { to: string; label: string; icon: LucideIcon }[] = [
     { to: '/me/trips', label: t('nav.myTrips'), icon: Map },
+    { to: '/me/map', label: t('nav.travelMap'), icon: MapPinned },
     ...(isHost
       ? [
           { to: '/host/trips', label: t('hosting.myTrips'), icon: Tent },

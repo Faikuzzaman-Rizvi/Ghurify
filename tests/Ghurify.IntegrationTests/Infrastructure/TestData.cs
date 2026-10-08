@@ -230,6 +230,7 @@ public sealed class TestData(string connectionString) : IAsyncDisposable
             (SELECT [TransactionRef] FROM [Pay].[Payment] WHERE [BookingId] IN (SELECT [Id] FROM @BookingIds));
         DELETE FROM [Pay].[Payment] WHERE [BookingId] IN (SELECT [Id] FROM @BookingIds);
         DELETE FROM [Main].[Notification] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);
+        DELETE FROM [Main].[Visit] WHERE [UserId] IN (SELECT [Id] FROM @UserIds) OR [TripId] IN (SELECT [Id] FROM @TripIds);
         DELETE FROM [Pay].[Booking] WHERE [TripId] IN (SELECT [Id] FROM @TripIds) OR [UserId] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[JoinRequest] WHERE [TripId] IN (SELECT [Id] FROM @TripIds) OR [UserId] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[TripCostItem] WHERE [TripId] IN (SELECT [Id] FROM @TripIds);

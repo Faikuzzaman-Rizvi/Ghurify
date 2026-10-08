@@ -102,8 +102,20 @@ public static class Procedures
         /// <summary>Cancels trips (by a host, or a closure) and everything hanging off them.</summary>
         public const string SetTripsCancelled = "[Main].[SetTripsCancelled]";
 
-        /// <summary>Marks finished trips completed, returning everyone who travelled.</summary>
+        /// <summary>Marks finished trips completed, puts them on the travellers' maps, returns who travelled.</summary>
         public const string SetTripsCompleted = "[Main].[SetTripsCompleted]";
+
+        /// <summary>One person's travel map: visits, photos per place and visit, trips to come.</summary>
+        public const string QueryTravelMap = "[Main].[QueryTravelMap]";
+
+        /// <summary>Adds a place someone has been to their travel map, with any photos for it.</summary>
+        public const string AddVisit = "[Main].[AddVisit]";
+
+        /// <summary>Puts someone's uploaded photos on one of their visits.</summary>
+        public const string AddVisitPhotos = "[Main].[AddVisitPhotos]";
+
+        /// <summary>Shows or hides someone's travel map on their public profile.</summary>
+        public const string SetTravelMapSharing = "[Main].[SetTravelMapSharing]";
 
         /// <summary>Status, gender, roles and strongest passed identity check, for authorization.</summary>
         public const string GetUserAccess = "[Main].[GetUserAccess]";

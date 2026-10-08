@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup Label="Main - Profiles and verification">
     <Build Include="Main\Tables\UserProfile.sql" />
+    <Build Include="Main\Tables\Visit.sql" />
     <Build Include="Main\Tables\UserRole.sql" />
     <Build Include="Main\Tables\Verification.sql" />
     <Build Include="Main\Tables\VerificationDocument.sql" />
@@ -151,6 +152,10 @@
     <Build Include="Pay\Stored Procedures\SetBookingCancelled.sql" />
     <Build Include="Main\Stored Procedures\SetTripsCancelled.sql" />
     <Build Include="Main\Stored Procedures\SetTripsCompleted.sql" />
+    <Build Include="Main\Stored Procedures\QueryTravelMap.sql" />
+    <Build Include="Main\Stored Procedures\AddVisit.sql" />
+    <Build Include="Main\Stored Procedures\AddVisitPhotos.sql" />
+    <Build Include="Main\Stored Procedures\SetTravelMapSharing.sql" />
     <Build Include="Main\User Defined Types\NotificationList.sql" />
     <Build Include="Main\Stored Procedures\AddNotifications.sql" />
   </ItemGroup>

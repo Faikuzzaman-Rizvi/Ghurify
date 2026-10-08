@@ -299,6 +299,7 @@ try
     app.MapHealthEndpoints();
     app.MapIdentityEndpoints();
     app.MapTripsEndpoints();
+    app.MapTravelMapEndpoints();
     app.MapProfileEndpoints();
     app.MapAdminEndpoints();
     app.MapBookingsEndpoints();

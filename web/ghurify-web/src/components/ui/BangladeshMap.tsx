@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { latToY, lonToX } from './mapProjection';
 
 /**
  * Bangladesh, drawn from Natural Earth's 1:10m country outline (public domain), projected
@@ -26,10 +27,6 @@ const destinations: Record<string, readonly [number, number]> = {
   rangamati: [394.3, 411],
 };
 const dhaka = [232.9, 295.3] as const;
-
-/** Where a longitude and latitude fall in the viewBox (same projection as the outline). */
-const lonToX = (lon: number) => (lon - 88) * 91.57 + 12;
-const latToY = (lat: number) => (26.65 - lat) * 100 + 11.33;
 
 /** Coastline contour rings, as stroke widths: each becomes one thin line at half its width out. */
 const contours = [26, 54, 88, 128, 176] as const;

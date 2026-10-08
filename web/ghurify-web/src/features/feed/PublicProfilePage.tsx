@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
@@ -16,6 +16,13 @@ import { ReportDialog } from '@/features/safety/ReportDialog';
 import { formatCount, formatDateRange, formatMonthYear, toLanguage } from '@/lib/format';
 import { feedApi } from './feedApi';
 import { PostCard } from './PostCard';
+
+// The travel map draws all 64 districts: loaded only when a profile is opened.
+const SharedTravelMap = lazy(() =>
+  import('@/features/travel/SharedTravelMap').then((module) => ({
+    default: module.SharedTravelMap,
+  })),
+);
 
 /** Five stars, filled up to the rating. Decorative: the label carries the number. */
 function Stars({ rating, label }: { rating: number; label: string }) {
@@ -233,6 +240,10 @@ export function PublicProfilePage() {
               </ul>
             </section>
           )}
+
+          <Suspense fallback={null}>
+            <SharedTravelMap userId={userId} name={person.displayName ?? t('chat.someone')} />
+          </Suspense>
 
           <section aria-labelledby="reviews-title">
             <h2 id="reviews-title" className="mb-4 text-xl font-semibold">

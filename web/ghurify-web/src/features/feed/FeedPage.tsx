@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { ChevronRight, HeartHandshake, LogIn, MapPin } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
@@ -20,6 +20,8 @@ export function FeedPage() {
   const { t } = useTranslation();
   const status = useAuthStore((state) => state.status);
   const user = useAuthStore((state) => state.user?.id ?? 'anonymous');
+  // ?destination=sajek: a story about a place, started from the travel map.
+  const [params] = useSearchParams();
 
   const feed = useInfiniteQuery({
     queryKey: ['feed', user],
@@ -49,7 +51,7 @@ export function FeedPage() {
           </h2>
 
           {status === 'authenticated' ? (
-            <StoryComposer />
+            <StoryComposer initialDestination={params.get('destination') ?? ''} />
           ) : (
             status === 'anonymous' && (
               <div className={`${cardClass} flex flex-wrap items-center justify-between gap-4`}>
