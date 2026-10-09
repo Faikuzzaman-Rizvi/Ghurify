@@ -48,6 +48,7 @@
     <Build Include="Security\Pay.sql" />
     <Build Include="Security\Social.sql" />
     <Build Include="Security\Safety.sql" />
+    <Build Include="Security\Site.sql" />
   </ItemGroup>
   <ItemGroup Label="Main">
     <Build Include="Main\User Defined Types\IdList.sql" />
@@ -189,6 +190,30 @@
     <Build Include="Safety\Stored Procedures\QueryReports.sql" />
     <Build Include="Safety\Stored Procedures\GetDashboardCounts.sql" />
   </ItemGroup>
+  <ItemGroup Label="Super admin - staff roles and permissions">
+    <Build Include="Main\User Defined Types\PermissionList.sql" />
+    <Build Include="Main\Tables\StaffRole.sql" />
+    <Build Include="Main\Tables\StaffRolePermission.sql" />
+    <Build Include="Main\Tables\UserStaffRole.sql" />
+    <Build Include="Main\Stored Procedures\QueryStaffRoles.sql" />
+    <Build Include="Main\Stored Procedures\SetStaffRole.sql" />
+    <Build Include="Main\Stored Procedures\DelStaffRole.sql" />
+    <Build Include="Main\Stored Procedures\SetUserStaffRole.sql" />
+    <Build Include="Main\Stored Procedures\QueryStaffMembers.sql" />
+    <Build Include="Safety\Stored Procedures\QueryAuditLog.sql" />
+  </ItemGroup>
+  <ItemGroup Label="Super admin - the site's own settings">
+    <Build Include="Site\User Defined Types\SettingList.sql" />
+    <Build Include="Site\Tables\Setting.sql" />
+    <Build Include="Site\Tables\SettingHistory.sql" />
+    <Build Include="Site\Tables\Asset.sql" />
+    <Build Include="Site\Stored Procedures\QuerySettings.sql" />
+    <Build Include="Site\Stored Procedures\SetSettings.sql" />
+    <Build Include="Site\Stored Procedures\QuerySettingHistory.sql" />
+    <Build Include="Site\Stored Procedures\GetAsset.sql" />
+    <Build Include="Site\Stored Procedures\SetAsset.sql" />
+    <Build Include="Site\Stored Procedures\DelAsset.sql" />
+  </ItemGroup>
   <ItemGroup Label="Deployment scripts">
     <PreDeploy Include="Script.PreDeployment.sql" />
     <PostDeploy Include="Script.PostDeployment.sql" />
@@ -209,5 +234,9 @@
     <Folder Include="Social\Stored Procedures\" />
     <Folder Include="Pay\User Defined Types\" />
     <Folder Include="Safety\Stored Procedures\" />
+    <Folder Include="Site\" />
+    <Folder Include="Site\Tables\" />
+    <Folder Include="Site\Stored Procedures\" />
+    <Folder Include="Site\User Defined Types\" />
   </ItemGroup>
 </Project>

@@ -284,22 +284,41 @@ describe('Admin portal pages', () => {
     });
   });
 
-  it('lists audit entries with who did what', async () => {
+  it('lists audit entries with who did what, and what changed', async () => {
     stubApi([
       [
         /\/api\/v1\/admin\/audit/,
-        [
-          {
-            id: 1,
-            actorId: 1,
-            actorName: 'Admin',
-            action: 'user.suspended',
-            entityType: 'User',
-            entityId: 30,
-            note: 'Harassment.',
-            created: '2026-10-06T06:00:00Z',
-          },
-        ],
+        {
+          total: 2,
+          page: 1,
+          pageSize: 50,
+          entries: [
+            {
+              id: 1,
+              actorId: 1,
+              actorName: 'Admin',
+              action: 'user.suspended',
+              entityType: 'User',
+              entityId: 30,
+              note: 'Harassment.',
+              changes: [],
+              created: '2026-10-06T06:00:00Z',
+            },
+            {
+              id: 2,
+              actorId: 1,
+              actorName: 'Admin',
+              action: 'staff.role.update',
+              entityType: 'StaffRole',
+              entityId: 4,
+              note: 'payments-desk',
+              changes: [
+                { field: 'permissions', from: 'payments.view', to: 'payments.view, payouts.view' },
+              ],
+              created: '2026-10-06T07:00:00Z',
+            },
+          ],
+        },
       ],
     ]);
 
@@ -308,5 +327,10 @@ describe('Admin portal pages', () => {
     expect(await screen.findByText('user.suspended')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '30' })).toHaveAttribute('href', '/admin/users/30');
     expect(screen.getByText(/Harassment\./)).toBeInTheDocument();
+
+    // The before/after pair, so "who changed what" is answerable from the list itself.
+    expect(screen.getByText('permissions')).toBeInTheDocument();
+    expect(screen.getByText('payments.view')).toBeInTheDocument();
+    expect(screen.getByText('payments.view, payouts.view')).toBeInTheDocument();
   });
 });

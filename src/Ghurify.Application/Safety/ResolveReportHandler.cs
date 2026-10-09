@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 using Ghurify.Application.Payments;
 using Ghurify.Domain.Payments;
 using Microsoft.Extensions.Logging;
@@ -22,7 +23,7 @@ public sealed class ResolveReportHandler(
         ArgumentNullException.ThrowIfNull(command);
 
         var actor = await access.GetAsync(actorId, cancellationToken);
-        if (!actor.IsModerator)
+        if (!actor.Can(Permissions.ModerationReportsResolve))
         {
             return AppError.Forbidden();
         }
@@ -40,9 +41,9 @@ public sealed class ResolveReportHandler(
             return AppError.NotFound("report_not_found", "There is no such open report.");
         }
 
-        if (open.Kind == ReportKind.Dispute && !actor.IsAdmin)
+        if (open.Kind == ReportKind.Dispute && !actor.Can(Permissions.ModerationDisputes))
         {
-            return AppError.Forbidden("Disputes are decided by an admin.");
+            return AppError.Forbidden("Deciding a dispute needs the disputes permission.");
         }
 
         var check = Validate(open, command.Action);
@@ -76,7 +77,7 @@ public sealed class ResolveReportHandler(
         var status = command.Action == ReportAction.Dismiss ? ReportStatus.Dismissed : ReportStatus.Actioned;
         await safety.ResolveReportAsync(reportId, status, resolution, actorId, cancellationToken);
 
-        await audit.WriteAsync(actorId, $"report.{command.Action.ToString().ToLowerInvariant()}", "Report", reportId, resolution, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, $"report.{command.Action.ToString().ToLowerInvariant()}", "Report", reportId, resolution), cancellationToken);
         logger.LogInformation("Moderator {ActorId} resolved report {ReportId}: {Action}.", actorId, reportId, command.Action);
 
         return Done.Value;

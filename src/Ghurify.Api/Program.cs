@@ -157,6 +157,10 @@ try
     builder.Services.AddAuthorization(options => options.AddGhurifyPolicies());
     builder.Services.AddScoped<IAuthorizationHandler, AccessRequirementHandler>();
 
+    // Admin endpoints ask for a permission (`perm:payouts.approve`) rather than a role, and this
+    // builds the matching policy on demand, so adding a permission needs no policy registration.
+    builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+
     // --- Real-time: SignalR hubs, and the adapters the use cases push through ---
     // Enums as names on the hubs too, matching the REST API and the generated client types.
     builder.Services.AddSignalR().AddJsonProtocol(options =>
@@ -313,6 +317,8 @@ try
     app.MapSocialEndpoints();
     app.MapSafetyEndpoints();
     app.MapAdminPortalEndpoints();
+    app.MapStaffEndpoints();
+    app.MapSiteEndpoints();
 
     app.MapHub<NotificationHub>(NotificationHub.Path);
     app.MapHub<ChatHub>(ChatHub.Path);

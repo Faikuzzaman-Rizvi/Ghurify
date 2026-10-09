@@ -61,7 +61,7 @@ public sealed class BookingRulesTests
     }
 
     private static UserAccess Traveller(Gender gender = Gender.Female, VerificationLevel? verified = VerificationLevel.Nid) =>
-        new(1, UserStatus.Active, gender, new HashSet<Role>(), verified);
+        new(1, UserStatus.Active, gender, new HashSet<Role>(), verified, new HashSet<string>(), false);
 
     private sealed class FakeNotificationStore : INotificationRepository
     {

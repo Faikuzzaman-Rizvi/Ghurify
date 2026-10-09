@@ -14,10 +14,14 @@ namespace Ghurify.DatabaseUpdate;
 ///                       Only for intentional data loss that BlockOnPossibleDataLoss blocks.
 ///   dotnet run          runs Scripts/{Year}/* against the NEW schema, after the dacpac.
 ///
-/// And one that is never part of a release:
+/// And two that are never part of a release:
 ///
 ///   dotnet run -- demo  runs Scripts/Demo/* : sample hosts and trips for showcases and
 ///                       local development. Run it after the data scripts.
+///   dotnet run -- superadmin someone@example.com
+///                       makes one existing, confirmed account a super admin. The only way to
+///                       open the admin portal on a fresh deployment; after that, super admins
+///                       grant the role to each other from the portal, where it is audited.
 ///
 /// This console never creates, alters or drops schema objects. That is the dacpac's job.
 /// </summary>
@@ -33,6 +37,23 @@ internal static class Program
     private static int Main(string[] args)
     {
         var argument = args.Length > 0 ? args[0] : string.Empty;
+
+        // Not a migration: one deliberate role grant, so it reads the connection string and
+        // returns without touching the journal or any script.
+        if (string.Equals(argument, "superadmin", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                return SuperAdmin.Grant(
+                    ReadConnectionString(),
+                    args.Length > 1 ? args[1] : string.Empty);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
+        }
 
         var stage = argument.ToUpperInvariant() switch
         {

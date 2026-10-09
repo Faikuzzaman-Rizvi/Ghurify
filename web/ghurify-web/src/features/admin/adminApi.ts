@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPost, apiPut } from '@/api/client';
 import type { components } from '@/api/schema';
+import { stepUpHeaders } from './stepUp';
 
 /** All taken from the generated OpenAPI types. Regenerate with `npm run gen:api`. */
 export type VerificationQueuePage = components['schemas']['VerificationQueuePage'];
@@ -32,6 +33,24 @@ export type EmergencyPointEdit = components['schemas']['EmergencyPointEdit'];
 export type DestinationRequest = components['schemas']['DestinationRequest'];
 export type UserStatus = NonNullable<components['schemas']['UserStatus']>;
 export type Role = components['schemas']['Role'];
+export type AuditPage = components['schemas']['AuditPage'];
+export type AuditChange = components['schemas']['AuditChange'];
+export type StaffRolesView = components['schemas']['StaffRolesView'];
+export type StaffRoleView = components['schemas']['StaffRoleView'];
+export type PermissionView = components['schemas']['PermissionView'];
+export type PermissionGroup = components['schemas']['PermissionGroup'];
+export type SaveStaffRoleCommand = components['schemas']['SaveStaffRoleCommand'];
+export type StaffMembersView = components['schemas']['StaffMembersView'];
+export type StaffMemberView = components['schemas']['StaffMemberView'];
+export type StaffRoleHeld = components['schemas']['StaffRoleHeld'];
+export type StepUpResponse = components['schemas']['StepUpResponse'];
+export type SettingsView = components['schemas']['SettingsView'];
+export type SettingView = components['schemas']['SettingView'];
+export type SettingGroup = components['schemas']['SettingGroup'];
+export type SettingKind = components['schemas']['SettingKind'];
+export type SiteAssetView = components['schemas']['SiteAssetView'];
+export type SettingChangeRecord = components['schemas']['SettingChangeRecord'];
+export type SettingsSaved = components['schemas']['SettingsSaved'];
 export type TripStatus = NonNullable<components['schemas']['TripStatus']>;
 
 const withSignal = (signal?: AbortSignal) => (signal ? { signal } : {});
@@ -145,9 +164,81 @@ export const adminApi = {
   saveEmergencyPoint: (edit: EmergencyPointEdit) =>
     apiPost<{ id: number | string }>('/api/v1/admin/emergency-points', edit),
 
-  auditLog: (entityType: string, entityId: string, signal?: AbortSignal) =>
-    apiGet<AuditEntry[]>(
-      `/api/v1/admin/audit?${new URLSearchParams({ ...(entityType ? { entityType } : {}), ...(entityId ? { entityId } : {}) }).toString()}`,
-      withSignal(signal),
+  /** Every filter is optional; an action ending in a dot ("payout.") matches that whole group. */
+  auditLog: (filter: AuditFilter, page: number, signal?: AbortSignal) =>
+    apiGet<AuditPage>(`/api/v1/admin/audit?${auditQuery(filter, page)}`, withSignal(signal)),
+
+  // --- Super admin: the desk's own roles and members ---
+
+  staffRoles: (signal?: AbortSignal) =>
+    apiGet<StaffRolesView>('/api/v1/admin/staff/roles', withSignal(signal)),
+
+  /** Needs a step-up receipt; without one the API answers 403 step_up_required. */
+  createStaffRole: (command: SaveStaffRoleCommand) =>
+    apiPost<StaffRoleView>('/api/v1/admin/staff/roles', command, { headers: stepUpHeaders() }),
+
+  updateStaffRole: (id: number, command: SaveStaffRoleCommand) =>
+    apiPut<StaffRoleView>(`/api/v1/admin/staff/roles/${id}`, command, { headers: stepUpHeaders() }),
+
+  deleteStaffRole: (id: number) =>
+    apiDelete<void>(`/api/v1/admin/staff/roles/${id}`, { headers: stepUpHeaders() }),
+
+  staffMembers: (signal?: AbortSignal) =>
+    apiGet<StaffMembersView>('/api/v1/admin/staff/members', withSignal(signal)),
+
+  assignStaffRole: (userId: number, staffRoleId: number, grant: boolean) =>
+    apiPost<void>(
+      `/api/v1/admin/staff/members/${userId}`,
+      { staffRoleId, grant },
+      { headers: stepUpHeaders() },
     ),
+
+  // --- The site's own settings: branding and theme ---
+
+  settings: (signal?: AbortSignal) =>
+    apiGet<SettingsView>('/api/v1/admin/settings', withSignal(signal)),
+
+  /** Only the keys that changed. An empty value puts one back to the shipped default. */
+  saveSettings: (settings: Record<string, string>) =>
+    apiPut<SettingsSaved>('/api/v1/admin/settings', { settings }),
+
+  settingHistory: (key: string, signal?: AbortSignal) =>
+    apiGet<SettingChangeRecord[]>(`/api/v1/admin/settings/history/${encodeURIComponent(key)}`, withSignal(signal)),
+
+  /** The image as base64, which the API checks is really an image before keeping it. */
+  uploadSiteAsset: (kind: string, contentType: string, base64: string) =>
+    apiPut<void>(`/api/v1/admin/settings/assets/${encodeURIComponent(kind)}`, { contentType, base64 }),
+
+  removeSiteAsset: (kind: string) =>
+    apiDelete<void>(`/api/v1/admin/settings/assets/${encodeURIComponent(kind)}`),
+
+  /** Confirms the caller's own password and returns the receipt for the calls above. */
+  stepUp: (password: string) => apiPost<StepUpResponse>('/api/v1/admin/step-up', { password }),
 };
+
+/** What the audit viewer is filtered by. Empty strings mean "no filter". */
+export interface AuditFilter {
+  actorId: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  from: string;
+  to: string;
+}
+
+function auditQuery(filter: AuditFilter, page: number): string {
+  const query = new URLSearchParams({ page: String(page) });
+  if (filter.actorId) query.set('actorId', filter.actorId);
+  if (filter.action) query.set('action', filter.action);
+  if (filter.entityType) query.set('entityType', filter.entityType);
+  if (filter.entityId) query.set('entityId', filter.entityId);
+  if (filter.from) query.set('from', `${filter.from}T00:00:00Z`);
+  // The API reads 'to' as exclusive, so the chosen day itself is included by asking for
+  // everything before the day after it.
+  if (filter.to) {
+    const dayAfter = new Date(`${filter.to}T00:00:00Z`);
+    dayAfter.setUTCDate(dayAfter.getUTCDate() + 1);
+    query.set('to', dayAfter.toISOString());
+  }
+  return query.toString();
+}

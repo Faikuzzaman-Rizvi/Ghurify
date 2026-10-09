@@ -15,7 +15,7 @@ public sealed class QueryVerificationQueueHandler(IVerificationRepository verifi
         CancellationToken cancellationToken)
     {
         var actor = await access.GetAsync(actorId, cancellationToken);
-        if (!actor.IsAdmin)
+        if (!actor.Can(Permissions.UsersVerify))
         {
             return AppError.Forbidden();
         }

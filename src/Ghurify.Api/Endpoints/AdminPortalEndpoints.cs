@@ -25,21 +25,21 @@ public static class AdminPortalEndpoints
         admin.MapGet("/users", SearchUsersAsync)
             .WithName("SearchUsers")
             .WithSummary("Finds people by email (start), phone (end) or name.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersView))
             .Produces<AdminUserPage>()
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapGet("/users/{id:long}", GetUserAsync)
             .WithName("GetUserForAdmin")
             .WithSummary("One person in full: account, roles, identity checks, trips, bookings and reports.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersView))
             .Produces<AdminUserDetail>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         admin.MapPost("/users/{id:long}/status", SetUserStatusAsync)
             .WithName("SetUserStatus")
             .WithSummary("Suspends, reactivates or closes an account. Suspending signs them out everywhere.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersSuspend))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -48,7 +48,7 @@ public static class AdminPortalEndpoints
         admin.MapPost("/users/{id:long}/require-password-reset", RequirePasswordResetAsync)
             .WithName("RequirePasswordReset")
             .WithSummary("Makes the password stop working and ends every session; the owner resets it by email.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersSecurity))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
@@ -56,13 +56,13 @@ public static class AdminPortalEndpoints
         admin.MapGet("/trips", SearchTripsAsync)
             .WithName("SearchAllTrips")
             .WithSummary("Trips in any status, by id, title, host or destination.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.TripsView))
             .Produces<AdminTripPage>();
 
         admin.MapPost("/trips/{id:long}/cancel", CancelTripAsync)
             .WithName("CancelTripAsAdmin")
             .WithSummary("Cancels a trip and refunds every paid traveller in full.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.TripsCancel))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
@@ -70,47 +70,47 @@ public static class AdminPortalEndpoints
         admin.MapGet("/bookings/lookup", LookupBookingAsync)
             .WithName("LookupBooking")
             .WithSummary("A booking with its payments, refunds and escrow balance, by number or payment reference.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.BookingsView))
             .Produces<AdminBookingDetail>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         admin.MapGet("/payments", SearchPaymentsAsync)
             .WithName("SearchPayments")
             .WithSummary("Every payment, by number, transaction reference, gateway id, traveller email or name, or trip.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.PaymentsView))
             .Produces<PaymentHistoryPage>()
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapGet("/payments/{id:long}", GetPaymentAsync)
             .WithName("GetPaymentForAdmin")
             .WithSummary("One payment in full: receipt, payer, gateway settlement, refunds and the callbacks received.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.PaymentsView))
             .Produces<AdminPaymentDetail>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         admin.MapPost("/refunds/retry", RetryRefundsAsync)
             .WithName("RetryRefundsNow")
             .WithSummary("Retries every failed refund now.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.PaymentsRefundRetry))
             .Produces<RetriedRefunds>();
 
         admin.MapPut("/destinations/{slug}", SaveDestinationAsync)
             .WithName("SaveDestination")
             .WithSummary("Adds a destination, or edits its details in both languages.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.DestinationsManage))
             .Produces<DestinationSaved>()
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
         admin.MapGet("/emergency-points", ListEmergencyPointsAsync)
             .WithName("ListEmergencyPoints")
             .WithSummary("Police stations and hospitals shown with an SOS, and whether each was checked.")
-            .RequireAuthorization(Policies.SafetyDesk)
+            .RequireAuthorization(Policies.Require(Permissions.SafetyPointsManage))
             .Produces<IReadOnlyList<EmergencyPointView>>();
 
         admin.MapPost("/emergency-points", SaveEmergencyPointAsync)
             .WithName("SaveEmergencyPoint")
             .WithSummary("Adds (no id) or edits an emergency point.")
-            .RequireAuthorization(Policies.SafetyDesk)
+            .RequireAuthorization(Policies.Require(Permissions.SafetyPointsManage))
             .Produces<EmergencyPointSaved>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);

@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Safety;
 
@@ -16,7 +17,7 @@ public sealed class SetSosStatusHandler(ISafetyRepository safety, AccessService 
             return AppError.Validation("sos_status", "An SOS can be acknowledged or resolved.");
         }
 
-        var desk = (await access.GetAsync(actorId, cancellationToken)).IsSafetyDesk;
+        var desk = (await access.GetAsync(actorId, cancellationToken)).Can(Permissions.SafetySosManage);
 
         // Not the desk: only the owner, and only to say they are safe.
         if (!desk && status != SosStatus.Resolved)
@@ -33,7 +34,13 @@ public sealed class SetSosStatusHandler(ISafetyRepository safety, AccessService 
         if (desk)
         {
             await audit.WriteAsync(
-                actorId, status == SosStatus.Resolved ? "sos.resolve" : "sos.acknowledge", "SosEvent", sosId, null, cancellationToken);
+                new AuditRecord(
+                    actorId,
+                    status == SosStatus.Resolved ? "sos.resolve" : "sos.acknowledge",
+                    "SosEvent",
+                    sosId,
+                    Changes: new AuditChanges().Set("status", SosStatus.Open, status).ToJson()),
+                cancellationToken);
         }
 
         return Done.Value;

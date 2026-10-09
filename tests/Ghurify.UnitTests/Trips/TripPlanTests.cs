@@ -89,7 +89,7 @@ public sealed class TripPlanTests
     }
 
     private static UserAccess Host(Gender gender = Gender.Female, VerificationLevel verified = VerificationLevel.NidSelfie) =>
-        new(7, UserStatus.Active, gender, new HashSet<Role> { Role.Host }, verified);
+        new(7, UserStatus.Active, gender, new HashSet<Role> { Role.Host }, verified, new HashSet<string>(), false);
 
     /// <summary>A three-day trip starting in ten days, priced at the sum of its lines, fully planned.</summary>
     private static TripPlan Plan(

@@ -22,10 +22,10 @@ public sealed class AdminHandlerTests
 
     public AdminHandlerTests()
     {
-        _access.Add(AdminId, [Role.Admin]);
-        _access.Add(OtherAdminId, [Role.Admin]);
+        _access.AddStaff(AdminId, StaffRoleDefaults.Admin);
+        _access.AddStaff(OtherAdminId, StaffRoleDefaults.Admin);
         _access.Add(TravellerId);
-        _access.Add(DeskId, [Role.SafetyDesk]);
+        _access.AddStaff(DeskId, StaffRoleDefaults.SafetyDesk);
     }
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
@@ -61,10 +61,20 @@ public sealed class AdminHandlerTests
     }
 
     [Fact]
-    public async Task SuspendUser_ThemselvesOrAnotherAdmin_IsRefused()
+    public async Task SuspendUser_ThemselvesOrAnotherStaffMember_IsRefused()
     {
         Assert.Equal("own_account", (await SetStatus(AdminId, AdminId, UserStatus.Suspended, "Oops.")).Error?.Code);
-        Assert.Equal("target_is_admin", (await SetStatus(AdminId, OtherAdminId, UserStatus.Suspended, "Oops.")).Error?.Code);
+        Assert.Equal("target_is_staff", (await SetStatus(AdminId, OtherAdminId, UserStatus.Suspended, "Oops.")).Error?.Code);
+        Assert.Empty(_admin.Statuses);
+    }
+
+    [Fact]
+    public async Task SuspendUser_WithoutTheSuspendPermission_IsForbidden()
+    {
+        // Somebody who may look people up but not act on them.
+        _access.AddStaff(DeskId, StaffRoleDefaults.SafetyDesk);
+
+        Assert.Equal("forbidden", (await SetStatus(DeskId, TravellerId, UserStatus.Suspended, "No.")).Error?.Code);
         Assert.Empty(_admin.Statuses);
     }
 

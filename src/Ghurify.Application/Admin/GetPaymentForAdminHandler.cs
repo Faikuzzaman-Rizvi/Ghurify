@@ -1,6 +1,7 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
 using Ghurify.Application.Payments;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Admin;
 
@@ -12,7 +13,7 @@ public sealed class GetPaymentForAdminHandler(IPaymentHistoryRepository history,
 {
     public async Task<Result<AdminPaymentDetail>> HandleAsync(long actorId, long paymentId, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.PaymentsView))
         {
             return AppError.Forbidden();
         }

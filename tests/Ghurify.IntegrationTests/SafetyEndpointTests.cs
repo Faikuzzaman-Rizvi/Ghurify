@@ -36,7 +36,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
             ReplaceServices = services => services.Replace(ServiceDescriptor.Singleton<ISmsSender>(sms)),
         };
         var scene = await Scenes.PaidBookingAsync(data, api);
-        var desk = await data.CreateUserAsync(Gender.Male, "Desk officer", [Role.SafetyDesk]);
+        var desk = await data.CreateSafetyDeskAsync(Gender.Male);
         await SetEmergencyContactAsync(data, scene.Traveller, "+8801711000111");
 
         await using var hub = Hub(api, desk);
@@ -106,7 +106,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
         await using var data = new TestData(database.ConnectionString);
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         var scene = await Scenes.PaidBookingAsync(data, api);
-        var desk = await data.CreateUserAsync(Gender.Female, "Desk officer", [Role.SafetyDesk]);
+        var desk = await data.CreateSafetyDeskAsync();
 
         using var traveller = TestData.ClientFor(api, scene.Traveller);
         using var raised = await traveller.PostAsJsonAsync($"/api/v1/trips/{scene.TripId}/sos", new { latitude = 23.1m, longitude = 92.2m }, Token);
@@ -144,7 +144,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
         await using var data = new TestData(database.ConnectionString);
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         var scene = await Scenes.PaidBookingAsync(data, api);
-        var desk = await data.CreateUserAsync(Gender.Female, "Desk officer", [Role.SafetyDesk]);
+        var desk = await data.CreateSafetyDeskAsync();
 
         using var host = TestData.ClientFor(api, scene.Host);
         using var scheduled = await host.PostAsJsonAsync(
@@ -216,7 +216,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
         {
             await using var api = new GhurifyApiFactory(database.ConnectionString);
             var scene = await Scenes.PaidBookingAsync(data, api, destination: slug);
-            var desk = await data.CreateUserAsync(Gender.Male, "Desk officer", [Role.SafetyDesk]);
+            var desk = await data.CreateSafetyDeskAsync(Gender.Male);
 
             using var deskClient = TestData.ClientFor(api, desk);
             using var closed = await deskClient.PostAsJsonAsync(
@@ -279,7 +279,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
     {
         await using var data = new TestData(database.ConnectionString);
         await using var api = new GhurifyApiFactory(database.ConnectionString);
-        var moderator = await data.CreateUserAsync(Gender.Female, "Moderator", [Role.Moderator]);
+        var moderator = await data.CreateModeratorAsync();
         var host = await data.CreateVerifiedHostAsync();
 
         foreach (var user in new[] { moderator, host })
@@ -300,7 +300,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         var reporter = await data.CreateVerifiedTravelerAsync();
         var reported = await data.CreateVerifiedTravelerAsync();
-        var moderator = await data.CreateUserAsync(Gender.Female, "Moderator", [Role.Moderator]);
+        var moderator = await data.CreateModeratorAsync();
 
         using var reporterClient = TestData.ClientFor(api, reporter);
         using var filed = await reporterClient.PostAsJsonAsync(
@@ -344,7 +344,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         var scene = await Scenes.PaidBookingAsync(data, api);
         var stranger = await data.CreateVerifiedTravelerAsync();
-        var moderator = await data.CreateUserAsync(Gender.Female, "Moderator", [Role.Moderator]);
+        var moderator = await data.CreateModeratorAsync();
         var admin = await data.CreateAdminAsync();
 
         var dispute = new { kind = "Dispute", targetId = scene.BookingId, reason = "Payment", details = "The host never showed up." };
@@ -382,7 +382,7 @@ public sealed class SafetyEndpointTests(SqlServerFixture database)
         await using var data = new TestData(database.ConnectionString);
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         var traveller = await data.CreateVerifiedTravelerAsync();
-        var desk = await data.CreateUserAsync(Gender.Female, "Desk officer", [Role.SafetyDesk]);
+        var desk = await data.CreateSafetyDeskAsync();
 
         using var travellerClient = TestData.ClientFor(api, traveller);
         using var refused = await travellerClient.GetAsync(new Uri("/api/v1/admin/dashboard", UriKind.Relative), Token);

@@ -6,18 +6,22 @@ import {
   Ambulance,
   ArrowUpRight,
   BadgeCheck,
+  Brush,
   ChevronRight,
   CreditCard,
   Flag,
+  KeyRound,
   LayoutDashboard,
   MapPinned,
   Newspaper,
   Menu,
+  Palette,
   Receipt,
   Scale,
   ScrollText,
   Siren,
   Tent,
+  UserCog,
   Users,
   Wallet,
   X,
@@ -29,18 +33,21 @@ import { NotificationBell } from '@/components/NotificationBell';
 import { AccountMenu } from '@/components/AccountMenu';
 import { Avatar } from '@/components/Avatar';
 import { BangladeshArtwork, BangladeshMap } from '@/components/ui/BangladeshMap';
-import type { Role } from '@/features/auth/profileApi';
 import { useSignedInIdentity } from '@/features/auth/useAccount';
 import { useMyProfile } from '@/features/auth/useProfile';
 import { formatCount, toLanguage } from '@/lib/format';
 import { adminApi, type DashboardCounts } from './adminApi';
+import { canAny, permissions } from './permissions';
 
 interface Section {
   to: string;
   label: string;
   icon: LucideIcon;
-  /** Roles that may open it. The API enforces the same rule on every call. */
-  roles: readonly Role[];
+  /**
+   * Permissions that open it; holding any one is enough. The API enforces the same permission
+   * on every call, so this only decides what is worth showing.
+   */
+  needs: readonly string[];
   /** A dashboard count shown beside the link while above zero: work waiting in that queue. */
   count?: keyof DashboardCounts;
   /** The count is an emergency, not just a backlog. */
@@ -52,13 +59,17 @@ interface Group {
   sections: readonly Section[];
 }
 
-const staff: readonly Role[] = ['Admin', 'SafetyDesk', 'Moderator'];
-const safety: readonly Role[] = ['Admin', 'SafetyDesk'];
-
 const groups: readonly Group[] = [
   {
     key: 'overview',
-    sections: [{ to: '/admin', label: 'admin.nav.dashboard', icon: LayoutDashboard, roles: staff }],
+    sections: [
+      {
+        to: '/admin',
+        label: 'admin.nav.dashboard',
+        icon: LayoutDashboard,
+        needs: [permissions.dashboardView],
+      },
+    ],
   },
   {
     key: 'safety',
@@ -67,7 +78,7 @@ const groups: readonly Group[] = [
         to: '/admin/sos',
         label: 'admin.nav.sos',
         icon: Siren,
-        roles: safety,
+        needs: [permissions.safetySosView],
         count: 'openSos',
         urgent: true,
       },
@@ -75,9 +86,14 @@ const groups: readonly Group[] = [
         to: '/admin/destinations',
         label: 'admin.nav.destinations',
         icon: MapPinned,
-        roles: safety,
+        needs: [permissions.safetyDestinationsStatus],
       },
-      { to: '/admin/emergency-points', label: 'admin.nav.points', icon: Ambulance, roles: safety },
+      {
+        to: '/admin/emergency-points',
+        label: 'admin.nav.points',
+        icon: Ambulance,
+        needs: [permissions.safetyPointsManage],
+      },
     ],
   },
   {
@@ -87,27 +103,27 @@ const groups: readonly Group[] = [
         to: '/admin/reports',
         label: 'admin.nav.reports',
         icon: Flag,
-        roles: ['Admin', 'Moderator'],
+        needs: [permissions.moderationReportsView],
         count: 'openReports',
       },
       {
         to: '/admin/stories',
         label: 'admin.nav.stories',
         icon: Newspaper,
-        roles: ['Admin', 'Moderator'],
+        needs: [permissions.moderationContentManage],
       },
       {
         to: '/admin/disputes',
         label: 'admin.nav.disputes',
         icon: Scale,
-        roles: ['Admin'],
+        needs: [permissions.moderationDisputes],
         count: 'openDisputes',
       },
       {
         to: '/admin/verifications',
         label: 'admin.nav.verifications',
         icon: BadgeCheck,
-        roles: ['Admin'],
+        needs: [permissions.usersVerify],
         count: 'pendingVerifications',
       },
     ],
@@ -115,40 +131,95 @@ const groups: readonly Group[] = [
   {
     key: 'operations',
     sections: [
-      { to: '/admin/users', label: 'admin.nav.users', icon: Users, roles: ['Admin'] },
-      { to: '/admin/trips', label: 'admin.nav.trips', icon: Tent, roles: ['Admin'] },
-      { to: '/admin/bookings', label: 'admin.nav.bookings', icon: Receipt, roles: ['Admin'] },
-      { to: '/admin/payments', label: 'admin.nav.payments', icon: CreditCard, roles: ['Admin'] },
+      { to: '/admin/users', label: 'admin.nav.users', icon: Users, needs: [permissions.usersView] },
+      { to: '/admin/trips', label: 'admin.nav.trips', icon: Tent, needs: [permissions.tripsView] },
+      {
+        to: '/admin/bookings',
+        label: 'admin.nav.bookings',
+        icon: Receipt,
+        needs: [permissions.bookingsView],
+      },
+      {
+        to: '/admin/payments',
+        label: 'admin.nav.payments',
+        icon: CreditCard,
+        needs: [permissions.paymentsView],
+      },
       {
         to: '/admin/payouts',
         label: 'admin.nav.payouts',
         icon: Wallet,
-        roles: ['Admin'],
+        needs: [permissions.payoutsView],
         count: 'payoutsAwaitingApproval',
+      },
+    ],
+  },
+  {
+    key: 'site',
+    sections: [
+      {
+        to: '/admin/branding',
+        label: 'admin.nav.branding',
+        icon: Palette,
+        needs: [permissions.settingsBranding],
+      },
+      {
+        to: '/admin/theme',
+        label: 'admin.nav.theme',
+        icon: Brush,
+        needs: [permissions.settingsTheme],
       },
     ],
   },
   {
     key: 'system',
     sections: [
-      { to: '/admin/audit', label: 'admin.nav.audit', icon: ScrollText, roles: ['Admin'] },
+      {
+        to: '/admin/staff',
+        label: 'admin.nav.staff',
+        icon: UserCog,
+        needs: [permissions.staffView],
+      },
+      {
+        to: '/admin/roles',
+        label: 'admin.nav.roles',
+        icon: KeyRound,
+        needs: [permissions.staffView],
+      },
+      {
+        to: '/admin/audit',
+        label: 'admin.nav.audit',
+        icon: ScrollText,
+        needs: [permissions.auditView],
+      },
     ],
   },
 ];
 
-/** The groups and links this person's roles can open, in order. */
+/** The groups and links this person's permissions can open, in order. */
 function useVisibleGroups() {
   const { data: profile } = useMyProfile();
-  const roles = profile?.roles ?? [];
 
   return groups
     .map((group) => ({
       ...group,
-      sections: group.sections.filter((section) =>
-        section.roles.some((role) => roles.includes(role)),
-      ),
+      sections: group.sections.filter((section) => canAny(profile, section.needs)),
     }))
     .filter((group) => group.sections.length > 0);
+}
+
+/**
+ * The admin roles this person holds, as one line for the sidebar's foot. A super admin with no
+ * other role still reads as something, because the role itself says so.
+ */
+function useStaffRoleNames(): string {
+  const { i18n } = useTranslation();
+  const { data: profile } = useMyProfile();
+  const language = toLanguage(i18n.language);
+
+  return (profile?.staffRoles ?? [])
+    .map((role) => (language === 'bn' ? role.nameBn : role.name))
+    .join(' · ');
 }
 
 /** The section the address is in: the longest matching link, so /admin/users/7 is "Users". */
@@ -280,14 +351,14 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   const visible = useVisibleGroups();
   const { data: profile } = useMyProfile();
   const identity = useSignedInIdentity();
-  const staffRoles = (profile?.roles ?? []).filter((role) => staff.includes(role));
+  const held = useStaffRoleNames();
 
   // Shares the dashboard's query and cache: one request a minute feeds both.
   const counts = useQuery({
     queryKey: ['admin', 'dashboard'],
     queryFn: ({ signal }) => adminApi.dashboard(signal),
     refetchInterval: 60_000,
-    enabled: staffRoles.length > 0,
+    enabled: canAny(profile, [permissions.dashboardView]),
   });
 
   return (
@@ -388,7 +459,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{identity.name}</p>
             <p className="truncate text-xs text-dusk">
-              {staffRoles.map((role) => t(`roles.${role}`)).join(' · ')}
+              {held}
             </p>
           </div>
         </div>

@@ -34,7 +34,7 @@ public sealed class PaymentHistoryTests
     {
         _access.Add(TravellerId);
         _access.Add(HostId, [Role.Host]);
-        _access.Add(AdminId, [Role.Admin]);
+        _access.AddStaff(AdminId, StaffRoleDefaults.Admin);
     }
 
     // --- SSLCommerz validation ------------------------------------------------------------

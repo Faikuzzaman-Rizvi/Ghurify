@@ -1,6 +1,7 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
 using Ghurify.Application.Trips;
+using Ghurify.Domain.Identity;
 using Ghurify.Domain.Payments;
 
 namespace Ghurify.Application.Admin;
@@ -15,7 +16,7 @@ public sealed class CancelTripAsAdminHandler(TripCancellationService cancellatio
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.TripsCancel))
         {
             return AppError.Forbidden();
         }
@@ -32,7 +33,7 @@ public sealed class CancelTripAsAdminHandler(TripCancellationService cancellatio
             return AppError.Rule("trip_not_cancellable", "This trip has already ended or been cancelled.");
         }
 
-        await audit.WriteAsync(actorId, "trip.cancelled_by_admin", "Trip", tripId, reason, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, "trip.cancelled_by_admin", "Trip", tripId, reason), cancellationToken);
         return Done.Value;
     }
 }

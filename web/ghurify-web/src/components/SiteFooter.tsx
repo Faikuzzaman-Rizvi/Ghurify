@@ -1,8 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { BadgeCheck, LockKeyhole, Siren, type LucideIcon } from 'lucide-react';
+import {
+  BadgeCheck,
+  LockKeyhole,
+  Mail,
+  MapPin,
+  Phone,
+  Siren,
+  type LucideIcon,
+} from 'lucide-react';
 import { useHealth } from '@/hooks/useHealth';
+import { useSiteConfig, useSiteName } from '@/features/site/useSiteConfig';
+import { toLanguage } from '@/lib/format';
 import { Logo } from './Logo';
+
 
 const promises: { key: string; icon: LucideIcon }[] = [
   { key: 'verified', icon: BadgeCheck },
@@ -12,7 +23,20 @@ const promises: { key: string; icon: LucideIcon }[] = [
 
 /** The promise strip, brand and links, and a small live status light. */
 export function SiteFooter() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { data: config } = useSiteConfig();
+  const language = toLanguage(i18n.language);
+  const siteName = useSiteName();
+
+  // The tagline, like the name, is the super admin's to change; the shipped copy is the
+  // fallback until the configuration has loaded.
+  const tagline = config
+    ? language === 'bn'
+      ? config.identity.taglineBn
+      : config.identity.tagline
+    : t('footer.tagline');
+
+  const address = language === 'bn' ? config?.contact.addressBn : config?.contact.address;
 
   const exploreLinks = [
     { to: '/trips', label: t('nav.explore') },
@@ -48,7 +72,64 @@ export function SiteFooter() {
         <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
           <div>
             <Logo inverted />
-            <p className="mt-4 max-w-sm leading-relaxed">{t('footer.tagline')}</p>
+            <p className="mt-4 max-w-sm leading-relaxed">{tagline}</p>
+
+            {/* Only the details that have been filled in: a dead "call us" line is worse than
+                no line at all. */}
+            {(config?.contact.email || config?.contact.phone || address) && (
+              <ul className="mt-5 flex flex-col gap-2 text-sm">
+                {config?.contact.email && (
+                  <li>
+                    <a
+                      href={`mailto:${config.contact.email}`}
+                      className="flex items-center gap-2 transition hover:text-dusk"
+                    >
+                      <Mail aria-hidden="true" className="h-4 w-4 shrink-0 text-turmeric" />
+                      {config.contact.email}
+                    </a>
+                  </li>
+                )}
+                {config?.contact.phone && (
+                  <li>
+                    <a
+                      href={`tel:${config.contact.phone}`}
+                      className="flex items-center gap-2 transition hover:text-dusk"
+                    >
+                      <Phone aria-hidden="true" className="h-4 w-4 shrink-0 text-turmeric" />
+                      {config.contact.phone}
+                    </a>
+                  </li>
+                )}
+                {address && (
+                  <li className="flex items-start gap-2">
+                    <MapPin aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-turmeric" />
+                    <span>{address}</span>
+                  </li>
+                )}
+              </ul>
+            )}
+
+            {config && config.social.length > 0 && (
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {config.social.map((link) => (
+                  <li key={link.platform}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      // noreferrer as well as noopener: the destination has no business
+                      // knowing which page of the site somebody left from.
+                      rel="noopener noreferrer"
+                      aria-label={t(`footer.social.${link.platform}`, {
+                        defaultValue: link.platform,
+                      })}
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xs font-bold uppercase transition hover:bg-turmeric hover:text-night"
+                    >
+                      <span aria-hidden="true">{link.platform.slice(0, 2)}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <FooterLinks title={t('footer.explore')} links={exploreLinks} />
@@ -59,7 +140,7 @@ export function SiteFooter() {
 
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col items-center justify-between gap-2 py-5 text-sm text-white/60 sm:flex-row">
-          <p>{t('footer.rights', { year: new Date().getFullYear() })}</p>
+          <p>{t('footer.rights', { year: new Date().getFullYear(), name: siteName })}</p>
           <Link to="/credits" className="transition hover:text-dusk">
             {t('credits.link')}
           </Link>

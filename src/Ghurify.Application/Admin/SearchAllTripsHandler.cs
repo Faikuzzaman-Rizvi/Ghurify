@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 using Ghurify.Domain.Trips;
 
 namespace Ghurify.Application.Admin;
@@ -12,7 +13,7 @@ public sealed class SearchAllTripsHandler(IAdminRepository admin, AccessService 
     public async Task<Result<AdminTripPage>> HandleAsync(
         long actorId, string? search, TripStatus? status, int page, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.TripsView))
         {
             return AppError.Forbidden();
         }

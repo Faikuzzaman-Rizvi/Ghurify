@@ -62,9 +62,13 @@ export const profileApi = {
   removeAvatar: () => apiDelete<void>('/api/v1/me/avatar'),
 };
 
-/** Staff can open the admin area; the API still checks every action. */
-export function isStaff(roles: readonly Role[] | undefined): boolean {
-  return (roles ?? []).some(
-    (role) => role === 'Admin' || role === 'SafetyDesk' || role === 'Moderator',
-  );
+/**
+ * Anyone holding a staff role can open the admin portal; which sections they then see is a
+ * permission each (see features/admin/permissions.ts). The API checks every call itself, so this
+ * only decides what is worth showing.
+ */
+export function isStaff(
+  profile: Pick<Profile, 'permissions' | 'isSuperAdmin'> | undefined,
+): boolean {
+  return profile?.isSuperAdmin === true || (profile?.permissions ?? []).length > 0;
 }

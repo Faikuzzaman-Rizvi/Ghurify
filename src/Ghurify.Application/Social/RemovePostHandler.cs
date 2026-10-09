@@ -2,6 +2,7 @@ using Ghurify.Application.Abstractions;
 using Ghurify.Application.Admin;
 using Ghurify.Application.Identity;
 using Ghurify.Application.Notifications;
+using Ghurify.Domain.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace Ghurify.Application.Social;
@@ -23,7 +24,7 @@ public sealed class RemovePostHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsModerator)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.ModerationContentManage))
         {
             return AppError.Forbidden();
         }
@@ -39,7 +40,7 @@ public sealed class RemovePostHandler(
             return AppError.NotFound("post_not_found", "There is no such post.");
         }
 
-        await audit.WriteAsync(actorId, "post.removed", "Post", postId, reason, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, "post.removed", "Post", postId, reason), cancellationToken);
         await notifications.NotifyAsync(authorId, "post.removed", $"post.removed:{postId}", new { postId, reason }, cancellationToken);
         logger.LogInformation("Moderator {ActorId} removed post {PostId}.", actorId, postId);
 

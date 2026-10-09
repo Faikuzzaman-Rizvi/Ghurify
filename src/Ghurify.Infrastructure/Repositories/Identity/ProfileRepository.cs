@@ -22,6 +22,8 @@ public sealed class ProfileRepository(IDbConnectionFactory connectionFactory) : 
 
         var row = await results.ReadSingleOrDefaultAsync<ProfileRow>();
         var roles = (await results.ReadAsync<byte>()).Select(role => (Role)role).ToList();
+        var permissions = await results.ReadAsync<string>();
+        var staffRoles = await results.ReadAsync<ProfileStaffRole>();
 
         if (row is null)
         {
@@ -41,7 +43,12 @@ public sealed class ProfileRepository(IDbConnectionFactory connectionFactory) : 
             [Role.Traveler, .. roles],
             row.VerifiedLevel is null ? null : (VerificationLevel)row.VerifiedLevel.Value,
             DateOnly.FromDateTime(row.Created),
-            row.AvatarUpdatedOn is null ? null : new DateTimeOffset(DateTime.SpecifyKind(row.AvatarUpdatedOn.Value, DateTimeKind.Utc)).ToUnixTimeSeconds());
+            row.AvatarUpdatedOn is null ? null : new DateTimeOffset(DateTime.SpecifyKind(row.AvatarUpdatedOn.Value, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+            // Keys this build does not define are dropped, so an older API serves an older UI
+            // exactly the sections it knows how to render.
+            [.. PermissionCatalog.Known(permissions).Order(StringComparer.Ordinal)],
+            row.IsSuperAdmin,
+            [.. staffRoles]);
     }
 
     public async Task<string?> SetAvatarAsync(long userId, string? avatarBlob, long actorId, CancellationToken cancellationToken)
@@ -112,5 +119,6 @@ public sealed class ProfileRepository(IDbConnectionFactory connectionFactory) : 
         string? EmergencyContactPhone,
         DateTime Created,
         byte? VerifiedLevel,
-        DateTime? AvatarUpdatedOn);
+        DateTime? AvatarUpdatedOn,
+        bool IsSuperAdmin);
 }

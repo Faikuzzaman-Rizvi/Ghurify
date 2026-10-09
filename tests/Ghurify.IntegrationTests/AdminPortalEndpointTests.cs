@@ -27,7 +27,7 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
         await using var data = new TestData(database.ConnectionString);
         var person = await data.CreateVerifiedTravelerAsync();
         var admin = await data.CreateAdminAsync();
-        var moderator = await data.CreateUserAsync(Gender.Female, "Moderator", [Role.Moderator]);
+        var moderator = await data.CreateModeratorAsync();
         await using var api = new GhurifyApiFactory(database.ConnectionString);
 
         using var adminClient = TestData.ClientFor(api, admin);
@@ -90,7 +90,7 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
         await using var data = new TestData(database.ConnectionString);
         var person = await data.CreateVerifiedTravelerAsync();
         var admin = await data.CreateAdminAsync();
-        var moderator = await data.CreateUserAsync(Gender.Male, "Moderator", [Role.Moderator]);
+        var moderator = await data.CreateModeratorAsync(Gender.Male);
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         using var adminClient = TestData.ClientFor(api, admin);
 
@@ -242,7 +242,7 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
     public async Task EmergencyPoints_CanBeCorrectedAndMarkedChecked_ByTheSafetyDesk()
     {
         await using var data = new TestData(database.ConnectionString);
-        var desk = await data.CreateUserAsync(Gender.Female, "Desk officer", [Role.SafetyDesk]);
+        var desk = await data.CreateSafetyDeskAsync();
         var traveller = await data.CreateVerifiedTravelerAsync();
         await using var api = new GhurifyApiFactory(database.ConnectionString);
         using var client = TestData.ClientFor(api, desk);

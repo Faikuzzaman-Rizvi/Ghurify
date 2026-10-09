@@ -121,24 +121,73 @@ Admin → **Destination alerts** → Change status → *Closed*, with a note in 
 requests stop at once; a background job cancels upcoming trips there and refunds everyone in full.
 It runs once per closure even if retried.
 
-## Make someone an admin
+## The admin desk
 
-The first admin has to be made in SQL; after that, admins grant roles in **Admin → People**.
-The person must first create an account and confirm their email.
+What somebody may do on the desk is a **permission** (`payouts.approve`, `users.suspend`), and a
+**role** is a named bundle of permissions kept in the database. A super admin edits roles in
+**Admin → Roles & permissions** and decides who holds them in **Admin → People on the desk**, so
+changing what an admin can do needs no release.
 
-```sql
-DECLARE @Email NVARCHAR (256) = N'person@example.com';   -- lower case
+Four roles ship with the platform and cannot be deleted: **super-admin** (everything, including
+anything a later release adds), **admin**, **moderator** and **safety-desk**. Their permissions
+can be retuned like any other role's; a redeploy never resets them.
 
-INSERT INTO [Main].[UserRole] ([UserId], [Role])
-SELECT [u].[Id], 10                                       -- 10 = Admin, 9 = SafetyDesk, 8 = Moderator
-FROM   [Main].[User] AS [u]
-WHERE  [u].[Email] = @Email
-  AND  [u].[Status] = 1
-  AND  NOT EXISTS (SELECT 1 FROM [Main].[UserRole] AS [r]
-                   WHERE [r].[UserId] = [u].[Id] AND [r].[Role] = 10 AND [r].[Archived] = 0);
+Editing a role, or putting somebody on or off the desk, asks for the actor's own password again
+and stays confirmed for ten minutes. Every change is in the audit log with what moved.
+
+### The first super admin
+
+A new deployment has nobody on the desk, and the portal is the only way in, so the first super
+admin is made from the console by whoever holds the database credentials. The person must have an
+account with a confirmed email first.
+
+```bash
+dotnet run --project src/Ghurify.DatabaseUpdate -- superadmin person@example.com
 ```
 
-Run it with an account that can write to the database, and note who and why in the team log.
+It grants one role, prints what it did, and changes nothing else. Note who and why in the team
+log. After that, super admins grant the role to each other from the portal.
+
+### What cannot be done, by design
+
+- Nobody edits their own admin roles. Ask another super admin.
+- Nobody can put a permission on a role, or hand over a role, that they do not hold themselves.
+- Only a super admin can make another super admin.
+- The last active super admin cannot be removed or suspended; the database refuses it inside the
+  transaction, so two admins cannot remove each other at the same moment.
+- Suspending anybody on the desk is refused until they are taken off it.
+
+## Changing the website itself
+
+The site's name, tagline, description, contact details, social links, logo, icons, colours and
+fonts are settings, not code. A super admin changes them in **Admin → Website & branding** and
+**Admin → Colours & fonts**; a change is live on the next page load, with no deploy.
+
+Two permissions, so the two jobs can be given separately:
+`settings.branding` (the words and the pictures) and `settings.theme` (the colours and type).
+Neither is given to the seeded **admin** role: a super admin grants them deliberately.
+
+- **Defaults.** Only settings that differ from the shipped values are stored. An untouched
+  database renders exactly the site the code ships with, and every field has a **Reset** that
+  deletes the row rather than storing a copy of the default.
+- **Readability is enforced.** A theme is refused if any text colour falls below WCAG AA against
+  the background it is painted on — checked over the whole theme, not just the colours being
+  changed. This is deliberate: whoever makes the site unreadable may be the only person who could
+  put it right. The theme screen shows the same check live, so a refusal is never a surprise.
+- **Fonts** come from a fixed list. Bangla faces are appended to every stack whatever is chosen,
+  so Bangla always renders.
+- **Social links** must be on the platform they are for, so the footer cannot be used to send
+  visitors elsewhere.
+- **Images** are PNG, JPEG or WebP, shrunk in the browser and re-checked by the API. SVG is
+  refused: it can carry script, and these files are served to every visitor from the site's own
+  origin. They are kept in `[Site].[Asset]` rather than blob storage, so the header renders even
+  if the storage account is unreachable. Replacing one archives the previous bytes, so a mistaken
+  change is recoverable from the database.
+- **History.** Every change is in the audit log, and each field keeps its own history
+  (`[Site].[SettingHistory]`) with who changed it and what it was before.
+
+Emails still carry the shipped Ghurify name and palette; making their text and branding editable
+is a later slice.
 
 ## Identity documents
 

@@ -30,7 +30,8 @@ public sealed class TestData(string connectionString) : IAsyncDisposable
         Gender gender = Gender.Female,
         string? name = null,
         Role[]? roles = null,
-        VerificationLevel? verified = null)
+        VerificationLevel? verified = null,
+        string? staffRole = null)
     {
         var token = TestContext.Current.CancellationToken;
         var email = $"user-{Guid.NewGuid():N}@ghurify.test";
@@ -53,6 +54,19 @@ public sealed class TestData(string connectionString) : IAsyncDisposable
             await connection.ExecuteAsync(new CommandDefinition(
                 "INSERT INTO [Main].[UserRole] ([UserId], [Role]) VALUES (@UserId, @Role);",
                 new { UserId = id, Role = (byte)role },
+                cancellationToken: token));
+        }
+
+        // Whatever the platform's own seed says this role may do, so the tests prove the seeded
+        // permission sets really do grant what the endpoints need.
+        if (staffRole is not null)
+        {
+            await connection.ExecuteAsync(new CommandDefinition(
+                """
+                INSERT INTO [Main].[UserStaffRole] ([UserId], [StaffRoleId])
+                SELECT @UserId, [Id] FROM [Main].[StaffRole] WHERE [Key] = @Key AND [Archived] = 0;
+                """,
+                new { UserId = id, Key = staffRole },
                 cancellationToken: token));
         }
 
@@ -83,7 +97,19 @@ public sealed class TestData(string connectionString) : IAsyncDisposable
     public Task<TestUser> CreateVerifiedTravelerAsync(Gender gender = Gender.Female) =>
         CreateUserAsync(gender, "Test traveller", verified: VerificationLevel.Nid);
 
-    public Task<TestUser> CreateAdminAsync() => CreateUserAsync(Gender.Male, "Test admin", [Role.Admin]);
+    /// <summary>Somebody with the seeded "admin" staff role: the platform's day-to-day desk.</summary>
+    public Task<TestUser> CreateAdminAsync() =>
+        CreateUserAsync(Gender.Male, "Test admin", staffRole: StaffRoleKeys.Admin);
+
+    /// <summary>Somebody who may do everything, including editing the desk itself.</summary>
+    public Task<TestUser> CreateSuperAdminAsync() =>
+        CreateUserAsync(Gender.Female, "Test super admin", staffRole: StaffRoleKeys.SuperAdmin);
+
+    public Task<TestUser> CreateModeratorAsync(Gender gender = Gender.Female) =>
+        CreateUserAsync(gender, "Test moderator", staffRole: StaffRoleKeys.Moderator);
+
+    public Task<TestUser> CreateSafetyDeskAsync(Gender gender = Gender.Female) =>
+        CreateUserAsync(gender, "Test desk officer", staffRole: StaffRoleKeys.SafetyDesk);
 
     /// <summary>
     /// A live trip straight in the database: three days at Sajek starting in <paramref name="startIn"/>
@@ -240,7 +266,8 @@ public sealed class TestData(string connectionString) : IAsyncDisposable
         DELETE FROM [Safety].[AuditLog] WHERE [ActorId] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[VerificationDocument] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[Verification] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);
-        DELETE FROM [Main].[UserRole] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);
+        DELETE FROM [Main].[UserStaffRole] WHERE [UserId] IN (SELECT [Id] FROM @UserIds) OR [GrantedById] IN (SELECT [Id] FROM @UserIds);
+        DELETE FROM [Main].[UserRole] WHERE [UserId] IN (SELECT [Id] FROM @UserIds) OR [GrantedById] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[UserProfile] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[RefreshToken] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);
         DELETE FROM [Main].[UserCredential] WHERE [UserId] IN (SELECT [Id] FROM @UserIds);

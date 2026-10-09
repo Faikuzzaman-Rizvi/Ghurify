@@ -25,7 +25,7 @@ public sealed class SafetyHandlerTests
     {
         _access.Add(TravellerId);
         _access.Add(HostId, [Role.Host]);
-        _access.Add(DeskId, [Role.SafetyDesk]);
+        _access.AddStaff(DeskId, StaffRoleDefaults.SafetyDesk);
     }
 
     // --- SOS -------------------------------------------------------------------------------

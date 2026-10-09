@@ -4,7 +4,8 @@
 --   3. their identity checks, newest first, with how many photos each has;
 --   4. the trips they host, newest first (20);
 --   5. their bookings, newest first (20);
---   6. counts: reports about them that are open, and in total.
+--   6. counts: reports about them that are open, and in total;
+--   7. the staff roles they hold, if any, and who put them on the desk.
 CREATE PROCEDURE [Main].[GetAdminUser]
     @UserId BIGINT
 AS
@@ -77,4 +78,19 @@ BEGIN
             WHERE [r].[Kind] = 1 AND [r].[TargetId] = @UserId AND [r].[Status] = 1 AND [r].[Archived] = 0) AS [OpenReports],
            (SELECT COUNT(1) FROM [Safety].[Report] AS [r]
             WHERE [r].[Kind] = 1 AND [r].[TargetId] = @UserId AND [r].[Archived] = 0)                    AS [TotalReports];
+
+    SELECT    [s].[Id]   AS [StaffRoleId],
+              [s].[Key],
+              [s].[Name],
+              [s].[NameBn],
+              [s].[IsSuperAdmin],
+              [h].[Created] AS [GrantedOn],
+              [h].[GrantedById],
+              [g].[DisplayName] AS [GrantedByName]
+    FROM      [Main].[UserStaffRole] AS [h]
+    JOIN      [Main].[StaffRole]     AS [s] ON [s].[Id] = [h].[StaffRoleId] AND [s].[Archived] = 0
+    LEFT JOIN [Main].[User]          AS [g] ON [g].[Id] = [h].[GrantedById]
+    WHERE     [h].[UserId] = @UserId
+      AND     [h].[Archived] = 0
+    ORDER BY  [s].[IsSuperAdmin] DESC, [s].[Name] ASC;
 END;

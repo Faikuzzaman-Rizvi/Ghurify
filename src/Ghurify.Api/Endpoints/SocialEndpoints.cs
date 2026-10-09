@@ -63,10 +63,12 @@ public static class SocialEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
-        // Moderation from the admin portal: moderators and admins see every story and may remove any.
+        // Moderation from the admin portal: whoever may manage content sees every story and
+        // may remove any of them.
         var moderation = app.MapGroup("/api/v1/admin/posts")
             .WithTags("Admin")
-            .RequireAuthorization(Authorization.Policies.Moderator);
+            .RequireAuthorization(Authorization.Policies.Require(
+                Ghurify.Domain.Identity.Permissions.ModerationContentManage));
 
         moderation.MapGet("/", ListAllPostsAsync)
             .WithName("ListAllPosts")

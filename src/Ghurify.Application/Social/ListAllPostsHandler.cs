@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Social;
 
@@ -8,7 +9,7 @@ public sealed class ListAllPostsHandler(ISocialRepository social, MediaLinks lin
 {
     public async Task<Result<PostPage>> HandleAsync(long actorId, long? authorId, long? before, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsModerator)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.ModerationContentManage))
         {
             return AppError.Forbidden();
         }

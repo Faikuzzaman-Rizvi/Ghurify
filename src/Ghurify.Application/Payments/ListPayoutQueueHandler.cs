@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Payments;
 
@@ -11,7 +12,7 @@ public sealed class ListPayoutQueueHandler(IPayoutRepository payouts, AccessServ
         PayoutStatus status,
         CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.PayoutsView))
         {
             return AppError.Forbidden();
         }

@@ -1,6 +1,7 @@
-using System.Globalization;
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
+using System.Globalization;
 
 namespace Ghurify.Application.Admin;
 
@@ -12,7 +13,7 @@ public sealed class GetBookingForAdminHandler(IAdminRepository admin, AccessServ
 {
     public async Task<Result<AdminBookingDetail>> HandleAsync(long actorId, string? lookup, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.BookingsView))
         {
             return AppError.Forbidden();
         }

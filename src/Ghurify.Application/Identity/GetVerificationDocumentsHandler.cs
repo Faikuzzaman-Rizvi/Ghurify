@@ -16,13 +16,13 @@ public sealed class GetVerificationDocumentsHandler(
 {
     public async Task<Result<IReadOnlyList<ReviewDocumentView>>> HandleAsync(long actorId, long verificationId, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.UsersDocumentsView))
         {
             return AppError.Forbidden();
         }
 
         var found = await documents.QueryForVerificationAsync(verificationId, cancellationToken);
-        await audit.WriteAsync(actorId, "verification.documents_viewed", "Verification", verificationId, $"{found.Count} document(s)", cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, "verification.documents_viewed", "Verification", verificationId, $"{found.Count} document(s)"), cancellationToken);
 
         var expires = clock.UtcNow.Add(UploadRules.ReviewLinkLifetime);
         IReadOnlyList<ReviewDocumentView> views =

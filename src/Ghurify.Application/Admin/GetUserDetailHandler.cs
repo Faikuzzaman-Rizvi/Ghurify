@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Admin;
 
@@ -8,7 +9,7 @@ public sealed class GetUserDetailHandler(IAdminRepository admin, AccessService a
 {
     public async Task<Result<AdminUserDetail>> HandleAsync(long actorId, long userId, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.UsersView))
         {
             return AppError.Forbidden();
         }

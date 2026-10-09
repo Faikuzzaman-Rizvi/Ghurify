@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Ghurify.Api.Authorization;
 using Ghurify.Application.Safety;
+using Ghurify.Domain.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ghurify.Api.Endpoints;
@@ -73,41 +74,43 @@ public static class SafetyEndpoints
 
         admin.MapGet("/dashboard", DashboardAsync)
             .WithName("GetAdminDashboard")
-            .Produces<DashboardCounts>();
+            .RequireAuthorization(Policies.Require(Permissions.DashboardView))
+            .Produces<DashboardCounts>()
+            .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapGet("/sos", SosBoardAsync)
             .WithName("GetSosBoard")
-            .RequireAuthorization(Policies.SafetyDesk)
+            .RequireAuthorization(Policies.Require(Permissions.SafetySosView))
             .Produces<IReadOnlyList<SosBoardItem>>();
 
         admin.MapPost("/sos/{id:long}/acknowledge", AcknowledgeSosAsync)
             .WithName("AcknowledgeSos")
-            .RequireAuthorization(Policies.SafetyDesk)
+            .RequireAuthorization(Policies.Require(Permissions.SafetySosManage))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         admin.MapGet("/check-ins/missed", MissedCheckInsAsync)
             .WithName("ListMissedCheckIns")
-            .RequireAuthorization(Policies.SafetyDesk)
+            .RequireAuthorization(Policies.Require(Permissions.SafetyCheckInsView))
             .Produces<IReadOnlyList<MissedCheckIn>>();
 
         admin.MapPost("/destinations/{slug}/status", ChangeDestinationStatusAsync)
             .WithName("ChangeDestinationStatus")
             .WithSummary("Sets a destination Open, Caution or Closed. Closing cancels its trips and refunds everyone.")
-            .RequireAuthorization(Policies.SafetyDesk)
+            .RequireAuthorization(Policies.Require(Permissions.SafetyDestinationsStatus))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         admin.MapGet("/reports", ReportsAsync)
             .WithName("ListReports")
-            .RequireAuthorization(Policies.Moderator)
+            .RequireAuthorization(Policies.Require(Permissions.ModerationReportsView))
             .Produces<IReadOnlyList<ReportView>>()
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapPost("/reports/{id:long}/resolve", ResolveReportAsync)
             .WithName("ResolveReport")
-            .RequireAuthorization(Policies.Moderator)
+            .RequireAuthorization(Policies.Require(Permissions.ModerationReportsResolve))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status403Forbidden)

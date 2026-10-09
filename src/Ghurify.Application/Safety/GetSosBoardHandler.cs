@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Safety;
 
@@ -8,7 +9,7 @@ public sealed class GetSosBoardHandler(ISafetyRepository safety, AccessService a
 {
     public async Task<Result<IReadOnlyList<SosBoardItem>>> HandleAsync(long actorId, bool includeResolved, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsSafetyDesk)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.SafetySosView))
         {
             return AppError.Forbidden();
         }

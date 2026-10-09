@@ -1,6 +1,7 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
 using Ghurify.Application.Payments;
+using Ghurify.Domain.Identity;
 using Ghurify.Domain.Payments;
 
 namespace Ghurify.Application.Admin;
@@ -17,7 +18,7 @@ public sealed class SearchPaymentsHandler(IPaymentHistoryRepository history, Acc
     public async Task<Result<PaymentHistoryPage>> HandleAsync(
         long actorId, string? search, PaymentStatus? status, int page, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.PaymentsView))
         {
             return AppError.Forbidden();
         }

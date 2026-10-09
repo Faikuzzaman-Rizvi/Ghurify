@@ -20,7 +20,7 @@ public sealed class ReviewVerificationHandler(
         ArgumentNullException.ThrowIfNull(command);
 
         var actor = await access.GetAsync(actorId, cancellationToken);
-        if (!actor.IsAdmin)
+        if (!actor.Can(Permissions.UsersVerify))
         {
             return AppError.Forbidden();
         }
@@ -51,11 +51,13 @@ public sealed class ReviewVerificationHandler(
         }
 
         await audit.WriteAsync(
-            actorId,
-            command.Approve ? "verification.approve" : "verification.reject",
-            "Verification",
-            verificationId,
-            reason,
+            new AuditRecord(
+                actorId,
+                command.Approve ? "verification.approve" : "verification.reject",
+                "Verification",
+                verificationId,
+                Note: reason,
+                Changes: new AuditChanges().Set("status", VerificationStatus.Pending, status).ToJson()),
             cancellationToken);
 
         logger.LogInformation("Admin {ActorId} set verification {VerificationId} to {Status}.", actorId, verificationId, status);

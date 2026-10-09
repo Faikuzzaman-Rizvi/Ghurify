@@ -33,6 +33,14 @@ public sealed class IdentityOptions
     [Range(1, 60)]
     public int AccessTokenMinutes { get; set; } = 15;
 
+    /// <summary>
+    /// How long re-entering the password unlocks the portal's most dangerous actions for
+    /// (see <see cref="IStepUpTokens"/>). Long enough to edit a role without being asked twice,
+    /// short enough that walking away from the desk closes the window.
+    /// </summary>
+    [Range(1, 60)]
+    public int StepUpMinutes { get; set; } = 10;
+
     [Range(1, 365)]
     public int RefreshTokenDays { get; set; } = 30;
 

@@ -134,6 +134,21 @@ public static class Procedures
 
         /// <summary>The admin verification queue.</summary>
         public const string QueryVerificationQueue = "[Main].[QueryVerificationQueue]";
+
+        /// <summary>Every admin role with its permissions and how many people hold it.</summary>
+        public const string QueryStaffRoles = "[Main].[QueryStaffRoles]";
+
+        /// <summary>Creates or edits an admin role, replacing its permissions atomically.</summary>
+        public const string SetStaffRole = "[Main].[SetStaffRole]";
+
+        /// <summary>Archives an unused admin role.</summary>
+        public const string DelStaffRole = "[Main].[DelStaffRole]";
+
+        /// <summary>Grants or revokes one admin role, guarding the last super admin.</summary>
+        public const string SetUserStaffRole = "[Main].[SetUserStaffRole]";
+
+        /// <summary>Everybody on the admin desk, with the roles each holds.</summary>
+        public const string QueryStaffMembers = "[Main].[QueryStaffMembers]";
     }
 
     public static class Pay
@@ -227,6 +242,29 @@ public static class Procedures
         public const string GetPublicProfile = "[Social].[GetPublicProfile]";
     }
 
+    public static class Site
+    {
+        public const string Schema = "Site";
+
+        /// <summary>Everything the super admin has changed about the site, and its images' stamps.</summary>
+        public const string QuerySettings = "[Site].[QuerySettings]";
+
+        /// <summary>Saves a batch of settings with their history, atomically; returns what moved.</summary>
+        public const string SetSettings = "[Site].[SetSettings]";
+
+        /// <summary>What one setting used to be, newest first.</summary>
+        public const string QuerySettingHistory = "[Site].[QuerySettingHistory]";
+
+        /// <summary>One uploaded image, to serve it.</summary>
+        public const string GetAsset = "[Site].[GetAsset]";
+
+        /// <summary>Replaces an image, archiving the one before it.</summary>
+        public const string SetAsset = "[Site].[SetAsset]";
+
+        /// <summary>Puts an image back to the one the app shipped with.</summary>
+        public const string DelAsset = "[Site].[DelAsset]";
+    }
+
     public static class Safety
     {
         public const string Schema = "Safety";
@@ -254,5 +292,8 @@ public static class Procedures
 
         /// <summary>Counts for the admin overview.</summary>
         public const string GetDashboardCounts = "[Safety].[GetDashboardCounts]";
+
+        /// <summary>The audit trail, filtered and paged.</summary>
+        public const string QueryAuditLog = "[Safety].[QueryAuditLog]";
     }
 }

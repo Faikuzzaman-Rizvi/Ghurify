@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Ghurify.Api.Authorization;
 using Ghurify.Application.Abstractions;
+using Ghurify.Application.Admin;
 using Ghurify.Application.Identity;
 using Ghurify.Application.Payments;
 using Ghurify.Domain.Identity;
@@ -25,28 +26,28 @@ public static class AdminEndpoints
         admin.MapGet("/verifications", QueryVerificationsAsync)
             .WithName("QueryVerificationQueue")
             .WithSummary("Identity checks in one status, oldest first.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersVerify))
             .Produces<VerificationQueuePage>()
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapGet("/verifications/{id:long}/documents", VerificationDocumentsAsync)
             .WithName("GetVerificationDocuments")
             .WithSummary("The ID photos of one check, as links that work for five minutes. Each viewing is audited.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersDocumentsView))
             .Produces<IReadOnlyList<ReviewDocumentView>>()
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapDelete("/users/{id:long}/avatar", RemoveUserAvatarAsync)
             .WithName("RemoveUserAvatar")
             .WithSummary("Removes someone's profile picture (for example, an inappropriate one). Audited.")
-            .RequireAuthorization(Policies.Moderator)
+            .RequireAuthorization(Policies.Require(Permissions.UsersAvatarRemove))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapPost("/verifications/{id:long}/review", ReviewVerificationAsync)
             .WithName("ReviewVerification")
             .WithSummary("Approves or rejects a pending identity check. A rejection needs a reason.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersVerify))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status403Forbidden)
@@ -56,7 +57,7 @@ public static class AdminEndpoints
         admin.MapPost("/users/{id:long}/roles", ChangeRoleAsync)
             .WithName("ChangeUserRole")
             .WithSummary("Grants or revokes a role.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.UsersRolesManage))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound);
@@ -64,23 +65,24 @@ public static class AdminEndpoints
         admin.MapGet("/payouts", QueryPayoutsAsync)
             .WithName("QueryPayoutQueue")
             .WithSummary("Payouts in one status; Released ones are waiting to be sent to hosts.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.PayoutsView))
             .Produces<IReadOnlyList<PayoutView>>()
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
         admin.MapPost("/payouts/{id:long}/approve", ApprovePayoutAsync)
             .WithName("ApprovePayout")
             .WithSummary("Confirms a released payout has been sent to the host. Audited.")
-            .RequireAuthorization(Policies.AdminOnly)
+            .RequireAuthorization(Policies.Require(Permissions.PayoutsApprove))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
         admin.MapGet("/audit", QueryAuditAsync)
             .WithName("QueryAuditLog")
-            .WithSummary("Recent admin and safety-desk actions, newest first.")
-            .RequireAuthorization(Policies.AdminOnly)
-            .Produces<IReadOnlyList<AuditEntry>>();
+            .WithSummary("Admin and safety-desk actions, newest first. Every filter is optional; an action ending in a dot matches that whole group.")
+            .RequireAuthorization(Policies.Require(Permissions.AuditView))
+            .Produces<AuditPage>()
+            .ProducesProblem(StatusCodes.Status403Forbidden);
 
         return app;
     }
@@ -120,20 +122,12 @@ public static class AdminEndpoints
         ChangeRoleRequest request,
         ClaimsPrincipal principal,
         [FromServices] ChangeRoleHandler handler,
-        [FromServices] IAuditLog audit,
-        CancellationToken cancellationToken)
-    {
-        var actorId = principal.RequireUserId();
-        var result = await handler.HandleAsync(actorId, id, request.Role, request.Grant, cancellationToken);
-
-        if (result.Succeeded)
-        {
-            await audit.WriteAsync(
-                actorId, request.Grant ? "role.grant" : "role.revoke", "User", id, request.Role.ToString(), cancellationToken);
-        }
-
-        return ApiResults.NoContent(result);
-    }
+        CancellationToken cancellationToken) =>
+        // The audit entry is written by the handler, which knows whether the change actually
+        // happened. This endpoint used to write a second one of its own.
+        ApiResults.NoContent(
+            await handler.HandleAsync(
+                principal.RequireUserId(), id, request.Role, request.Grant, cancellationToken));
 
     private static async Task<IResult> QueryPayoutsAsync(
         ClaimsPrincipal principal,
@@ -150,11 +144,21 @@ public static class AdminEndpoints
         ApiResults.NoContent(await handler.HandleAsync(principal.RequireUserId(), id, cancellationToken));
 
     private static async Task<IResult> QueryAuditAsync(
-        [FromServices] IAuditLog audit,
+        ClaimsPrincipal principal,
+        [FromServices] QueryAuditLogHandler handler,
         CancellationToken cancellationToken,
+        long? actorId = null,
+        string? action = null,
         string? entityType = null,
-        long? entityId = null) =>
-        Results.Ok(await audit.QueryAsync(entityType, entityId, take: 100, cancellationToken));
+        long? entityId = null,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null,
+        int page = 1,
+        int pageSize = 50) =>
+        ApiResults.Ok(await handler.HandleAsync(
+            principal.RequireUserId(),
+            new AuditQuery(actorId, action, entityType, entityId, from, to, page, pageSize),
+            cancellationToken));
 
     public sealed record ChangeRoleRequest(Role Role, bool Grant);
 }

@@ -7,8 +7,9 @@ namespace Ghurify.Application.Admin;
 
 /// <summary>
 /// Suspends, reactivates or closes an account, with a written reason (audited). Suspending ends
-/// every session. An admin cannot change their own account, and another admin must lose the
-/// role before they can be suspended, so the desk cannot be locked out by one mistake.
+/// every session. Nobody can change their own account here, and anybody on the admin desk has to
+/// be taken off it first, so the desk cannot be emptied by one mistake. The database refuses the
+/// last active super admin as well, inside the transaction, in case two of these race.
 /// </summary>
 public sealed class SetUserStatusHandler(
     IAdminRepository admin,
@@ -20,7 +21,7 @@ public sealed class SetUserStatusHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.UsersSuspend))
         {
             return AppError.Forbidden();
         }
@@ -41,21 +42,41 @@ public sealed class SetUserStatusHandler(
             return AppError.Rule("own_account", "You cannot change your own account here.");
         }
 
-        if (command.Status != UserStatus.Active && (await access.GetAsync(userId, cancellationToken)).Roles.Contains(Role.Admin))
+        if (command.Status != UserStatus.Active && (await access.GetAsync(userId, cancellationToken)).IsStaff)
         {
-            return AppError.Rule("target_is_admin", "Remove the admin role before suspending or closing this account.");
+            return AppError.Rule(
+                "target_is_staff",
+                "Take this person off the admin desk before suspending or closing their account.");
         }
 
         var outcome = await admin.SetUserStatusAsync(userId, command.Status, actorId, cancellationToken);
-        if (outcome == StatusChange.NotFound)
+
+        switch (outcome)
         {
-            return AppError.NotFound("user_not_found", "There is no such person.");
+            case StatusChange.NotFound:
+                return AppError.NotFound("user_not_found", "There is no such person.");
+
+            case StatusChange.LastSuperAdmin:
+                return AppError.Rule(
+                    "last_super_admin",
+                    "This is the only active super admin. Make somebody else one first.");
+
+            default:
+                break;
         }
 
         access.Forget(userId);
         if (outcome == StatusChange.Changed)
         {
-            await audit.WriteAsync(actorId, $"user.{command.Status.ToString().ToLowerInvariant()}", "User", userId, reason, cancellationToken);
+            await audit.WriteAsync(
+                new AuditRecord(
+                    actorId,
+                    $"user.{command.Status.ToString().ToLowerInvariant()}",
+                    "User",
+                    userId,
+                    Note: reason,
+                    Changes: new AuditChanges().Set("status", (UserStatus?)null, command.Status).ToJson()),
+                cancellationToken);
             logger.LogWarning("Admin {ActorId} set user {UserId} to {Status}.", actorId, userId, command.Status);
         }
 

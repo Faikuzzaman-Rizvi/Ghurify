@@ -20,7 +20,7 @@ public sealed class ProfileHandlerTests
     public ProfileHandlerTests()
     {
         _access.Add(UserId);
-        _access.Add(AdminId, [Role.Admin]);
+        _access.AddStaff(AdminId, StaffRoleDefaults.Admin);
         _profiles.Add(UserId);
     }
 
@@ -135,15 +135,45 @@ public sealed class ProfileHandlerTests
         Assert.Equal((AdminId, "verification.approve", "Verification", 5L), Assert.Single(_audit.Entries));
     }
 
-    [Fact]
-    public async Task ChangeRole_AnAdminRemovingTheirOwnAdminRole_IsRefused()
+    [Theory]
+    [InlineData(Role.Admin)]
+    [InlineData(Role.Moderator)]
+    [InlineData(Role.SafetyDesk)]
+    public async Task ChangeRole_ForAnAdminDeskRole_SendsTheCallerToTheStaffScreen(Role role)
     {
+        // Admin roles carry permissions over everyone else's data, so they are granted on the
+        // staff screen, where the change needs the password again.
         var handler = new ChangeRoleHandler(_access, new AccessService(_access), _audit, NullLogger<ChangeRoleHandler>.Instance);
 
-        var result = await handler.HandleAsync(AdminId, AdminId, Role.Admin, grant: false, CancellationToken.None);
+        var result = await handler.HandleAsync(AdminId, 9, role, grant: true, CancellationToken.None);
 
-        Assert.Equal("cannot_revoke_own_admin", result.Error?.Code);
-        Assert.Contains(Role.Admin, _access.Accounts[AdminId].Roles);
+        Assert.Equal("staff_role_not_here", result.Error?.Code);
+        Assert.Empty(_audit.Entries);
+    }
+
+    [Fact]
+    public async Task ChangeRole_WithoutThePermission_IsForbidden()
+    {
+        _access.Add(77);
+        var handler = new ChangeRoleHandler(_access, new AccessService(_access), _audit, NullLogger<ChangeRoleHandler>.Instance);
+
+        var result = await handler.HandleAsync(77, 9, Role.Guide, grant: true, CancellationToken.None);
+
+        Assert.Equal("forbidden", result.Error?.Code);
+        Assert.Empty(_audit.Entries);
+    }
+
+    [Fact]
+    public async Task ChangeRole_GrantingAPlatformRole_IsAudited()
+    {
+        _access.Add(9);
+        var handler = new ChangeRoleHandler(_access, new AccessService(_access), _audit, NullLogger<ChangeRoleHandler>.Instance);
+
+        var result = await handler.HandleAsync(AdminId, 9, Role.Guide, grant: true, CancellationToken.None);
+
+        Assert.True(result.Succeeded);
+        Assert.Contains(Role.Guide, _access.Accounts[9].Roles);
+        Assert.Equal((AdminId, "role.grant", "User", 9L), Assert.Single(_audit.Entries));
     }
 
     private Task<Result<ProfileDetails>> UpdateAsync(UpdateProfileCommand command) =>

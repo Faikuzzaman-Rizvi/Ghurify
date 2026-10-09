@@ -7,7 +7,10 @@ using Ghurify.Infrastructure.Data;
 
 namespace Ghurify.Infrastructure.Repositories.Identity;
 
-/// <summary>Roles, status and verification level, for authorization.</summary>
+/// <summary>
+/// Roles, status, verification level and admin permissions, for authorization. Read once per
+/// request (see <see cref="AccessService"/>), so it is one round trip over narrow indexes.
+/// </summary>
 public sealed class UserAccessRepository(IDbConnectionFactory connectionFactory) : IUserAccessRepository
 {
     public async Task<UserAccess?> GetAsync(long userId, CancellationToken cancellationToken)
@@ -22,6 +25,7 @@ public sealed class UserAccessRepository(IDbConnectionFactory connectionFactory)
 
         var row = await results.ReadSingleOrDefaultAsync<AccessRow>();
         var roles = (await results.ReadAsync<byte>()).Select(role => (Role)role).ToHashSet();
+        var permissions = await results.ReadAsync<string>();
 
         if (row is null)
         {
@@ -33,7 +37,11 @@ public sealed class UserAccessRepository(IDbConnectionFactory connectionFactory)
             (UserStatus)row.Status,
             row.Gender is null ? null : (Gender)row.Gender.Value,
             roles,
-            row.VerifiedLevel is null ? null : (VerificationLevel)row.VerifiedLevel.Value);
+            row.VerifiedLevel is null ? null : (VerificationLevel)row.VerifiedLevel.Value,
+            // Keys this build does not define are dropped here, so running an older API against
+            // a newer database can only narrow what somebody may do, never widen it.
+            PermissionCatalog.Known(permissions),
+            row.IsSuperAdmin);
     }
 
     public async Task GrantRoleAsync(long userId, Role role, long? grantedById, CancellationToken cancellationToken)
@@ -74,5 +82,10 @@ public sealed class UserAccessRepository(IDbConnectionFactory connectionFactory)
             cancellationToken: cancellationToken));
     }
 
-    private sealed record AccessRow(long UserId, byte Status, byte? Gender, byte? VerifiedLevel);
+    private sealed record AccessRow(
+        long UserId,
+        byte Status,
+        byte? Gender,
+        byte? VerifiedLevel,
+        bool IsSuperAdmin);
 }

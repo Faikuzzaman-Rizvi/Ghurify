@@ -2,7 +2,10 @@ using Ghurify.Domain.Identity;
 
 namespace Ghurify.UnitTests.Identity;
 
-/// <summary>The rules behind the VerifiedTraveler, VerifiedHost and staff policies.</summary>
+/// <summary>
+/// The rules behind the VerifiedTraveler, VerifiedHost and Staff policies, and behind every
+/// admin permission check.
+/// </summary>
 public sealed class UserAccessTests
 {
     [Fact]
@@ -39,34 +42,81 @@ public sealed class UserAccessTests
     public void EveryPolicy_ForASuspendedAccount_IsFalse()
     {
         var access = Access(
-            roles: [Role.Host, Role.Admin, Role.SafetyDesk, Role.Moderator],
+            roles: [Role.Host],
             verified: VerificationLevel.NidSelfie,
+            permissions: [Permissions.UsersView, Permissions.PayoutsApprove],
             status: UserStatus.Suspended);
 
         Assert.False(access.IsVerifiedTraveler);
         Assert.False(access.IsVerifiedHost);
-        Assert.False(access.IsAdmin);
-        Assert.False(access.IsSafetyDesk);
-        Assert.False(access.IsModerator);
+        Assert.False(access.Can(Permissions.UsersView));
+        Assert.False(access.Can(Permissions.PayoutsApprove));
+        Assert.False(access.IsStaff);
     }
 
     [Fact]
-    public void Admin_CanActAsSafetyDeskAndModerator()
+    public void Can_ForASuspendedSuperAdmin_IsFalse()
     {
-        var access = Access(roles: [Role.Admin]);
+        var access = Access(superAdmin: true, status: UserStatus.Suspended);
 
-        Assert.True(access.IsSafetyDesk);
-        Assert.True(access.IsModerator);
+        Assert.False(access.Can(Permissions.StaffRolesManage));
+        Assert.False(access.IsStaff);
     }
 
     [Fact]
-    public void SafetyDesk_IsNotAnAdmin()
+    public void Can_GrantsOnlyTheHeldPermissions()
     {
-        var access = Access(roles: [Role.SafetyDesk]);
+        var access = Access(permissions: [Permissions.SafetySosView]);
 
-        Assert.True(access.IsSafetyDesk);
-        Assert.False(access.IsAdmin);
-        Assert.False(access.IsModerator);
+        Assert.True(access.Can(Permissions.SafetySosView));
+        Assert.False(access.Can(Permissions.SafetySosManage));
+        Assert.False(access.Can(Permissions.StaffRolesManage));
+    }
+
+    [Fact]
+    public void Can_ForASuperAdmin_IsTrueForEveryPermission()
+    {
+        var access = Access(superAdmin: true);
+
+        Assert.All(PermissionCatalog.All, definition => Assert.True(access.Can(definition.Key)));
+        Assert.True(access.IsStaff);
+    }
+
+    [Fact]
+    public void Can_ForAnUnknownPermission_IsFalseUnlessSuperAdmin()
+    {
+        // A permission a newer release defines: an older build must not accidentally allow it,
+        // and a super admin must still hold it without this one being redeployed.
+        Assert.False(Access(permissions: [Permissions.UsersView]).Can("settings.future.edit"));
+        Assert.True(Access(superAdmin: true).Can("settings.future.edit"));
+    }
+
+    [Fact]
+    public void IsStaff_ForSomebodyWithNoPermissions_IsFalse()
+    {
+        Assert.False(Access(roles: [Role.Host], verified: VerificationLevel.NidSelfie).IsStaff);
+    }
+
+    [Fact]
+    public void PermissionCatalog_HasNoDuplicatesAndFitsTheColumn()
+    {
+        var keys = PermissionCatalog.All.Select(definition => definition.Key).ToList();
+
+        Assert.Equal(keys.Count, keys.Distinct(StringComparer.Ordinal).Count());
+        // [Main].[StaffRolePermission].[Permission] is VARCHAR (40).
+        Assert.All(keys, key => Assert.InRange(key.Length, 1, 40));
+        // ASCII and dotted, so it reads the same in an audit row as in code.
+        Assert.All(keys, key => Assert.Matches(@"^[a-z]+(\.[a-z]+)+$", key));
+    }
+
+    [Fact]
+    public void None_CanDoNothing()
+    {
+        var none = UserAccess.None(42);
+
+        Assert.False(none.IsActive);
+        Assert.False(none.IsStaff);
+        Assert.All(PermissionCatalog.All, definition => Assert.False(none.Can(definition.Key)));
     }
 
     [Fact]
@@ -110,6 +160,14 @@ public sealed class UserAccessTests
         Role[]? roles = null,
         VerificationLevel? verified = null,
         Gender gender = Gender.Female,
-        UserStatus status = UserStatus.Active) =>
-        new(1, status, gender, new HashSet<Role>(roles ?? []), verified);
+        UserStatus status = UserStatus.Active,
+        string[]? permissions = null,
+        bool superAdmin = false) =>
+        new(1,
+            status,
+            gender,
+            new HashSet<Role>(roles ?? []),
+            verified,
+            new HashSet<string>(permissions ?? [], StringComparer.Ordinal),
+            superAdmin);
 }

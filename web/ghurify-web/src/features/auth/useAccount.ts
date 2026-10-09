@@ -23,7 +23,7 @@ export function useAccountLinks() {
     ...(profile?.roles.includes('Host')
       ? [{ to: '/host/trips', label: t('nav.hosting'), icon: Tent }]
       : []),
-    ...(isStaff(profile?.roles)
+    ...(isStaff(profile)
       ? [{ to: '/admin', label: t('nav.admin'), icon: LayoutDashboard }]
       : []),
   ];

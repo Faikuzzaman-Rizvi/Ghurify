@@ -8,7 +8,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Same arrangement as Ghurify.Api: the tests exercise internal helpers (building the site
+         configuration, the staff-role view mapping) without those having to be public API. -->
+    <InternalsVisibleTo Include="Ghurify.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" />
+    <!-- IMemoryCache only. The implementation is registered in Ghurify.Infrastructure, so this
+         layer stays unaware of how anything is actually cached. -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />

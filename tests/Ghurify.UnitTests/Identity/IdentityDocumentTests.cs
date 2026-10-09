@@ -34,7 +34,7 @@ public sealed class IdentityDocumentTests
     {
         _access.Add(UserId);
         _access.Add(OtherId);
-        _access.Add(AdminId, [Role.Admin]);
+        _access.AddStaff(AdminId, StaffRoleDefaults.Admin);
         _profiles.Add(UserId);
     }
 
@@ -251,7 +251,7 @@ public sealed class IdentityDocumentTests
     [Fact]
     public async Task Avatar_RemovedByAnotherTraveller_IsForbidden_ButAModeratorCan_WithAnAuditEntry()
     {
-        _access.Add(50, [Role.Moderator]);
+        _access.AddStaff(50, StaffRoleDefaults.Moderator);
         _profiles.Avatars[UserId] = "avatars/1/rude.jpg";
         var handler = new RemoveAvatarHandler(_storage, _profiles, new AccessService(_access), _audit);
 

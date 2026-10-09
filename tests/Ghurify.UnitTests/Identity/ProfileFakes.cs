@@ -8,8 +8,33 @@ internal sealed class FakeAccessRepository : IUserAccessRepository
 {
     public Dictionary<long, UserAccess> Accounts { get; } = [];
 
-    public void Add(long userId, Role[]? roles = null, VerificationLevel? verified = null, Gender? gender = Gender.Female) =>
-        Accounts[userId] = new UserAccess(userId, UserStatus.Active, gender, new HashSet<Role>(roles ?? []), verified);
+    public void Add(
+        long userId,
+        Role[]? roles = null,
+        VerificationLevel? verified = null,
+        Gender? gender = Gender.Female,
+        string[]? permissions = null,
+        bool superAdmin = false,
+        UserStatus status = UserStatus.Active) =>
+        Accounts[userId] = new UserAccess(
+            userId,
+            status,
+            gender,
+            new HashSet<Role>(roles ?? []),
+            verified,
+            new HashSet<string>(permissions ?? [], StringComparer.Ordinal),
+            superAdmin);
+
+    /// <summary>Somebody on the admin desk with every permission, now and in future releases.</summary>
+    public void AddSuperAdmin(long userId) => Add(userId, superAdmin: true);
+
+    /// <summary>
+    /// An actor with the permissions one of the built-in staff roles is seeded with. Tests use
+    /// these rather than a super admin, so they keep proving that the narrow role really does
+    /// grant what the handler needs.
+    /// </summary>
+    public void AddStaff(long userId, IEnumerable<string> permissions, Role[]? roles = null) =>
+        Add(userId, roles, permissions: [.. permissions]);
 
     public Task<UserAccess?> GetAsync(long userId, CancellationToken cancellationToken) =>
         Task.FromResult(Accounts.GetValueOrDefault(userId));
@@ -239,12 +264,17 @@ internal sealed class FakeAuditLog : IAuditLog
 {
     public List<(long ActorId, string Action, string EntityType, long EntityId)> Entries { get; } = [];
 
-    public Task WriteAsync(long actorId, string action, string entityType, long entityId, string? note, CancellationToken cancellationToken)
+    /// <summary>Everything written, in full, for tests that assert on the recorded changes.</summary>
+    public List<AuditRecord> Records { get; } = [];
+
+    public Task WriteAsync(AuditRecord entry, CancellationToken cancellationToken)
     {
-        Entries.Add((actorId, action, entityType, entityId));
+        ArgumentNullException.ThrowIfNull(entry);
+        Entries.Add((entry.ActorId, entry.Action, entry.EntityType, entry.EntityId));
+        Records.Add(entry);
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyList<AuditEntry>> QueryAsync(string? entityType, long? entityId, int take, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<AuditEntry>>([]);
+    public Task<AuditPage> QueryAsync(AuditQuery query, CancellationToken cancellationToken) =>
+        Task.FromResult(new AuditPage([], 0, 1, 50));
 }

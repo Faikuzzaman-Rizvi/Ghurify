@@ -2,9 +2,9 @@
 -- the admin desk. Runs only through the "demo" stage, never in a release.
 --
 -- The demo hosts get the Host role and an approved national ID + selfie check. Their "NID hash"
--- is a hash of their email, not of any real ID number. Two staff accounts are added:
--- admin@demo.ghurify.app (Admin) and safety@demo.ghurify.app (SafetyDesk). Their password is set
--- by 003_DemoPasswords.sql.
+-- is a hash of their email, not of any real ID number. Two staff accounts are added here, and
+-- 004_DemoStaffRoles.sql puts them on the admin desk; their password is set by
+-- 003_DemoPasswords.sql.
 --
 -- Every insert is guarded, so running the script again adds nothing.
 
@@ -18,7 +18,8 @@ FROM
 ) AS [s] ([Email], [DisplayName], [Gender])
 WHERE NOT EXISTS (SELECT 1 FROM [Main].[User] AS [u] WHERE [u].[Email] = [s].[Email]);
 
--- Role: 2 Host, 9 SafetyDesk, 10 Admin.
+-- Platform roles only (2 = Host). What somebody may do on the admin desk is a staff role now,
+-- granted by 004_DemoStaffRoles.sql.
 INSERT INTO [Main].[UserRole] ([UserId], [Role])
 SELECT [u].[Id], [r].[Role]
 FROM
@@ -27,9 +28,7 @@ FROM
     (N'nadia.rahman@demo.ghurify.app',    CAST(2 AS TINYINT)),
     (N'tanvir.hasan@demo.ghurify.app',    CAST(2 AS TINYINT)),
     (N'farhana.akter@demo.ghurify.app',   CAST(2 AS TINYINT)),
-    (N'rafiq.chowdhury@demo.ghurify.app', CAST(2 AS TINYINT)),
-    (N'admin@demo.ghurify.app',           CAST(10 AS TINYINT)),
-    (N'safety@demo.ghurify.app',          CAST(9 AS TINYINT))
+    (N'rafiq.chowdhury@demo.ghurify.app', CAST(2 AS TINYINT))
 ) AS [r] ([Email], [Role])
 JOIN [Main].[User] AS [u] ON [u].[Email] = [r].[Email]
 WHERE NOT EXISTS (SELECT 1

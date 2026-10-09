@@ -11,7 +11,10 @@ paths:
 ## Structure
 
 - Feature folders in every project: `Identity, Trips, Bookings, Payments, Marketplace, Social,
-  Chat, Safety, Notifications, Admin`.
+  Chat, Safety, Notifications, Admin, Site`.
+  `Site` holds the site's own configuration — the name, branding, theme and content a super
+  admin changes without a release. It is separate from `Admin` because every visitor reads it:
+  `GET /api/v1/site/config` is anonymous, while editing it needs a `settings.*` permission.
 - Endpoints: Minimal API groups per feature in `Ghurify.Api/Endpoints/{Feature}Endpoints.cs`,
   mapped under `/api/v1/{feature}`. Keep endpoints thin: bind, call the use case, map the result.
 - Use cases: one class per action in `Ghurify.Application/{Feature}/{Action}Handler.cs`
@@ -30,8 +33,19 @@ paths:
 ## Security
 
 - `[Authorize]` by default; opt out explicitly with `AllowAnonymous`.
-- Roles: Traveler, Host, Creator, Celebrity, Guide, Operator, Partner, Moderator, SafetyDesk, Admin.
-  Use policies (`VerifiedHost`, `AdminOnly`) rather than role strings in endpoints.
+- Two kinds of authority, kept apart:
+  - **Platform roles** (`Main.UserRole`, `Role` enum): what somebody is on Ghurify — Traveler,
+    Host, Creator, Celebrity, Guide, Operator, Partner. Gate these with the named policies
+    (`VerifiedHost`, `Host`, `VerifiedTraveler`).
+  - **Admin permissions** (`Main.StaffRole` → `Main.UserStaffRole`, `Permissions` constants):
+    what somebody may do on the admin desk. Roles are data a super admin edits from the portal,
+    so admin endpoints name a permission, never a role:
+    `.RequireAuthorization(Policies.Require(Permissions.PayoutsApprove))`. `Policies.Staff` is
+    the portal's front door only. Adding a permission means a constant in
+    `Ghurify.Domain.Identity.Permissions`, an entry in `PermissionCatalog`, bn+en labels in the
+    i18n files, and a DbUp script granting it to the system roles that should have it.
+  - The handful of actions that could be used to take over the platform add `.RequireStepUp()`,
+    which demands the caller's password again (ten-minute receipt, see `IStepUpTokens`).
 - Ownership check in the handler **and** owner filter in SQL.
 - Built-in rate limiter on auth, join-request and payment endpoints.
 - Never log OTPs, tokens, NID numbers, email addresses or full phone numbers. Log identifiers

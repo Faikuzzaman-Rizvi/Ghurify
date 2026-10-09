@@ -46,7 +46,9 @@ docker-compose.yml          sqlserver, redis, azurite
 
 Dependency rule: Domain <- Application <- Infrastructure <- Api. Application never references
 Infrastructure. Feature folders use the same names everywhere:
-`Identity, Trips, Bookings, Payments, Marketplace, Social, Chat, Safety, Notifications, Admin`.
+`Identity, Trips, Bookings, Payments, Marketplace, Social, Chat, Safety, Notifications, Admin,
+Site`. (`Site` is the site's own configuration: what a super admin changes about the name,
+branding, theme and content. Read by every visitor, so it is not part of `Admin`.)
 
 ## Commands
 

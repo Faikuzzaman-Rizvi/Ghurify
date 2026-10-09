@@ -185,4 +185,16 @@ public sealed record ProfileDetails(
     VerificationLevel? VerifiedLevel,
     DateOnly MemberSince,
     // Changes whenever the profile picture does (Unix seconds); null when there is none.
-    long? AvatarVersion = null);
+    long? AvatarVersion = null,
+    // What this person may do on the admin desk. Empty for everyone who is not staff. The web
+    // app hides sections and buttons with these; the API checks every call again regardless, so
+    // they are a convenience and never the security boundary.
+    IReadOnlyList<string>? Permissions = null,
+    // Holds the built-in super-admin role, and so every permission there is, including the ones
+    // a later release adds.
+    bool IsSuperAdmin = false,
+    // The admin roles held, so the portal can name the job rather than list permissions.
+    IReadOnlyList<ProfileStaffRole>? StaffRoles = null);
+
+/// <summary>An admin role somebody holds, named in both languages for the portal's sidebar.</summary>
+public sealed record ProfileStaffRole(string Key, string Name, string NameBn);

@@ -396,6 +396,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/step-up": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirms the caller's password and returns a short-lived receipt for the actions that need one. */
+        post: operations["StartStepUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -1056,7 +1073,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Recent admin and safety-desk actions, newest first. */
+        /** Admin and safety-desk actions, newest first. Every filter is optional; an action ending in a dot matches that whole group. */
         get: operations["QueryAuditLog"];
         put?: never;
         post?: never;
@@ -1825,6 +1842,163 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/staff/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every admin role, every permission the platform has, and which of them the caller may hand out. */
+        get: operations["ListStaffRoles"];
+        put?: never;
+        /** Creates an admin role. Needs the password again. */
+        post: operations["CreateStaffRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff/roles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Renames a role or changes what it may do. Needs the password again. */
+        put: operations["UpdateStaffRole"];
+        post?: never;
+        /** Removes an unused role. Refuses a built-in one, or one somebody still holds. */
+        delete: operations["DeleteStaffRole"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everybody on the admin desk, with the roles each holds and who granted them. */
+        get: operations["ListStaffMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grants or revokes one admin role. Needs the password again. */
+        post: operations["AssignStaffRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The site's name, contact details, theme and images. Public: every page needs it. */
+        get: operations["GetSiteConfig"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/assets/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of the site's uploaded images. Public, cached, and versioned by its URL. */
+        get: operations["GetSiteAsset"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every setting with its value and its default, the fonts on offer, and the state of each image. */
+        get: operations["GetSiteSettings"];
+        /** Saves a batch of settings. All or nothing, and refused if the colours would be unreadable. */
+        put: operations["SaveSiteSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/history/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What one setting used to be, and who changed it. */
+        get: operations["GetSiteSettingHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/assets/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replaces the logo, an icon or the link-preview picture. */
+        put: operations["UploadSiteAsset"];
+        post?: never;
+        /** Puts one image back to the one the app shipped with. */
+        delete: operations["RemoveSiteAsset"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2054,6 +2228,16 @@ export interface components {
             /** Format: int32 */
             documentCount: number | string;
         };
+        AssignStaffRoleCommand: {
+            /** Format: int64 */
+            staffRoleId: number | string;
+            grant: boolean;
+        };
+        AuditChange: {
+            field: string;
+            from: null | string;
+            to: null | string;
+        };
         AuditEntry: {
             /** Format: int64 */
             id: number | string;
@@ -2065,8 +2249,18 @@ export interface components {
             /** Format: int64 */
             entityId: number | string;
             note: null | string;
+            changes: components["schemas"]["AuditChange"][];
             /** Format: date-time */
             created: string;
+        };
+        AuditPage: {
+            entries: components["schemas"]["AuditEntry"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
         };
         AvatarUploadRequest: {
             contentType: string;
@@ -2678,6 +2872,13 @@ export interface components {
             /** Format: date-time */
             approvedOn: null | string;
         };
+        /** @enum {unknown} */
+        PermissionGroup: "Overview" | "People" | "Trips" | "Money" | "Safety" | "Moderation" | "Staff" | "Site" | "System";
+        PermissionView: {
+            key: string;
+            group: components["schemas"]["PermissionGroup"];
+            requiresStepUp: boolean;
+        };
         PlacePhoto: {
             /** Format: int64 */
             mediaId: number | string;
@@ -2757,6 +2958,15 @@ export interface components {
             memberSince: string;
             /** Format: int64 */
             avatarVersion?: null | number | string;
+            permissions?: null | string[];
+            /** @default false */
+            isSuperAdmin: boolean;
+            staffRoles?: null | components["schemas"]["ProfileStaffRole"][];
+        };
+        ProfileStaffRole: {
+            key: string;
+            name: string;
+            nameBn: string;
         };
         ProfileTrip: {
             /** Format: int64 */
@@ -2977,6 +3187,19 @@ export interface components {
             total: number | string;
             status: string;
         };
+        SaveSettingsCommand: {
+            settings: {
+                [key: string]: string;
+            };
+        };
+        SaveStaffRoleCommand: {
+            key: string;
+            name: string;
+            nameBn: string;
+            description: null | string;
+            descriptionBn: null | string;
+            permissions: string[];
+        };
         SaveTripCommand: {
             destinationSlug: string;
             title: string;
@@ -3023,6 +3246,44 @@ export interface components {
             expiresInSeconds: number | string;
             user: components["schemas"]["SignedInUserResponse"];
         };
+        SettingChangeRecord: {
+            /** Format: int64 */
+            id: number | string;
+            key: string;
+            oldValue: null | string;
+            newValue: null | string;
+            /** Format: int64 */
+            changedById: number | string;
+            changedByName: null | string;
+            /** Format: date-time */
+            created: string;
+        };
+        /** @enum {unknown} */
+        SettingGroup: "Identity" | "Contact" | "Social" | "Theme";
+        /** @enum {unknown} */
+        SettingKind: "Text" | "LongText" | "Colour" | "Url" | "EmailAddress" | "Phone" | "Font";
+        SettingsSaved: {
+            /** Format: int32 */
+            changed: number | string;
+        };
+        SettingsView: {
+            settings: components["schemas"]["SettingView"][];
+            editableGroups: components["schemas"]["SettingGroup"][];
+            bodyFonts: string[];
+            displayFonts: string[];
+            assets: components["schemas"]["SiteAssetView"][];
+        };
+        SettingView: {
+            key: string;
+            group: components["schemas"]["SettingGroup"];
+            kind: components["schemas"]["SettingKind"];
+            value: string;
+            default: string;
+            isCustom: boolean;
+            required: boolean;
+            /** Format: int32 */
+            maxLength: number | string;
+        };
         SetUserStatusCommand: {
             status: components["schemas"]["UserStatus"];
             reason: null | string;
@@ -3036,6 +3297,58 @@ export interface components {
         SignInCommand: {
             email: string;
             password: string;
+        };
+        SiteAssetLink: {
+            kind: string;
+            url: string;
+            isCustom: boolean;
+        };
+        SiteAssetView: {
+            kind: string;
+            url: string;
+            isCustom: boolean;
+            /** Format: int32 */
+            maxBytes: number | string;
+            /** Format: int32 */
+            sizeBytes: null | number | string;
+            /** Format: date-time */
+            updatedOn: null | string;
+        };
+        SiteConfig: {
+            version: string;
+            identity: components["schemas"]["SiteIdentityConfig"];
+            contact: components["schemas"]["SiteContactConfig"];
+            social: components["schemas"]["SiteSocialLink"][];
+            theme: components["schemas"]["SiteThemeConfig"];
+            assets: components["schemas"]["SiteAssetLink"][];
+        };
+        SiteContactConfig: {
+            email: string;
+            phone: string;
+            address: string;
+            addressBn: string;
+        };
+        SiteIdentityConfig: {
+            name: string;
+            nameBn: string;
+            tagline: string;
+            taglineBn: string;
+            description: string;
+            descriptionBn: string;
+        };
+        SiteSocialLink: {
+            platform: string;
+            url: string;
+        };
+        SiteThemeConfig: {
+            colours: {
+                [key: string]: string;
+            };
+            bodyFont: string;
+            displayFont: string;
+            bodyFontStack: string;
+            displayFontStack: string;
+            fontStylesheet: string;
         };
         SosBoardItem: {
             /** Format: int64 */
@@ -3074,6 +3387,55 @@ export interface components {
         };
         /** @enum {unknown} */
         SosStatus: "Open" | "Acknowledged" | "Resolved";
+        StaffMembersView: {
+            members: components["schemas"]["StaffMemberView"][];
+        };
+        StaffMemberView: {
+            /** Format: int64 */
+            userId: number | string;
+            email: string;
+            displayName: null | string;
+            status: components["schemas"]["UserStatus"];
+            /** Format: date-time */
+            avatarUpdatedOn: null | string;
+            /** Format: date-time */
+            staffSince: string;
+            roles: components["schemas"]["StaffRoleHeld"][];
+        };
+        StaffRoleHeld: {
+            /** Format: int64 */
+            staffRoleId: number | string;
+            key: string;
+            name: string;
+            nameBn: string;
+            isSuperAdmin: boolean;
+            /** Format: date-time */
+            grantedOn: string;
+            /** Format: int64 */
+            grantedById: null | number | string;
+            grantedByName: null | string;
+        };
+        StaffRolesView: {
+            permissions: components["schemas"]["PermissionView"][];
+            grantablePermissions: string[];
+            roles: components["schemas"]["StaffRoleView"][];
+        };
+        StaffRoleView: {
+            /** Format: int64 */
+            id: number | string;
+            key: string;
+            name: string;
+            nameBn: string;
+            description: null | string;
+            descriptionBn: null | string;
+            isSystem: boolean;
+            isSuperAdmin: boolean;
+            /** Format: int32 */
+            memberCount: number | string;
+            permissions: string[];
+            /** Format: date-time */
+            created: string;
+        };
         StartDocumentUploadCommand: {
             kind: components["schemas"]["VerificationDocumentKind"];
             contentType: string;
@@ -3087,6 +3449,16 @@ export interface components {
             dateOfBirth: string;
             documentIds: null | (number | string)[];
             idType: null | components["schemas"]["IdDocumentType"];
+        };
+        StepUpRequest: {
+            password: null | string;
+        };
+        StepUpResponse: {
+            token: string;
+            /** Format: date-time */
+            expiresOn: string;
+            /** Format: int32 */
+            expiresInSeconds: number | string;
         };
         TravelMap: {
             /** Format: int64 */
@@ -3250,6 +3622,10 @@ export interface components {
             contentType: null | string;
             /** Format: int64 */
             sizeBytes: number | string;
+        };
+        UploadSiteAssetCommand: {
+            contentType: string;
+            base64: string;
         };
         UploadTicket: {
             id: string;
@@ -4131,6 +4507,57 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    StartStepUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StepUpRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StepUpResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5811,8 +6238,14 @@ export interface operations {
     QueryAuditLog: {
         parameters: {
             query?: {
+                actorId?: number | string;
+                action?: string;
                 entityType?: string;
                 entityId?: number | string;
+                from?: string;
+                to?: string;
+                page?: number | string;
+                pageSize?: number | string;
             };
             header?: never;
             path?: never;
@@ -5826,7 +6259,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditEntry"][];
+                    "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
         };
@@ -6961,6 +7403,15 @@ export interface operations {
                     "application/json": components["schemas"]["DashboardCounts"];
                 };
             };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
         };
     };
     GetSosBoard: {
@@ -7588,6 +8039,558 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListStaffRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffRolesView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateStaffRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveStaffRoleCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffRoleView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateStaffRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveStaffRoleCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffRoleView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    DeleteStaffRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListStaffMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMembersView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AssignStaffRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignStaffRoleCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetSiteConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteConfig"];
+                };
+            };
+        };
+    };
+    GetSiteAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetSiteSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SaveSiteSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSettingsCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsSaved"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetSiteSettingHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingChangeRecord"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UploadSiteAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadSiteAssetCommand"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveSiteAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

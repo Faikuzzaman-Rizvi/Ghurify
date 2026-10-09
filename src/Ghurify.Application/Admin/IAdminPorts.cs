@@ -36,6 +36,12 @@ public enum StatusChange
     Changed = 0,
     NotFound = 1,
     Unchanged = 2,
+
+    /// <summary>
+    /// The only active super admin. Taking them out of action would leave nobody who can put
+    /// anyone back on the desk, so the database refuses it inside the transaction.
+    /// </summary>
+    LastSuperAdmin = 3,
 }
 
 public sealed record AdminUserItem(

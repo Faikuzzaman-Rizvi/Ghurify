@@ -12,7 +12,7 @@ public sealed class SearchUsersHandler(IAdminRepository admin, AccessService acc
     public async Task<Result<AdminUserPage>> HandleAsync(
         long actorId, string? search, UserStatus? status, Role? role, int page, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.UsersView))
         {
             return AppError.Forbidden();
         }

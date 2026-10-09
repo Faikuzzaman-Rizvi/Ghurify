@@ -8,6 +8,93 @@ Rules:
   - Never delete or overwrite rows a user may have edited.
 */
 
+-- The staff roles the platform ships with, and what each may do. Insert-if-missing by key:
+-- once a role exists its permissions belong to the super admin who edits them from the portal,
+-- and a redeploy must never reset them. A later release that adds a permission grants it to
+-- these roles with a DbUp data script, not from here.
+--
+-- super-admin keeps no permission rows on purpose: it holds every permission there is, now and
+-- in later releases (see Ghurify.Domain.Identity.UserAccess.Can).
+INSERT INTO [Main].[StaffRole] ([Key], [Name], [NameBn], [Description], [DescriptionBn], [IsSystem], [IsSuperAdmin])
+SELECT [seed].[Key], [seed].[Name], [seed].[NameBn], [seed].[Description], [seed].[DescriptionBn],
+       1, [seed].[IsSuperAdmin]
+FROM
+(
+    VALUES
+    ('super-admin', N'Super admin', N'সুপার অ্যাডমিন',
+     N'Complete control of the platform, including who else is on the admin desk and what the site looks like.',
+     N'প্ল্যাটফর্মের সম্পূর্ণ নিয়ন্ত্রণ, কে অ্যাডমিন ডেস্কে থাকবে আর সাইট কেমন দেখাবে তা-ও।', CAST(1 AS BIT)),
+
+    ('admin', N'Admin', N'অ্যাডমিন',
+     N'Runs the platform day to day: people, trips, money, safety and moderation.',
+     N'প্রতিদিনের প্ল্যাটফর্ম পরিচালনা: মানুষ, ট্রিপ, টাকা, নিরাপত্তা আর মডারেশন।', CAST(0 AS BIT)),
+
+    ('moderator', N'Moderator', N'মডারেটর',
+     N'Reports, disputes and the stories people post.',
+     N'রিপোর্ট, বিরোধ আর মানুষের পোস্ট করা গল্প।', CAST(0 AS BIT)),
+
+    ('safety-desk', N'Safety desk', N'সেফটি ডেস্ক',
+     N'SOS alerts, check-ins, destination closures and emergency points.',
+     N'এসওএস সতর্কতা, চেক-ইন, গন্তব্য বন্ধ করা আর ইমার্জেন্সি পয়েন্ট।', CAST(0 AS BIT))
+) AS [seed] ([Key], [Name], [NameBn], [Description], [DescriptionBn], [IsSuperAdmin])
+WHERE NOT EXISTS (SELECT 1 FROM [Main].[StaffRole] AS [r] WHERE [r].[Key] = [seed].[Key] AND [r].[Archived] = 0);
+
+-- The starting permissions of the three ordinary system roles. Each set matches exactly what
+-- that role could do before roles became data, so nobody gained or lost access on the upgrade.
+INSERT INTO [Main].[StaffRolePermission] ([StaffRoleId], [Permission])
+SELECT [r].[Id], [seed].[Permission]
+FROM
+(
+    VALUES
+    ('admin', 'dashboard.view'),
+    ('admin', 'users.view'),
+    ('admin', 'users.suspend'),
+    ('admin', 'users.security'),
+    ('admin', 'users.roles.manage'),
+    ('admin', 'users.verify'),
+    ('admin', 'users.documents.view'),
+    ('admin', 'users.avatar.remove'),
+    ('admin', 'trips.view'),
+    ('admin', 'trips.cancel'),
+    ('admin', 'destinations.manage'),
+    ('admin', 'bookings.view'),
+    ('admin', 'payments.view'),
+    ('admin', 'payments.refund.retry'),
+    ('admin', 'payouts.view'),
+    ('admin', 'payouts.approve'),
+    ('admin', 'safety.sos.view'),
+    ('admin', 'safety.sos.manage'),
+    ('admin', 'safety.checkins.view'),
+    ('admin', 'safety.destinations.status'),
+    ('admin', 'safety.points.manage'),
+    ('admin', 'moderation.reports.view'),
+    ('admin', 'moderation.reports.resolve'),
+    ('admin', 'moderation.content.manage'),
+    ('admin', 'moderation.disputes'),
+    ('admin', 'staff.view'),
+    ('admin', 'audit.view'),
+
+    ('moderator', 'dashboard.view'),
+    ('moderator', 'moderation.reports.view'),
+    ('moderator', 'moderation.reports.resolve'),
+    ('moderator', 'moderation.content.manage'),
+    ('moderator', 'users.avatar.remove'),
+
+    ('safety-desk', 'dashboard.view'),
+    ('safety-desk', 'safety.sos.view'),
+    ('safety-desk', 'safety.sos.manage'),
+    ('safety-desk', 'safety.checkins.view'),
+    ('safety-desk', 'safety.destinations.status'),
+    ('safety-desk', 'safety.points.manage')
+) AS [seed] ([Key], [Permission])
+JOIN [Main].[StaffRole] AS [r] ON [r].[Key] = [seed].[Key] AND [r].[Archived] = 0
+-- Only fills in a role that has no permissions at all, i.e. one this script just created. A
+-- super admin who deliberately strips a permission from the admin role must not get it back on
+-- the next deploy.
+WHERE NOT EXISTS (SELECT 1 FROM [Main].[StaffRolePermission] AS [p] WHERE [p].[StaffRoleId] = [r].[Id]);
+
+PRINT 'Post-deployment: staff roles seeded (insert-if-missing).';
+
 -- Destinations. Insert-if-missing by slug: once a row exists, its status and text belong to
 -- the safety desk and the admin screens, and a redeploy must never reset them.
 -- Kind: 1 Hills, 2 Beach, 3 Island, 4 Forest, 5 Wetland, 6 TeaGarden, 7 Lake, 8 River.

@@ -1,9 +1,13 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Safety;
 
-/// <summary>The moderation queue. Moderators see reports; disputes (money) are for admins.</summary>
+/// <summary>
+/// The moderation queue. Reports and disputes are separate permissions, because a dispute ends
+/// in money moving: a role can be given the reports queue without the disputes in it.
+/// </summary>
 public sealed class ListReportsHandler(ISafetyRepository safety, AccessService access)
 {
     public async Task<Result<IReadOnlyList<ReportView>>> HandleAsync(
@@ -13,7 +17,11 @@ public sealed class ListReportsHandler(ISafetyRepository safety, AccessService a
         CancellationToken cancellationToken)
     {
         var actor = await access.GetAsync(actorId, cancellationToken);
-        var allowed = kind == ReportKind.Dispute ? actor.IsAdmin : actor.IsModerator;
+        var canSeeDisputes = actor.Can(Permissions.ModerationDisputes);
+
+        var allowed = kind == ReportKind.Dispute
+            ? canSeeDisputes
+            : actor.Can(Permissions.ModerationReportsView);
 
         if (!allowed)
         {
@@ -22,8 +30,10 @@ public sealed class ListReportsHandler(ISafetyRepository safety, AccessService a
 
         var reports = await safety.QueryReportsAsync(kind, status, cancellationToken);
 
-        // Without a kind filter a moderator sees everything but disputes.
+        // Without a kind filter, somebody who may not see disputes gets everything else.
         return Result.Ok<IReadOnlyList<ReportView>>(
-            kind is null && !actor.IsAdmin ? [.. reports.Where(report => report.Kind != ReportKind.Dispute)] : reports);
+            kind is null && !canSeeDisputes
+                ? [.. reports.Where(report => report.Kind != ReportKind.Dispute)]
+                : reports);
     }
 }

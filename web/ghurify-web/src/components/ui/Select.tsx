@@ -25,6 +25,7 @@ export function Select({
   buttonClassName = '',
   icon,
   align = 'left',
+  disabled = false,
 }: {
   /** Put the same id in the <label htmlFor>: the button is the labelled control. */
   id: string;
@@ -36,6 +37,8 @@ export function Select({
   /** Drawn before the chosen label inside the button. */
   icon?: ReactNode;
   align?: 'left' | 'right';
+  /** Shown but not changeable, for a setting the reader may see and not edit. */
+  disabled?: boolean;
 }) {
   const listId = useId();
   const [open, setOpen] = useState(false);
@@ -162,9 +165,10 @@ export function Select({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={open ? `${listId}-${active}` : undefined}
+        disabled={disabled}
         onClick={() => (open ? setOpen(false) : openAt(selectedIndex))}
         onKeyDown={onKeyDown}
-        className={`flex w-full items-center gap-2 text-left outline-none ${buttonClassName}`}
+        className={`flex w-full items-center gap-2 text-left outline-none disabled:cursor-default disabled:bg-mist disabled:text-deep/50 ${buttonClassName}`}
       >
         {icon}
         <span className="min-w-0 flex-1 truncate">{selected?.label}</span>

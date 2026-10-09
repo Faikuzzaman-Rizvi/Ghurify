@@ -81,6 +81,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddSingleton<IOtpCodeService, OtpCodeService>();
         services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+        services.AddSingleton<IStepUpTokens, StepUpTokens>();
 
         AddOtpSender(services, configuration, isDevelopment);
 
@@ -116,6 +117,13 @@ public static class InfrastructureServiceCollectionExtensions
 
         // --- Admin portal ---
         services.AddScoped<IAdminRepository, AdminRepository>();
+        services.AddScoped<IStaffRoleRepository, StaffRoleRepository>();
+
+        // --- The site's own settings ---
+        services.AddScoped<Application.Site.ISiteSettingsRepository, Repositories.Site.SiteSettingsRepository>();
+        // Backs SiteConfigService. One instance holds the whole site configuration, so this is
+        // the first thing to move to Redis when the API runs on more than one machine.
+        services.AddMemoryCache();
 
         // --- Safety ---
         services.AddScoped<ISafetyRepository, SafetyRepository>();

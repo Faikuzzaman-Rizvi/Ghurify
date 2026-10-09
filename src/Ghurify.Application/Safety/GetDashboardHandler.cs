@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Safety;
 
@@ -8,8 +9,7 @@ public sealed class GetDashboardHandler(ISafetyRepository safety, AccessService 
 {
     public async Task<Result<DashboardCounts>> HandleAsync(long actorId, CancellationToken cancellationToken)
     {
-        var actor = await access.GetAsync(actorId, cancellationToken);
-        if (!(actor.IsAdmin || actor.IsSafetyDesk || actor.IsModerator))
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.DashboardView))
         {
             return AppError.Forbidden();
         }

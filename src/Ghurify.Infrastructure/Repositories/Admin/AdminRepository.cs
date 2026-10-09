@@ -111,6 +111,7 @@ public sealed class AdminRepository(IDbConnectionFactory connectionFactory) : IA
         {
             0 => StatusChange.Changed,
             2 => StatusChange.Unchanged,
+            3 => StatusChange.LastSuperAdmin,
             _ => StatusChange.NotFound,
         };
     }

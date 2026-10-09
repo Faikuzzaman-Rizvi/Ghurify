@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Social;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Identity;
 
@@ -13,12 +14,12 @@ public sealed class RemoveAvatarHandler(IMediaStorage storage, IProfileRepositor
     {
         if (actorId != userId)
         {
-            if (!(await access.GetAsync(actorId, cancellationToken)).IsModerator)
+            if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.UsersAvatarRemove))
             {
                 return AppError.Forbidden();
             }
 
-            await audit.WriteAsync(actorId, "user.avatar_removed", "User", userId, null, cancellationToken);
+            await audit.WriteAsync(new AuditRecord(actorId, "user.avatar_removed", "User", userId, null), cancellationToken);
         }
 
         var previous = await profiles.SetAvatarAsync(userId, null, actorId, cancellationToken);

@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Admin;
 
@@ -14,7 +15,7 @@ public sealed class SaveEmergencyPointHandler(IAdminRepository admin, AccessServ
     {
         ArgumentNullException.ThrowIfNull(edit);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsSafetyDesk)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.SafetyPointsManage))
         {
             return AppError.Forbidden();
         }
@@ -47,7 +48,7 @@ public sealed class SaveEmergencyPointHandler(IAdminRepository admin, AccessServ
             return AppError.NotFound("point_not_found", "There is no such emergency point.");
         }
 
-        await audit.WriteAsync(actorId, edit.Id is null ? "emergency_point.added" : "emergency_point.edited", "EmergencyPoint", id.Value, null, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, edit.Id is null ? "emergency_point.added" : "emergency_point.edited", "EmergencyPoint", id.Value, null), cancellationToken);
         return new EmergencyPointSaved(id.Value);
     }
 }

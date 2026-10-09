@@ -6,6 +6,7 @@ using Ghurify.Application.Identity;
 using Ghurify.Application.Notifications;
 using Ghurify.Application.Payments;
 using Ghurify.Application.Safety;
+using Ghurify.Application.Site;
 using Ghurify.Application.Social;
 using Ghurify.Application.Trips;
 using Microsoft.Extensions.Configuration;
@@ -207,6 +208,29 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<SaveDestinationHandler>();
         services.AddScoped<SaveEmergencyPointHandler>();
         services.AddScoped<ListEmergencyPointsHandler>();
+
+        // --- Super admin: roles, permissions, step-up and the audit trail ---
+        services.AddScoped<ListStaffRolesHandler>();
+        services.AddScoped<SaveStaffRoleHandler>();
+        services.AddScoped<DeleteStaffRoleHandler>();
+        services.AddScoped<ListStaffMembersHandler>();
+        services.AddScoped<AssignStaffRoleHandler>();
+        services.AddScoped<StartStepUpHandler>();
+        services.AddScoped<QueryAuditLogHandler>();
+
+        services.AddScoped<IValidator<SaveStaffRoleCommand>, SaveStaffRoleCommandValidator>();
+
+        // --- The site's own settings: branding and theme ---
+        // The configuration is read on every page load, so it is held in an IMemoryCache (see
+        // SiteConfigService). The cache itself is registered in Ghurify.Infrastructure.
+        services.AddScoped<SiteConfigService>();
+        services.AddScoped<GetSiteConfigHandler>();
+        services.AddScoped<GetSettingsHandler>();
+        services.AddScoped<SaveSettingsHandler>();
+        services.AddScoped<GetSettingHistoryHandler>();
+        services.AddScoped<UploadSiteAssetHandler>();
+        services.AddScoped<RemoveSiteAssetHandler>();
+        services.AddScoped<GetSiteAssetHandler>();
 
         // --- Safety and the admin desk ---
         services.AddScoped<RaiseSosHandler>();

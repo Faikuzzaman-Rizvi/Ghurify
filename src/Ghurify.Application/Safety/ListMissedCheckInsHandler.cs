@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 
 namespace Ghurify.Application.Safety;
 
@@ -8,7 +9,7 @@ public sealed class ListMissedCheckInsHandler(ISafetyRepository safety, AccessSe
 {
     public async Task<Result<IReadOnlyList<MissedCheckIn>>> HandleAsync(long actorId, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsSafetyDesk)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.SafetyCheckInsView))
         {
             return AppError.Forbidden();
         }

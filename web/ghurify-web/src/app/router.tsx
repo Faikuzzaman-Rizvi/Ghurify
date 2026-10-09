@@ -21,6 +21,12 @@ import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { RoleRoute } from '@/features/auth/RoleRoute';
 import { VerificationPage } from '@/features/auth/VerificationPage';
 import { isStaff } from '@/features/auth/profileApi';
+import { permissions } from '@/features/admin/permissions';
+import { PermissionRoute } from '@/features/admin/PermissionRoute';
+import { StaffMembersPage } from '@/features/admin/StaffMembersPage';
+import { StaffRolesPage } from '@/features/admin/StaffRolesPage';
+import { BrandingPage } from '@/features/admin/BrandingPage';
+import { ThemePage } from '@/features/admin/ThemePage';
 import { AdminLayout } from '@/features/admin/AdminLayout';
 import { VerificationQueuePage } from '@/features/admin/VerificationQueuePage';
 import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage';
@@ -41,6 +47,7 @@ import { TripSafetyPage } from '@/features/safety/TripSafetyPage';
 import { useSilentRefresh } from '@/features/auth/useSilentRefresh';
 import { useForgetOnSignOut } from '@/features/auth/useForgetOnSignOut';
 import { useLiveNotifications } from '@/hooks/useNotifications';
+import { useAppliedSiteConfig } from '@/features/site/useSiteConfig';
 import { ExplorePage } from '@/features/trips/ExplorePage';
 import { TripDetailPage } from '@/features/trips/TripDetailPage';
 import { HostTripsPage } from '@/features/trips/HostTripsPage';
@@ -69,6 +76,9 @@ function RootLayout() {
   useForgetOnSignOut();
   useScrollOnNavigate();
   useLiveNotifications();
+  // The site's own name, colours and icons, applied to the document. Here rather than in each
+  // frame, so moving between the site and the admin portal does not reapply them.
+  useAppliedSiteConfig();
   return <Outlet />;
 }
 
@@ -312,140 +322,169 @@ const router = createBrowserRouter([
         // The admin portal has its own frame (sidebar and top bar), not the public header and footer.
         path: '/admin',
         element: (
-          <RoleRoute allow={(profile) => isStaff(profile.roles)}>
+          <RoleRoute allow={(profile) => isStaff(profile)}>
             <AdminLayout />
           </RoleRoute>
         ),
         children: [
-          { index: true, element: <AdminDashboardPage /> },
+          {
+            index: true,
+            element: (
+              <PermissionRoute needs={permissions.dashboardView}>
+                <AdminDashboardPage />
+              </PermissionRoute>
+            ),
+          },
           {
             path: 'verifications',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.usersVerify}>
                 <VerificationQueuePage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'reports',
             element: (
-              <RoleRoute
-                allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'Moderator')}
-              >
+              <PermissionRoute needs={permissions.moderationReportsView}>
                 <ReportsQueuePage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'stories',
             element: (
-              <RoleRoute
-                allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'Moderator')}
-              >
+              <PermissionRoute needs={permissions.moderationContentManage}>
                 <StoriesModerationPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'disputes',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.moderationDisputes}>
                 <ReportsQueuePage disputes />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'destinations',
             element: (
-              <RoleRoute
-                allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'SafetyDesk')}
-              >
+              <PermissionRoute needs={permissions.safetyDestinationsStatus}>
                 <DestinationAlertsPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'sos',
             element: (
-              <RoleRoute
-                allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'SafetyDesk')}
-              >
+              <PermissionRoute needs={permissions.safetySosView}>
                 <SosBoardPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'payouts',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.payoutsView}>
                 <PayoutQueuePage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'users',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.usersView}>
                 <UsersPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'users/:id',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.usersView}>
                 <UserDetailPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'trips',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.tripsView}>
                 <AdminTripsPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'bookings',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.bookingsView}>
                 <BookingLookupPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'payments',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.paymentsView}>
                 <AdminPaymentsPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'payments/:id',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.paymentsView}>
                 <AdminPaymentDetailPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
           {
             path: 'emergency-points',
             element: (
-              <RoleRoute
-                allow={(profile) => profile.roles.some((r) => r === 'Admin' || r === 'SafetyDesk')}
-              >
+              <PermissionRoute needs={permissions.safetyPointsManage}>
                 <EmergencyPointsPage />
-              </RoleRoute>
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: 'branding',
+            element: (
+              <PermissionRoute needs={permissions.settingsBranding}>
+                <BrandingPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: 'theme',
+            element: (
+              <PermissionRoute needs={permissions.settingsTheme}>
+                <ThemePage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: 'staff',
+            element: (
+              <PermissionRoute needs={permissions.staffView}>
+                <StaffMembersPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: 'roles',
+            element: (
+              <PermissionRoute needs={permissions.staffView}>
+                <StaffRolesPage />
+              </PermissionRoute>
             ),
           },
           {
             path: 'audit',
             element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Admin')}>
+              <PermissionRoute needs={permissions.auditView}>
                 <AuditLogPage />
-              </RoleRoute>
+              </PermissionRoute>
             ),
           },
         ],

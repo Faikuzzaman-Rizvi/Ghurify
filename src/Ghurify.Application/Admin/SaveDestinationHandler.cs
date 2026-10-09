@@ -1,6 +1,7 @@
-using System.Text.RegularExpressions;
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
+using System.Text.RegularExpressions;
 
 namespace Ghurify.Application.Admin;
 
@@ -15,7 +16,7 @@ public sealed partial class SaveDestinationHandler(IAdminRepository admin, Acces
     {
         ArgumentNullException.ThrowIfNull(edit);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.DestinationsManage))
         {
             return AppError.Forbidden();
         }
@@ -36,7 +37,7 @@ public sealed partial class SaveDestinationHandler(IAdminRepository admin, Acces
         };
 
         var added = await admin.SetDestinationAsync(clean, actorId, cancellationToken);
-        await audit.WriteAsync(actorId, added ? "destination.added" : "destination.edited", "Destination", 0, clean.Slug, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, added ? "destination.added" : "destination.edited", "Destination", 0, clean.Slug), cancellationToken);
         return new DestinationSaved(clean.Slug, added);
     }
 

@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace Ghurify.Application.Admin;
@@ -18,7 +19,7 @@ public sealed class RequirePasswordResetHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.UsersSecurity))
         {
             return AppError.Forbidden();
         }
@@ -35,7 +36,7 @@ public sealed class RequirePasswordResetHandler(
         }
 
         await admin.RequirePasswordResetAsync(userId, actorId, cancellationToken);
-        await audit.WriteAsync(actorId, "user.password_reset_required", "User", userId, reason, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, "user.password_reset_required", "User", userId, reason), cancellationToken);
         logger.LogWarning("Admin {ActorId} required a new password for user {UserId}.", actorId, userId);
         return Done.Value;
     }

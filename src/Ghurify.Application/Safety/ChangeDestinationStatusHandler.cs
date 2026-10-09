@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 using Ghurify.Domain.Trips;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +22,7 @@ public sealed class ChangeDestinationStatusHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsSafetyDesk)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.SafetyDestinationsStatus))
         {
             return AppError.Forbidden();
         }
@@ -50,7 +51,7 @@ public sealed class ChangeDestinationStatusHandler(
             return AppError.NotFound("destination_not_found", "There is no such destination.");
         }
 
-        await audit.WriteAsync(actorId, $"destination.{command.Status.ToString().ToLowerInvariant()}", "DestinationAlert", alertId.Value, note, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, $"destination.{command.Status.ToString().ToLowerInvariant()}", "DestinationAlert", alertId.Value, note), cancellationToken);
         logger.LogWarning("Destination {Slug} set to {Status} by {ActorId}.", slug, command.Status, actorId);
 
         if (command.Status == DestinationStatus.Closed)

@@ -1,5 +1,6 @@
 using Ghurify.Application.Abstractions;
 using Ghurify.Application.Identity;
+using Ghurify.Domain.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace Ghurify.Application.Payments;
@@ -13,7 +14,7 @@ public sealed class ApprovePayoutHandler(
 {
     public async Task<Result<Done>> HandleAsync(long actorId, long payoutId, CancellationToken cancellationToken)
     {
-        if (!(await access.GetAsync(actorId, cancellationToken)).IsAdmin)
+        if (!(await access.GetAsync(actorId, cancellationToken)).Can(Permissions.PayoutsApprove))
         {
             return AppError.Forbidden();
         }
@@ -23,7 +24,7 @@ public sealed class ApprovePayoutHandler(
             return AppError.Conflict("payout_not_waiting", "This payout is not waiting for approval.");
         }
 
-        await audit.WriteAsync(actorId, "payout.approve", "Payout", payoutId, null, cancellationToken);
+        await audit.WriteAsync(new AuditRecord(actorId, "payout.approve", "Payout", payoutId, null), cancellationToken);
         logger.LogInformation("Admin {ActorId} approved payout {PayoutId}.", actorId, payoutId);
         return Done.Value;
     }
