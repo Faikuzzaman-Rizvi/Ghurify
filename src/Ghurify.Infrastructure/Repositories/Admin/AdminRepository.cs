@@ -33,7 +33,8 @@ public sealed class AdminRepository(IDbConnectionFactory connectionFactory) : IA
                 (UserStatus)row.Status,
                 Utc(row.Created),
                 row.VerifiedLevel is null ? null : (VerificationLevel)row.VerifiedLevel.Value,
-                ParseRoles(row.Roles)))],
+                ParseRoles(row.Roles),
+                row.AvatarUpdatedOn is null ? null : Utc(row.AvatarUpdatedOn.Value).ToUnixTimeSeconds()))],
             rows.Count > 0 ? rows[0].TotalCount : 0,
             offset / Math.Max(take, 1) + 1,
             take);
@@ -299,8 +300,21 @@ public sealed class AdminRepository(IDbConnectionFactory connectionFactory) : IA
             .Where(role => role != Role.Traveler)
             .Order()];
 
+    /// <summary>
+    /// Columns of Main.QueryAdminUsers, in the order it selects them: Dapper matches a record
+    /// constructor to the result set positionally, so this order is part of the contract.
+    /// </summary>
     private sealed record UserRow(
-        long Id, string Email, string? DisplayName, string? Phone, byte Status, DateTime Created, byte? VerifiedLevel, string? Roles, int TotalCount);
+        long Id,
+        string Email,
+        string? DisplayName,
+        string? Phone,
+        byte Status,
+        DateTime Created,
+        byte? VerifiedLevel,
+        string? Roles,
+        DateTime? AvatarUpdatedOn,
+        int TotalCount);
 
     private sealed record DetailRow(
         long Id,

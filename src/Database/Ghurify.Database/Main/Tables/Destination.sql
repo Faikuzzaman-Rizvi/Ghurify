@@ -28,10 +28,13 @@ CREATE TABLE [Main].[Destination]
     [UpdatedId]     BIGINT          NULL,
 
     CONSTRAINT [PK_Destination] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [CK_Destination_Slug] CHECK ([Slug] NOT LIKE '%[^a-z0-9-]%' COLLATE Latin1_General_CS_AS
+    -- Written as NOT ... LIKE rather than NOT LIKE because that is how SQL Server stores it, and
+    -- the dacpac compares the stored form: the other way round, every publish drops and recreates
+    -- this constraint for no reason. Same for the other pattern checks in this project.
+    CONSTRAINT [CK_Destination_Slug] CHECK (NOT [Slug] LIKE '%[^a-z0-9-]%' COLLATE Latin1_General_CS_AS
                                             AND LEN([Slug]) > 0),
-    CONSTRAINT [CK_Destination_Kind] CHECK ([Kind] BETWEEN 1 AND 8),
-    CONSTRAINT [CK_Destination_Status] CHECK ([Status] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_Destination_Kind] CHECK ([Kind] >= 1 AND [Kind] <= 8),
+    CONSTRAINT [CK_Destination_Status] CHECK ([Status] >= 1 AND [Status] <= 3)
 );
 GO
 

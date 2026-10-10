@@ -1,10 +1,14 @@
-import type {
-  InputHTMLAttributes,
-  ReactNode,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  type InputHTMLAttributes,
+  type OptionHTMLAttributes,
+  type ReactNode,
+  type TextareaHTMLAttributes,
 } from 'react';
 import { DatePicker, type DatePickerProps } from './ui/DatePicker';
+import { Select, type SelectOption } from './ui/Select';
 
 /** The one input style, so every form in the app looks and focuses the same way. */
 export const inputClass =
@@ -89,26 +93,81 @@ export function TextAreaField({ id, label, hint, error, ...textarea }: TextAreaF
   );
 }
 
-type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
+interface SelectFieldProps {
   id: string;
   label: string;
   hint?: string | undefined;
   error?: string | undefined;
+  value: string | number | null | undefined;
+  /** Shaped like a change event, so a handler written for a native select keeps working. */
+  onChange: (event: { target: { value: string } }) => void;
+  onBlur?: (() => void) | undefined;
+  disabled?: boolean | undefined;
+  /** The empty option is a prompt ("Choose…"), shown muted until something is chosen. */
+  placeholder?: boolean | undefined;
+  /** The choices, written as <option value="…">Label</option> just as for a native select. */
   children: ReactNode;
-};
+}
 
-export function SelectField({ id, label, hint, error, children, ...select }: SelectFieldProps) {
+/** The text inside an <option>, however it was written (a string, numbers, fragments). */
+function textOf(node: ReactNode): string {
+  if (node === null || node === undefined || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join('');
+  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children);
+  return '';
+}
+
+/** The <option> children of a SelectField as the custom dropdown's choices. */
+function optionsOf(children: ReactNode): SelectOption[] {
+  const options: SelectOption[] = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement<OptionHTMLAttributes<HTMLOptionElement>>(child)) return;
+    if (child.type === Fragment) {
+      options.push(...optionsOf((child.props as { children?: ReactNode }).children));
+      return;
+    }
+    if (child.type !== 'option') return;
+    const { value, children: text, disabled } = child.props;
+    const option: SelectOption = { value: String(value ?? textOf(text)), label: textOf(text) };
+    if (disabled) option.disabled = true;
+    options.push(option);
+  });
+  return options;
+}
+
+/**
+ * A labelled dropdown. The browser's own <select> cannot be styled when open (a bare list with
+ * the system's blue highlight), so this is the app's custom one, with the same keyboard
+ * behaviour: see components/ui/Select. Controlled: give it `value` and `onChange`, or wire it
+ * to a form with react-hook-form's Controller.
+ */
+export function SelectField({
+  id,
+  label,
+  hint,
+  error,
+  value,
+  onChange,
+  onBlur,
+  disabled = false,
+  placeholder = false,
+  children,
+}: SelectFieldProps) {
   return (
     <FieldShell id={id} label={label} hint={hint} error={error}>
-      <select
+      <Select
         id={id}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={describedBy(id, hint, error)}
-        className={`${inputClass} cursor-pointer`}
-        {...select}
-      >
-        {children}
-      </select>
+        value={value === null || value === undefined ? '' : String(value)}
+        onChange={(next) => onChange({ target: { value: next } })}
+        onBlur={onBlur}
+        options={optionsOf(children)}
+        disabled={disabled}
+        invalid={Boolean(error)}
+        describedBy={describedBy(id, hint, error)}
+        emptyIsPlaceholder={placeholder}
+        buttonClassName={`${inputClass} cursor-pointer`}
+      />
     </FieldShell>
   );
 }

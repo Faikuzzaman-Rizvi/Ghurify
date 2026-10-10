@@ -23,8 +23,8 @@ CREATE TABLE [Social].[Review]
     CONSTRAINT [FK_Review_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [FK_Review_User_ReviewerId] FOREIGN KEY ([ReviewerId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Review_User_RevieweeId] FOREIGN KEY ([RevieweeId]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_Review_Direction] CHECK ([Direction] BETWEEN 1 AND 3),
-    CONSTRAINT [CK_Review_Rating] CHECK ([Rating] BETWEEN 1 AND 5),
+    CONSTRAINT [CK_Review_Direction] CHECK ([Direction] >= 1 AND [Direction] <= 3),
+    CONSTRAINT [CK_Review_Rating] CHECK ([Rating] >= 1 AND [Rating] <= 5),
     CONSTRAINT [CK_Review_NotSelf] CHECK ([ReviewerId] <> [RevieweeId])
 );
 GO

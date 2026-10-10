@@ -27,7 +27,7 @@ CREATE TABLE [Main].[OtpCode]
     [UpdatedId]   BIGINT          NULL,
 
     CONSTRAINT [PK_OtpCode] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [CK_OtpCode_Purpose] CHECK ([Purpose] BETWEEN 1 AND 2),
+    CONSTRAINT [CK_OtpCode_Purpose] CHECK ([Purpose] >= 1 AND [Purpose] <= 2),
     -- The explicit collation matters: the database default is case-insensitive, under which
     -- [Email] = LOWER([Email]) is true for anything and enforces nothing.
     CONSTRAINT [CK_OtpCode_Email] CHECK ([Email] LIKE '%_@_%._%'

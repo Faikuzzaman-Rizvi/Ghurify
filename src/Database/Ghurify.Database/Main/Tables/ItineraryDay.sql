@@ -17,7 +17,7 @@ CREATE TABLE [Main].[ItineraryDay]
     CONSTRAINT [PK_ItineraryDay] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_ItineraryDay_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [CK_ItineraryDay_DayNo] CHECK ([DayNo] >= 1),
-    CONSTRAINT [CK_ItineraryDay_Difficulty] CHECK ([Difficulty] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_ItineraryDay_Difficulty] CHECK ([Difficulty] >= 1 AND [Difficulty] <= 3)
 );
 GO
 

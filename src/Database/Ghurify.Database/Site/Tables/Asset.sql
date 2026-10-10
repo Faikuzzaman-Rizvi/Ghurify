@@ -30,7 +30,7 @@ CREATE TABLE [Site].[Asset]
 
     CONSTRAINT [PK_Asset] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Asset_User_UploadedById] FOREIGN KEY ([UploadedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_Asset_Kind] CHECK ([Kind] NOT LIKE '%[^a-z-]%' COLLATE Latin1_General_CS_AS
+    CONSTRAINT [CK_Asset_Kind] CHECK (NOT [Kind] LIKE '%[^a-z-]%' COLLATE Latin1_General_CS_AS
                                       AND LEN([Kind]) > 0),
     CONSTRAINT [CK_Asset_SizeBytes] CHECK ([SizeBytes] > 0)
 );

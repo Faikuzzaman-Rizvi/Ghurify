@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Ghurify.Api.Authorization;
+using Ghurify.Api.Configuration;
 using Ghurify.Application.Trips;
 using Ghurify.Domain.Trips;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,10 @@ public static class TripsEndpoints
         trips.MapGet("/", SearchTripsAsync)
             .WithName("SearchTrips")
             .WithSummary("Searches live trips, soonest first unless another sort is asked for.")
+            // Held in memory for a few seconds, for anonymous callers only. Who is asking changes
+            // the result (women-only trips, a host's own draft), so CachePolicies refuses any
+            // request that carries a token or a cookie: those are always built fresh.
+            .CacheOutput(CachePolicies.TripSearch)
             .Produces<TripPage>(StatusCodes.Status200OK)
             .ProducesValidationProblem();
 
@@ -89,11 +94,14 @@ public static class TripsEndpoints
         destinations.MapGet("/", ListDestinationsAsync)
             .WithName("ListDestinations")
             .WithSummary("Every destination with its safety status and upcoming trips.")
+            // A lookup table in practice, and on the home page of every first visit.
+            .CacheOutput(CachePolicies.Destinations)
             .Produces<IReadOnlyList<DestinationSummary>>(StatusCodes.Status200OK);
 
         destinations.MapGet("/{slug}", GetDestinationAsync)
             .WithName("GetDestination")
             .WithSummary("One destination by its slug.")
+            .CacheOutput(CachePolicies.Destinations)
             .Produces<DestinationSummary>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 

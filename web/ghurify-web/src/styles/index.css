@@ -36,7 +36,11 @@
 
   --animate-float: float 7s ease-in-out infinite;
   --animate-drift: drift 40s linear infinite;
-  --animate-rise: rise 0.6s ease-out both;
+  /* `backwards`, not `both`: the end of the animation is the element's normal state anyway,
+     and keeping it applied would leave a transform behind. A transform makes its element the
+     frame of reference for any `fixed` child, which would misplace a dropdown opened inside
+     something that has risen into view. */
+  --animate-rise: rise 0.6s ease-out backwards;
   --animate-spin-slow: spin 18s linear infinite;
   --animate-fade-in: fade-in 1.2s ease-out both;
   /* Menus that open on a click: readable at once, not after the page fade above. */
@@ -114,6 +118,11 @@
 }
 
 html {
+  /* The site is designed light. Saying so keeps the parts the browser draws itself — the
+     option list of a <select>, scrollbars, the focus ring — light as well; without it a
+     reader whose system is set to dark gets a black dropdown over a white page. */
+  color-scheme: light;
+
   /* Bangla glyphs are taller than Latin ones; a little extra leading keeps
      mixed-script paragraphs readable. */
   line-height: 1.6;
@@ -190,6 +199,16 @@ h4 {
     transform: scale(1.08);
     filter: brightness(0.75);
   }
+}
+
+/*
+ * Leaflet stacks its own layers with large z-indexes (tiles 200, markers 600, the zoom buttons
+ * 1000). Left loose, those numbers compete with everything else on the page, so a map drew
+ * over the dropdown list that opened above it in "Add a place". Isolating the map keeps its
+ * layers ordered among themselves and makes the whole map one ordinary layer of the page.
+ */
+.leaflet-container {
+  isolation: isolate;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -21,7 +21,7 @@ CREATE TABLE [Main].[JoinRequest]
     CONSTRAINT [PK_JoinRequest] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_JoinRequest_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [FK_JoinRequest_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_JoinRequest_Status] CHECK ([Status] BETWEEN 1 AND 5)
+    CONSTRAINT [CK_JoinRequest_Status] CHECK ([Status] >= 1 AND [Status] <= 5)
 );
 GO
 

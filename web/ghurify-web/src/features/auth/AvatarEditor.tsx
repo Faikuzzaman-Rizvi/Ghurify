@@ -21,8 +21,10 @@ export function AvatarEditor({ profile }: { profile: Profile }) {
   const hasAvatar = profile.avatarVersion !== null && profile.avatarVersion !== undefined;
   const busy = upload.isPending || remove.isPending;
 
+  const failure = upload.error ?? remove.error;
+
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex w-full flex-col items-center gap-2">
       <div className="relative">
         <Avatar
           userId={asNumber(profile.userId)}
@@ -72,9 +74,14 @@ export function AvatarEditor({ profile }: { profile: Profile }) {
           {t('account.avatar.remove')}
         </button>
       )}
-      {(upload.isError || remove.isError) && (
-        <p role="alert" className="text-xs text-jamdani">
-          {errorText(upload.error ?? remove.error, t)}
+      {/* Its own full-width line under the picture, so a long reason wraps inside the card
+          rather than squeezing itself in beside the camera button. */}
+      {failure && (
+        <p
+          role="alert"
+          className="mt-1 w-full rounded-xl bg-jamdani/8 px-3 py-2 text-center text-xs leading-snug text-jamdani ring-1 ring-jamdani/20"
+        >
+          {errorText(failure, t)}
         </p>
       )}
     </div>

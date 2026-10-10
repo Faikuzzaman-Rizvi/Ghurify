@@ -41,11 +41,11 @@ export function Dialog({
       aria-labelledby={titleId}
       onClose={onClose}
       onCancel={onClose}
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-night/60 backdrop:backdrop-blur-sm"
+      className="m-auto flex max-h-[min(44rem,calc(100dvh-3rem))] w-[min(32rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-night/60 backdrop:backdrop-blur-sm"
     >
       {open && (
-        <div className="flex flex-col gap-4 p-6">
-          <div className="flex items-start justify-between gap-4">
+        <>
+          <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6">
             <h2 id={titleId} className="text-xl font-bold text-deep">
               {title}
             </h2>
@@ -58,8 +58,12 @@ export function Dialog({
               <X aria-hidden="true" className="h-5 w-5" />
             </button>
           </div>
-          {children}
-        </div>
+          {/* Only this part scrolls, and only when the form is genuinely taller than the
+              window: the dialog itself no longer grows a scrollbar for a popover inside it. */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 pt-4">
+            {children}
+          </div>
+        </>
       )}
     </dialog>
   );

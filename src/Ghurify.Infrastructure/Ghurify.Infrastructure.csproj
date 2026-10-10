@@ -8,6 +8,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Same arrangement as Ghurify.Application: the tests pin down the connection string's
+         pooling settings without SqlConnectionFactory.Normalize having to be public API. -->
+    <InternalsVisibleTo Include="Ghurify.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />

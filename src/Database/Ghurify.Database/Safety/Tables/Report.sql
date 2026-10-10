@@ -24,9 +24,9 @@ CREATE TABLE [Safety].[Report]
     CONSTRAINT [PK_Report] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Report_User_ReporterId] FOREIGN KEY ([ReporterId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Report_User_ResolvedById] FOREIGN KEY ([ResolvedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_Report_Kind] CHECK ([Kind] BETWEEN 1 AND 4),
-    CONSTRAINT [CK_Report_Reason] CHECK ([Reason] BETWEEN 1 AND 6),
-    CONSTRAINT [CK_Report_Status] CHECK ([Status] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_Report_Kind] CHECK ([Kind] >= 1 AND [Kind] <= 4),
+    CONSTRAINT [CK_Report_Reason] CHECK ([Reason] >= 1 AND [Reason] <= 6),
+    CONSTRAINT [CK_Report_Status] CHECK ([Status] >= 1 AND [Status] <= 3)
 );
 GO
 

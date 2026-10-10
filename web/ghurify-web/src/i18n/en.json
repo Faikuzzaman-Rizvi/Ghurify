@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Ghurify",
+    "name": "GhuriFiri",
     "tagline": "Travel together, safely"
   },
   "language": {
@@ -32,7 +32,7 @@
     "pageOf": "Page {{page}} of {{pages}}"
   },
   "nav": {
-    "home": "Ghurify home",
+    "home": "GhuriFiri home",
     "explore": "Explore trips",
     "destinations": "Destinations",
     "safety": "Safety",
@@ -73,7 +73,7 @@
     "tripsTitle": "Trips leaving <accent>soon</accent>",
     "tripsSubtitle": "Small groups, transparent costs, real hosts.",
     "seeAll": "See all trips",
-    "howTitle": "How Ghurify <accent>works</accent>",
+    "howTitle": "How GhuriFiri <accent>works</accent>",
     "steps": {
       "find": {
         "title": "Find a trip",
@@ -93,7 +93,7 @@
       }
     },
     "safetyTitle": "Safety is the <accent>promise</accent>",
-    "safetySubtitle": "Everything on Ghurify is built around getting you there and back safely.",
+    "safetySubtitle": "Everything on GhuriFiri is built around getting you there and back safely.",
     "safety": {
       "verified": {
         "title": "Verified hosts",
@@ -132,14 +132,14 @@
     "why": {
       "eyebrow": "Travel together, safely",
       "title": "Small groups. <accent>Real</accent> people. Safe trips.",
-      "body": "Ghurify joins travellers with verified local hosts for small-group trips across Bangladesh. You see every taka of the price before you go, your money waits in escrow until the trip runs, and help is one tap away on the road.",
+      "body": "GhuriFiri joins travellers with verified local hosts for small-group trips across Bangladesh. You see every taka of the price before you go, your money waits in escrow until the trip runs, and help is one tap away on the road.",
       "howSafe": "How we keep you safe",
-      "badge": "Travel together · Travel safe · Ghurify · "
+      "badge": "Travel together · Travel safe · GhuriFiri · "
     },
     "destinationsEyebrow": "Top destinations",
     "tripsEyebrow": "Choose your trip",
     "numbers": {
-      "label": "Ghurify in numbers",
+      "label": "GhuriFiri in numbers",
       "destinations": "Destinations",
       "trips": "Upcoming trips",
       "escrow": "Payments in escrow",
@@ -179,7 +179,7 @@
     "days_one": "{{n}} day",
     "days_other": "{{n}} days",
     "hostedBy": "Hosted by {{name}}",
-    "aHost": "a Ghurify host",
+    "aHost": "a GhuriFiri host",
     "loadError": "We could not load trips. Check your connection and try again.",
     "verifiedHostsOnly": "Only hosts with a verified ID and selfie",
     "exploreEyebrow": "Choose your trip",
@@ -204,7 +204,7 @@
     "seats": "Seats",
     "seatsOf": "{{left}} of {{total}} left",
     "host": "Your host",
-    "memberSince": "On Ghurify since {{date}}",
+    "memberSince": "On GhuriFiri since {{date}}",
     "request": "Request to join",
     "signInToJoin": "Sign in to join",
     "joinSoon": "Join requests and escrow payments open with the bookings release.",
@@ -293,8 +293,8 @@
     "finish": "Start exploring",
     "steps": {
       "welcome": {
-        "title": "Welcome to Ghurify",
-        "body": "Ghurify connects travellers with trusted hosts for small-group trips across Bangladesh. This one-minute tour shows you around."
+        "title": "Welcome to GhuriFiri",
+        "body": "GhuriFiri connects travellers with trusted hosts for small-group trips across Bangladesh. This one-minute tour shows you around."
       },
       "search": {
         "title": "Search for a trip",
@@ -348,7 +348,7 @@
     "home": "Back to home"
   },
   "auth": {
-    "title": "Sign in to Ghurify",
+    "title": "Sign in to GhuriFiri",
     "subtitle": "Welcome back. Sign in with your email and password.",
     "emailLabel": "Email address",
     "emailHint": "This is your sign-in address for good. We send one code here to confirm it.",
@@ -374,7 +374,7 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "forgotPassword": "Forgot password?",
-    "noAccount": "New to Ghurify?",
+    "noAccount": "New to GhuriFiri?",
     "createAccount": "Create an account",
     "haveAccount": "Already have an account?",
     "legacyHint": "Used to sign in with an emailed code? Choose a password with “Forgot password?”.",
@@ -399,7 +399,7 @@
     },
     "reset": {
       "title": "Choose a new password",
-      "sentTo": "If {{email}} has a Ghurify account, a reset code is on its way.",
+      "sentTo": "If {{email}} has a GhuriFiri account, a reset code is on its way.",
       "submit": "Save password and sign in"
     }
   },
@@ -409,7 +409,7 @@
     "nameLabel": "Name",
     "noName": "Not set yet",
     "loadError": "We could not load your profile.",
-    "memberSince": "on Ghurify since {{date}}",
+    "memberSince": "on GhuriFiri since {{date}}",
     "eyebrow": "Your account",
     "completeness": "Profile complete",
     "completenessHint": "Hosts look at profiles before they accept a request. A full one gets you in faster.",
@@ -486,7 +486,7 @@
     "payout_not_waiting": "This payout is not waiting for approval.",
     "storage_unavailable": "Photos can't be saved right now. Please try again in a minute.",
     "media_type": "Upload a JPEG, PNG or WebP photo, or an MP4 or MOV video.",
-    "media_too_large": "This file is too large.",
+    "media_too_large": "That photo is too large. Choose a smaller one.",
     "media_not_found": "That upload could not be found.",
     "media_not_usable": "One of the photos could not be attached. Remove it and try again.",
     "post_length": "Write up to 2000 characters, or add a photo.",
@@ -558,6 +558,9 @@
     "point_position": "The position must be inside Bangladesh.",
     "point_not_found": "That emergency point no longer exists.",
     "upload_failed": "The photo didn't get through. Check your connection and try again.",
+    "upload_offline": "The photo service did not answer. Check your connection and try again.",
+    "upload_link_expired": "The upload link has run out. Choose the photo again.",
+    "upload_rejected": "The photo service refused the upload. Please try again in a moment.",
     "payment_not_found": "There is no such payment.",
     "visit_exists": "That place is already on your map for that day.",
     "place_outside_bangladesh": "Put the pin on the place, inside Bangladesh.",
@@ -660,7 +663,12 @@
     "pending": "Your check is being reviewed. We will let you know the result.",
     "approved": "You are verified.",
     "rejected": "Your check was not approved.",
-    "level": "Check",
+    "level": "How far to verify",
+    "levelHint": "The selfie check is only needed if you want to host trips.",
+    "levelOptions": {
+      "Nid": "Photo ID only — lets me join trips",
+      "NidSelfie": "Photo ID and a selfie — lets me host trips too"
+    },
     "levels": {
       "Phone": "Phone number",
       "Nid": "National ID",
@@ -680,7 +688,7 @@
     },
     "badgeHint": {
       "Phone": "Phone number confirmed",
-      "Nid": "Photo ID checked by the Ghurify team",
+      "Nid": "Photo ID checked by the GhuriFiri team",
       "NidSelfie": "Photo ID checked and a selfie holding it matched"
     },
     "status": {
@@ -694,7 +702,8 @@
     "formLead": "Tell us which ID you have, then add clear photos of it.",
     "whyTitle": "Why we ask",
     "privacyTitle": "Your ID stays private",
-    "idType": "ID document",
+    "idType": "Which document will you show?",
+    "idTypeHint": "We will ask for photos of this document next.",
     "idTypes": {
       "Nid": "National ID card",
       "Passport": "Passport",
@@ -789,7 +798,8 @@
       "showPhotos": "View ID photos",
       "hidePhotos": "Hide photos",
       "photoDeleted": "Deleted after the decision",
-      "photoNotice": "Links expire in 5 minutes. Every viewing is recorded in the audit log."
+      "photoNotice": "Links expire in 5 minutes. Every viewing is recorded in the audit log.",
+      "lead": "Identity checks from hosts and travellers, oldest first. Approve, or reject with a reason."
     },
     "dashboard": {
       "title": "Overview",
@@ -826,7 +836,7 @@
       "sectionLead": {
         "attention": "Emergencies on the road. These come first.",
         "queues": "Decisions waiting for a person.",
-        "platform": "How Ghurify is running today."
+        "platform": "How GhuriFiri is running today."
       }
     },
     "reports": {
@@ -853,7 +863,11 @@
         "SuspendUser": "Suspend the person",
         "RefundBooking": "Refund in full",
         "Resolve": "Mark handled"
-      }
+      },
+      "lead": "Reports about people, stories and trips. Every decision needs a written reason.",
+      "disputesLead": "Disputes about bookings and money. Only an admin decides, and every decision is recorded.",
+      "waiting_one": "{{count}} waiting",
+      "waiting_other": "{{count}} waiting"
     },
     "destinations": {
       "title": "Destination alerts",
@@ -875,7 +889,14 @@
       "divisionEn": "Division in English",
       "divisionBn": "Division in Bangla",
       "summaryEn": "Summary in English",
-      "summaryBn": "Summary in Bangla"
+      "summaryBn": "Summary in Bangla",
+      "lead": "Set each place open, on caution or closed. Travellers see the note on the destination and on every trip there.",
+      "filterLabel": "Show destinations by status",
+      "noneWithStatus": "No destinations have this status.",
+      "noNote": "No alert. Travellers see it as open.",
+      "upcomingTrips_one": "{{value}} upcoming trip",
+      "upcomingTrips_other": "{{value}} upcoming trips",
+      "noUpcomingTrips": "No upcoming trips"
     },
     "sos": {
       "title": "SOS board",
@@ -894,12 +915,13 @@
         "Resolved": "Resolved"
       },
       "raisedAt": "Raised {{time}}",
-      "lastSeen": "last position {{time}}",
+      "lastSeen": "Last position {{time}}",
       "traveller": "Traveller",
       "host": "Host {{name}}",
       "map": "Open map",
       "acknowledge": "Acknowledge",
-      "resolve": "Resolve"
+      "resolve": "Resolve",
+      "lead": "Every SOS raised on a trip, live. Call the traveller first, then the host, and keep it open until they are safe."
     },
     "payouts": {
       "title": "Payouts",
@@ -910,7 +932,16 @@
       "status": {
         "Released": "Waiting to be sent",
         "Paid": "Sent"
-      }
+      },
+      "lead": "Money released from escrow for hosts. Send it, then mark it sent here.",
+      "summary": {
+        "Released_one": "{{count}} payout waiting to be sent, {{amount}} in all.",
+        "Released_other": "{{count}} payouts waiting to be sent, {{amount}} in all.",
+        "Paid_one": "{{count}} payout sent, {{amount}} in all.",
+        "Paid_other": "{{count}} payouts sent, {{amount}} in all."
+      },
+      "tripStarts": "Trip starts {{date}}",
+      "sentOn": "Sent on {{date}}"
     },
     "reason": {
       "label": "Reason",
@@ -958,7 +989,8 @@
           "Deactivated": "Close account"
         }
       },
-      "stories": "Their stories"
+      "stories": "Their stories",
+      "lead": "Find anyone by email, phone number or name, and open their record."
     },
     "trips": {
       "title": "Trips",
@@ -970,7 +1002,9 @@
       "seats": "{{taken}} of {{seats}} seats taken",
       "cancel": "Cancel trip",
       "confirmTitle": "Cancel “{{title}}”?",
-      "confirmText": "Every paid traveller is refunded in full, and everyone on the trip is told. This cannot be undone."
+      "confirmText": "Every paid traveller is refunded in full, and everyone on the trip is told. This cannot be undone.",
+      "lead": "Every trip in any state. Cancelling one refunds every traveller in full.",
+      "view": "Open trip"
     },
     "bookings": {
       "title": "Bookings & payments",
@@ -1014,7 +1048,10 @@
         "DuplicatePayment": "Paid twice",
         "AmountMismatch": "Wrong amount charged",
         "Admin": "Admin decision"
-      }
+      },
+      "lead": "Answer \"where is my money?\": every payment, refund and what escrow still holds for one booking.",
+      "startTitle": "Look up a booking",
+      "startHint": "Enter a booking number, or the payment reference the traveller quotes from their receipt."
     },
     "points": {
       "title": "Emergency points",
@@ -1040,7 +1077,18 @@
       "phone": "Phone number",
       "latitude": "Latitude",
       "longitude": "Longitude",
-      "confirmChecked": "I have confirmed the name, phone number and position are correct."
+      "confirmChecked": "I have confirmed the name, phone number and position are correct.",
+      "lead": "The police stations and hospitals offered with every SOS. Check each one and add a phone number that answers.",
+      "stats": {
+        "total": "Emergency points",
+        "checked": "Checked",
+        "unchecked": "Not checked yet",
+        "noPhone": "Without a phone number"
+      },
+      "noMatches": "Nothing matches these filters.",
+      "noDestinationGroup": "Not near a destination",
+      "position": "Position",
+      "checkedOn": "Checked by {{name}} on {{date}}"
     },
     "audit": {
       "title": "Audit log",
@@ -1083,7 +1131,7 @@
       "site": "The website"
     },
     "portal": {
-      "title": "Ghurify admin",
+      "title": "GhuriFiri admin",
       "backToSite": "View site",
       "waiting": "waiting"
     },
@@ -1104,7 +1152,7 @@
       "host": "Host",
       "settlement": "Gateway settlement",
       "gatewayCharge": "Gateway charge",
-      "storeAmount": "Settled to Ghurify",
+      "storeAmount": "Settled to GhuriFiri",
       "risk": "Gateway risk check",
       "riskFlagged": "Flagged as risky",
       "riskClear": "Clear",
@@ -1114,7 +1162,13 @@
       "signatureValid": "Signature valid",
       "signatureInvalid": "Bad signature",
       "processed": "processed {{when}}",
-      "notProcessed": "not processed"
+      "notProcessed": "not processed",
+      "lead": "Every payment on the platform. Search by the reference a traveller quotes, the gateway's id, or their name.",
+      "stats": {
+        "count": "Payments",
+        "paid": "Paid",
+        "refunded": "Refunded"
+      }
     },
     "stories": {
       "title": "Stories",
@@ -1126,11 +1180,13 @@
       "remove": "Remove story",
       "more": "Load more",
       "confirmTitle": "Remove this story by {{name}}?",
-      "confirmText": "It disappears for everyone. The author is told it was removed and why, and your reason is kept in the audit log."
+      "confirmText": "It disappears for everyone. The author is told it was removed and why, and your reason is kept in the audit log.",
+      "lead": "Every story travellers share, newest first. Remove one only with a reason; the author is told why.",
+      "likes": "Likes"
     },
     "stepUp": {
       "title": "Confirm it is you",
-      "lead": "This change affects who can run Ghurify, so enter your password again. It stays confirmed for the next ten minutes.",
+      "lead": "This change affects who can run GhuriFiri, so enter your password again. It stays confirmed for the next ten minutes.",
       "password": "Your password",
       "confirm": "Confirm"
     },
@@ -1328,6 +1384,10 @@
         "nightOnTurmeric": "Dark text on the accent fill",
         "mistOnWhite": "Tinted sections against white cards"
       }
+    },
+    "ui": {
+      "all": "All",
+      "showing": "Showing {{first}}–{{last}} of {{total}}"
     }
   },
   "tripStatus": {
@@ -1484,7 +1544,7 @@
       "past": "Past"
     },
     "noneHere": "Nothing here yet.",
-    "safeTitle": "Travelling with Ghurify",
+    "safeTitle": "Travelling with GhuriFiri",
     "safe": {
       "escrow": "Your payment waits in escrow until the trip runs.",
       "sos": "Every trip has SOS and check-ins, reaching the safety desk.",
@@ -1516,7 +1576,7 @@
     "unread_other": "{{count}} new",
     "notMember": "This chat is for the people on the trip.",
     "notMemberHint": "You join the group chat once the host approves your request.",
-    "maskedWarning": "Phone and wallet numbers are hidden until everyone in the group has paid. Keep payments inside Ghurify so your money stays protected.",
+    "maskedWarning": "Phone and wallet numbers are hidden until everyone in the group has paid. Keep payments inside GhuriFiri so your money stays protected.",
     "maskedNote": "A number was hidden here",
     "connection": {
       "connecting": "Connecting",
@@ -1761,7 +1821,7 @@
     "backToTrip": "Back to the trip",
     "sos": {
       "title": "SOS",
-      "explain": "In danger? Send an SOS. The Ghurify safety desk sees your location at once, your emergency contact gets a text, and your host is told.",
+      "explain": "In danger? Send an SOS. The GhuriFiri safety desk sees your location at once, your emergency contact gets a text, and your host is told.",
       "button": "Send SOS",
       "sent": "SOS sent. The safety desk can see where you are.",
       "contactTexted": "Your emergency contact has been texted.",
@@ -1823,7 +1883,7 @@
     "link": "Photo credits",
     "eyebrow": "Thank you",
     "title": "Photo <accent>credits</accent>",
-    "body": "The photos on Ghurify come from photographers who shared their work on Wikimedia Commons under Creative Commons licences.",
+    "body": "The photos on GhuriFiri come from photographers who shared their work on Wikimedia Commons under Creative Commons licences.",
     "by": "By {{author}}",
     "source": "View the original",
     "newTab": "(opens in a new tab)"
@@ -1843,7 +1903,7 @@
   "paymentHistory": {
     "eyebrow": "Your money",
     "titleAccent": "Payment <accent>history</accent>",
-    "subtitle": "Every payment you have made or tried on Ghurify, each with a receipt you can keep.",
+    "subtitle": "Every payment you have made or tried on GhuriFiri, each with a receipt you can keep.",
     "figures": {
       "paid": "Paid",
       "refunded": "Refunded to you",
@@ -1931,7 +1991,7 @@
       "refundRef": "Refund reference"
     },
     "gateway": {
-      "fake": "Ghurify sandbox",
+      "fake": "GhuriFiri sandbox",
       "sslcommerz": "SSLCommerz"
     },
     "failure": {
@@ -1982,14 +2042,14 @@
   "travel": {
     "eyebrow": "Your Bangladesh",
     "titleAccent": "Travel <accent>map</accent>",
-    "subtitle": "Every place you have been, pinned. Ghurify trips add themselves when they end; add the rest yourself.",
+    "subtitle": "Every place you have been, pinned. GhuriFiri trips add themselves when they end; add the rest yourself.",
     "addPlace": "Add a place",
     "summary": {
       "places_one": "Place",
       "places_other": "Places",
       "divisions": "Divisions",
-      "trips_one": "Ghurify trip",
-      "trips_other": "Ghurify trips",
+      "trips_one": "GhuriFiri trip",
+      "trips_other": "GhuriFiri trips",
       "days_one": "Day on trips",
       "days_other": "Days on trips",
       "districts": "Districts"
@@ -1999,7 +2059,7 @@
       "comingUpPin": "{{place}}: coming up"
     },
     "legend": {
-      "trip": "Ghurify trip",
+      "trip": "GhuriFiri trip",
       "added": "Added by you",
       "upcoming": "Coming up",
       "district": "Visited district"
@@ -2027,11 +2087,11 @@
     },
     "sharing": {
       "title": "Show on my public profile",
-      "body": "Others see only the Ghurify destinations and when you went. Places you added yourself, your notes and trips to come stay private.",
+      "body": "Others see only the GhuriFiri destinations and when you went. Places you added yourself, your notes and trips to come stay private.",
       "see": "See how it looks"
     },
     "source": {
-      "Trip": "Ghurify trip",
+      "Trip": "GhuriFiri trip",
       "Added": "Added by you"
     },
     "details": {
@@ -2061,7 +2121,7 @@
     "add": {
       "title": "Add a place you have been",
       "which": "Where was it?",
-      "destination": "A Ghurify destination",
+      "destination": "A GhuriFiri destination",
       "elsewhere": "Somewhere else",
       "destinationLabel": "Destination",
       "choose": "Choose...",
@@ -2076,6 +2136,12 @@
       "note": "A note (optional)",
       "noteHint": "Only you see it.",
       "save": "Add to my map",
+      "added": "{{place}} is on your map.",
+      "addedWithPhotos_one": "{{place}} is on your map. Your photo is being checked and will appear in a moment.",
+      "addedWithPhotos_other": "{{place}} is on your map. Your {{n}} photos are being checked and will appear in a moment.",
+      "added": "{{place}} is on your map.",
+      "addedWithPhotos_one": "{{place}} is on your map. Your photo is being checked and will appear in a moment.",
+      "addedWithPhotos_other": "{{place}} is on your map. Your {{n}} photos are being checked and will appear in a moment.",
       "errors": {
         "destination": "Choose a destination.",
         "name": "Name the place, in 2 to 120 characters.",
@@ -2091,8 +2157,8 @@
     },
     "public": {
       "title": "Where {{name}} has been",
-      "summary_one": "{{places}} place · {{divisions}} of 8 divisions · {{trips}} Ghurify trips",
-      "summary_other": "{{places}} places · {{divisions}} of 8 divisions · {{trips}} Ghurify trips",
+      "summary_one": "{{places}} place · {{divisions}} of 8 divisions · {{trips}} GhuriFiri trips",
+      "summary_other": "{{places}} places · {{divisions}} of 8 divisions · {{trips}} GhuriFiri trips",
       "places": "Places visited",
       "hosted": "as host"
     },

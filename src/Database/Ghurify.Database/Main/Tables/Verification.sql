@@ -29,9 +29,9 @@ CREATE TABLE [Main].[Verification]
     CONSTRAINT [PK_Verification] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Verification_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Verification_User_ReviewedById] FOREIGN KEY ([ReviewedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_Verification_Level] CHECK ([Level] BETWEEN 1 AND 3),
-    CONSTRAINT [CK_Verification_Status] CHECK ([Status] BETWEEN 1 AND 3),
-    CONSTRAINT [CK_Verification_IdType] CHECK ([IdType] BETWEEN 1 AND 3),
+    CONSTRAINT [CK_Verification_Level] CHECK ([Level] >= 1 AND [Level] <= 3),
+    CONSTRAINT [CK_Verification_Status] CHECK ([Status] >= 1 AND [Status] <= 3),
+    CONSTRAINT [CK_Verification_IdType] CHECK ([IdType] >= 1 AND [IdType] <= 3),
     -- NID checks always carry the hash; a phone check never does.
     CONSTRAINT [CK_Verification_NidHash] CHECK (([Level] = 1 AND [NidHash] IS NULL)
                                                 OR ([Level] >= 2 AND [NidHash] IS NOT NULL))

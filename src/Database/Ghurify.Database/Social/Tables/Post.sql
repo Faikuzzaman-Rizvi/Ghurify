@@ -21,7 +21,7 @@ CREATE TABLE [Social].[Post]
     CONSTRAINT [FK_Post_User_AuthorId] FOREIGN KEY ([AuthorId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Post_Destination] FOREIGN KEY ([DestinationId]) REFERENCES [Main].[Destination] ([Id]),
     CONSTRAINT [FK_Post_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
-    CONSTRAINT [CK_Post_Status] CHECK ([Status] BETWEEN 1 AND 2)
+    CONSTRAINT [CK_Post_Status] CHECK ([Status] >= 1 AND [Status] <= 2)
 );
 GO
 

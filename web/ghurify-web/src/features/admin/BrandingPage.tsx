@@ -6,6 +6,7 @@ import { errorText } from '@/lib/errors';
 import { SettingField } from './SettingField';
 import { SiteAssetField } from './SiteAssetField';
 import { useSettingsForm } from './useSettingsForm';
+import { AdminPageHeader } from './AdminUi';
 
 /** The groups this screen owns: the words the site says about itself, and how to reach it. */
 const groups = ['Identity', 'Contact', 'Social'] as const;
@@ -47,12 +48,11 @@ export function BrandingPage() {
         form.submit();
       }}
     >
-      <header>
-        <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-          {t('admin.branding.title')}
-        </h2>
-        <p className="mt-1 max-w-2xl text-sm text-deep/70">{t('admin.branding.lead')}</p>
-      </header>
+      <AdminPageHeader
+        eyebrow={t('admin.groups.site')}
+        title={t('admin.branding.title')}
+        description={t('admin.branding.lead')}
+      />
 
       {readOnly && (
         <p className="rounded-xl bg-turmeric/10 px-4 py-3 text-sm font-medium text-ochre">

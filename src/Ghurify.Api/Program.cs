@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -18,6 +19,8 @@ using Ghurify.Infrastructure.Logging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -79,6 +82,32 @@ try
         options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     builder.Services.AddOpenApi();
+
+    // --- Compression: JSON is highly compressible and most travellers are on mobile data ---
+    // Brotli first (smaller), gzip for anything that cannot take it. Fastest rather than
+    // Optimal: on a payload of a few hundred kilobytes Optimal costs more CPU time than the
+    // saved bytes cost on the wire, and this also serves the built web app's assets.
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<BrotliCompressionProvider>();
+        options.Providers.Add<GzipCompressionProvider>();
+        options.MimeTypes =
+        [
+            .. ResponseCompressionDefaults.MimeTypes,
+            "application/json",
+            "application/problem+json",
+            "image/svg+xml",
+            "application/manifest+json",
+        ];
+    });
+    builder.Services.Configure<BrotliCompressionProviderOptions>(
+        options => options.Level = CompressionLevel.Fastest);
+    builder.Services.Configure<GzipCompressionProviderOptions>(
+        options => options.Level = CompressionLevel.Fastest);
+
+    // --- Output cache: the public lists, which are the same for every visitor. See CachePolicies. ---
+    builder.Services.AddOutputCache(options => options.AddGhurifyPolicies());
 
     // --- Authentication: bearer tokens issued by the email-OTP sign-in ---
     var identityOptions = builder.Configuration
@@ -271,8 +300,17 @@ try
 
     WarnIfSignInCodesWillNotBeDelivered(app);
 
+    // Outermost, so every response below it (API JSON, ProblemDetails and the built web app's
+    // assets alike) leaves compressed.
+    app.UseResponseCompression();
+
     app.UseSecurityHeaders();
     app.UseExceptionHandler();
+
+    // --- Optionally, the built web app from this same origin (LAN and tunnel hosting) ---
+    // Before routing, which is what the static-file middleware needs: see WebAppHosting.
+    // Null, and nothing is served, unless Hosting:ServeWebApp is on. Off when deployed.
+    var webAppFiles = WebAppHosting.UseBuiltWebApp(app);
     app.UseStatusCodePages();
     app.UseSerilogRequestLogging();
 
@@ -293,6 +331,12 @@ try
     }
 
     app.UseCors(CorsOptions.PolicyName);
+
+    // After CORS (so a cached body is never replayed with another origin's headers) and before
+    // authentication, which is what the policy wants: it only ever caches requests that carry no
+    // credentials at all, so there is nothing for authentication to tell it.
+    app.UseOutputCache();
+
     app.UseAuthentication();
 
     // After authentication, so the limits can be per user: before it, every request looks
@@ -323,6 +367,9 @@ try
     app.MapHub<NotificationHub>(NotificationHub.Path);
     app.MapHub<ChatHub>(ChatHub.Path);
     app.MapHub<SafetyHub>(SafetyHub.Path);
+
+    // Last, so the catch-all only ever answers paths the API endpoints above did not claim.
+    WebAppHosting.MapWebAppFallback(app, webAppFiles);
 
     await app.RunAsync();
     return 0;

@@ -27,8 +27,8 @@ CREATE TABLE [Pay].[Payout]
     CONSTRAINT [FK_Payout_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [FK_Payout_User_HostId] FOREIGN KEY ([HostId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Payout_User_ApprovedById] FOREIGN KEY ([ApprovedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_Payout_Stage] CHECK ([Stage] BETWEEN 1 AND 2),
-    CONSTRAINT [CK_Payout_Status] CHECK ([Status] BETWEEN 1 AND 2),
+    CONSTRAINT [CK_Payout_Stage] CHECK ([Stage] >= 1 AND [Stage] <= 2),
+    CONSTRAINT [CK_Payout_Status] CHECK ([Status] >= 1 AND [Status] <= 2),
     CONSTRAINT [CK_Payout_Amounts] CHECK ([Amount] >= 0 AND [PlatformAmount] >= 0)
 );
 GO

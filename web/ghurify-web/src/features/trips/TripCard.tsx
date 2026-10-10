@@ -39,9 +39,10 @@ export function TripCard({ trip }: { trip: TripSummary }) {
         <GroupBadge groupType={trip.groupType} />
       </div>
 
-      {/* The price tag, read bottom to top like a luggage label. */}
-      <p className="absolute right-4 top-0 flex rotate-180 items-center gap-2 rounded-t-md bg-turmeric px-2 py-3 font-display text-sm font-bold text-night shadow-md [writing-mode:vertical-rl]">
-        <span>{formatMoney(trip.pricePerPerson, language)}</span>
+      {/* The price tag, read bottom to top like a luggage label. Wide enough, and set large
+          enough, that four or five digits stay legible over the photo behind it. */}
+      <p className="absolute right-4 top-0 flex rotate-180 items-center justify-center gap-2 rounded-t-lg bg-turmeric px-2.5 py-4 font-display text-base font-bold leading-none tracking-wide text-night shadow-[0_6px_16px_rgba(15,42,31,0.35)] ring-1 ring-night/10 [writing-mode:vertical-rl]">
+        <span className="tabular-nums">{formatMoney(trip.pricePerPerson, language)}</span>
         <span className="sr-only">{t('trips.perPerson')}</span>
       </p>
 

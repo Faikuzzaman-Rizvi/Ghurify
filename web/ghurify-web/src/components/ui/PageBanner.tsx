@@ -55,10 +55,10 @@ export function PageBanner({
       <div
         className={`container-page flex flex-wrap items-end justify-between gap-x-8 gap-y-6 ${
           compact
-            ? 'min-h-72 pb-24 pt-28 sm:min-h-80'
+            ? 'min-h-60 pb-20 pt-26 sm:min-h-68'
             : tall
               ? 'min-h-120 pb-16 pt-32 sm:min-h-144'
-              : 'min-h-88 pb-12 pt-32 sm:min-h-104'
+              : 'min-h-80 pb-12 pt-30 sm:min-h-96'
         }`}
       >
         <div className="max-w-3xl animate-rise">

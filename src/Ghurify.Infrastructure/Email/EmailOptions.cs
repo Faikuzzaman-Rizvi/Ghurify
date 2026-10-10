@@ -43,7 +43,7 @@ public sealed class EmailOptions
     /// <summary>Defaults to <see cref="UserName"/>; Gmail rejects a mismatched From anyway.</summary>
     public string FromAddress { get; set; } = string.Empty;
 
-    public string FromName { get; set; } = "Ghurify";
+    public string FromName { get; set; } = "GhuriFiri";
 
     /// <summary>Seconds to wait on the SMTP server before giving up.</summary>
     [Range(1, 120)]

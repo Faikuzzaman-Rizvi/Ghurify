@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { AdminDashboardPage } from './AdminDashboardPage';
@@ -129,8 +129,11 @@ describe('Admin safety pages', () => {
 
     renderScreen(<DestinationAlertsPage />);
 
-    const change = await screen.findAllByRole('button', { name: 'Change status' });
-    await user.click(change[0]!);
+    // Closed and caution places sort first, so pick Sajek's card by its name.
+    const sajek = (await screen.findByRole('heading', { name: 'Sajek Valley' })).closest(
+      'article',
+    )!;
+    await user.click(within(sajek).getByRole('button', { name: 'Change status' }));
     await user.click(screen.getByLabelText('Closed'));
 
     const save = screen.getByRole('button', { name: 'Save' });

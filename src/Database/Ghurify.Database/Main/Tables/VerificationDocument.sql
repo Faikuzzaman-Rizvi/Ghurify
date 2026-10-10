@@ -36,8 +36,8 @@ CREATE TABLE [Main].[VerificationDocument]
     CONSTRAINT [PK_VerificationDocument] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_VerificationDocument_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_VerificationDocument_Verification] FOREIGN KEY ([VerificationId]) REFERENCES [Main].[Verification] ([Id]),
-    CONSTRAINT [CK_VerificationDocument_Kind] CHECK ([Kind] BETWEEN 1 AND 7),
-    CONSTRAINT [CK_VerificationDocument_Status] CHECK ([Status] BETWEEN 1 AND 4)
+    CONSTRAINT [CK_VerificationDocument_Kind] CHECK ([Kind] >= 1 AND [Kind] <= 7),
+    CONSTRAINT [CK_VerificationDocument_Status] CHECK ([Status] >= 1 AND [Status] <= 4)
 );
 GO
 

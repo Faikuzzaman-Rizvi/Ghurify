@@ -27,7 +27,7 @@ CREATE TABLE [Main].[StaffRole]
     [UpdatedId]     BIGINT          NULL,
 
     CONSTRAINT [PK_StaffRole] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [CK_StaffRole_Key] CHECK ([Key] NOT LIKE '%[^a-z0-9-]%' COLLATE Latin1_General_CS_AS
+    CONSTRAINT [CK_StaffRole_Key] CHECK (NOT [Key] LIKE '%[^a-z0-9-]%' COLLATE Latin1_General_CS_AS
                                          AND LEN([Key]) > 0),
     -- The super-admin role is a system role by definition: nothing may delete it.
     CONSTRAINT [CK_StaffRole_SuperAdminIsSystem] CHECK ([IsSuperAdmin] = 0 OR [IsSystem] = 1)

@@ -339,7 +339,11 @@ function FilterPanel({
           </button>
         </div>
 
-        <div className="flex flex-col gap-6 overflow-y-auto p-5">{children}</div>
+        {/* The sheet scrolls on a phone; the sidebar must not, or it clips the destination
+            list as it opens. */}
+        <div className="flex flex-col gap-6 overflow-y-auto p-5 lg:overflow-visible">
+          {children}
+        </div>
 
         <div className="border-t border-hill/10 p-4 lg:hidden">
           <button

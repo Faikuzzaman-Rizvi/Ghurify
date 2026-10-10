@@ -30,14 +30,14 @@ describe('GuidedTour', () => {
 
     act(() => useTourStore.getState().start());
 
-    expect(screen.getByRole('dialog', { name: 'Welcome to Ghurify' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Welcome to GhuriFiri' })).toBeInTheDocument();
     expect(screen.getByText(/Step 1 of 7/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByRole('dialog', { name: 'Search for a trip' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByRole('dialog', { name: 'Welcome to Ghurify' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Welcome to GhuriFiri' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Skip tour' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -60,6 +60,6 @@ describe('GuidedTour', () => {
 
     act(() => useTourStore.getState().start());
 
-    expect(screen.getByRole('dialog', { name: 'ঘুরিফাইতে স্বাগতম' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'ঘুরিফিরিতে স্বাগতম' })).toBeInTheDocument();
   });
 });

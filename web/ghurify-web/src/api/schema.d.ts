@@ -2191,6 +2191,8 @@ export interface components {
             created: string;
             verifiedLevel: null | components["schemas"]["VerificationLevel"];
             roles: components["schemas"]["Role"][];
+            /** Format: int64 */
+            avatarVersion: null | number | string;
         };
         AdminUserPage: {
             items: components["schemas"]["AdminUserItem"][];

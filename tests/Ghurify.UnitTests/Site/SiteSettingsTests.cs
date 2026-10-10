@@ -234,7 +234,7 @@ public sealed class SiteSettingsTests
     {
         var values = SiteConfigService.Effective(new Dictionary<string, string>());
 
-        Assert.Equal("Ghurify", values[SiteSettingKeys.Name]);
+        Assert.Equal("GhuriFiri", values[SiteSettingKeys.Name]);
         Assert.Equal("#245c43", values[SiteSettingKeys.ColourHill]);
         Assert.Equal(SiteSettingsCatalog.All.Count, values.Count);
     }
@@ -261,7 +261,7 @@ public sealed class SiteSettingsTests
             [SiteSettingKeys.Name] = string.Empty,
         });
 
-        Assert.Equal("Ghurify", values[SiteSettingKeys.Name]);
+        Assert.Equal("GhuriFiri", values[SiteSettingKeys.Name]);
     }
 
     [Fact]

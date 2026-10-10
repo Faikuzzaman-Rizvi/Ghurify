@@ -23,7 +23,7 @@ CREATE TABLE [Social].[ChatMessage]
     CONSTRAINT [PK_ChatMessage] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_ChatMessage_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [FK_ChatMessage_User_SenderId] FOREIGN KEY ([SenderId]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_ChatMessage_Kind] CHECK ([Kind] BETWEEN 1 AND 3),
+    CONSTRAINT [CK_ChatMessage_Kind] CHECK ([Kind] >= 1 AND [Kind] <= 3),
     CONSTRAINT [CK_ChatMessage_Body] CHECK (LEN([Body]) > 0)
 );
 GO

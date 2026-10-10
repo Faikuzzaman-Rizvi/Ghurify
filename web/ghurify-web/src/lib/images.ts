@@ -59,5 +59,26 @@ export async function prepareImage(
   return new File([blob], name, { type: 'image/jpeg' });
 }
 
-/** The image types the API accepts. */
+/** The image types the API accepts. Mirrors UploadRules.ImageTypes on the server. */
 export const acceptedImageTypes = 'image/jpeg,image/png,image/webp';
+
+/** Mirrors UploadRules.MaxAvatarBytes. */
+export const maxAvatarBytes = 3 * 1024 * 1024;
+
+/** Mirrors MediaOptions.MaxImageMegabytes, the shipped default. */
+export const maxPhotoBytes = 10 * 1024 * 1024;
+
+/**
+ * Why a chosen file cannot be uploaded, as the same code the API would answer with, or null
+ * when it is fine. Checking here means the reader is told what is wrong with their file —
+ * the format, the size — instead of watching a request fail with nothing to act on. Run it on
+ * the prepared photo, not the original: a large camera photo is small again by then.
+ */
+export function imageProblem(
+  file: File,
+  maxBytes: number,
+): 'media_type' | 'media_too_large' | null {
+  if (!acceptedImageTypes.split(',').includes(file.type)) return 'media_type';
+  if (file.size <= 0 || file.size > maxBytes) return 'media_too_large';
+  return null;
+}

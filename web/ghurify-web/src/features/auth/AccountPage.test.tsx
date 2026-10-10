@@ -54,6 +54,30 @@ describe('AccountPage', () => {
     expect(screen.getByRole('button', { name: 'Become a host' })).toBeInTheDocument();
   });
 
+  it('names why a profile picture was refused, rather than blaming the connection', async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubApi([
+      [/\/api\/v1\/me\/profile$/, profile],
+      [/\/api\/v1\/me\/verification$/, []],
+    ]);
+
+    const { container } = renderScreen(<AccountPage />);
+    await screen.findByRole('heading', { level: 1, name: 'Nusrat Jahan' });
+
+    const picker = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    // Over the 3 MB the API allows for a profile picture.
+    const tooBig = new File([new Uint8Array(3.5 * 1024 * 1024)], 'holiday.jpg', {
+      type: 'image/jpeg',
+    });
+    await user.upload(picker, tooBig);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'That photo is too large. Choose a smaller one.',
+    );
+    // Nothing was sent: the file could never have been accepted.
+    expect(requests(fetchMock).some((request) => request.url.includes('/me/avatar'))).toBe(false);
+  });
+
   it('refuses a phone number that is not a Bangladeshi mobile before calling the API', async () => {
     const user = userEvent.setup();
     const fetchMock = stubApi([

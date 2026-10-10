@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
@@ -422,6 +422,7 @@ function ProfileFormCard({ profile }: { profile: Profile }) {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<ProfileForm>({
@@ -475,20 +476,28 @@ function ProfileFormCard({ profile }: { profile: Profile }) {
             error={fieldError(errors.displayName?.message)}
             {...register('displayName')}
           />
-          <SelectField
-            id="gender"
-            label={t('profile.gender')}
-            disabled={genderLocked}
-            hint={genderLocked ? t('profile.genderLocked') : t('profile.genderHint')}
-            {...register('gender')}
-          >
-            <option value="">{t('profile.genderUnset')}</option>
-            {genders.map((gender) => (
-              <option key={gender} value={gender ?? ''}>
-                {t(`gender.${gender}`)}
-              </option>
-            ))}
-          </SelectField>
+          <Controller
+            control={control}
+            name="gender"
+            render={({ field }) => (
+              <SelectField
+                id="gender"
+                label={t('profile.gender')}
+                disabled={genderLocked}
+                hint={genderLocked ? t('profile.genderLocked') : t('profile.genderHint')}
+                value={field.value}
+                onChange={(event) => field.onChange(event.target.value)}
+                onBlur={field.onBlur}
+              >
+                <option value="">{t('profile.genderUnset')}</option>
+                {genders.map((gender) => (
+                  <option key={gender} value={gender ?? ''}>
+                    {t(`gender.${gender}`)}
+                  </option>
+                ))}
+              </SelectField>
+            )}
+          />
           <TextField
             id="phone"
             type="tel"

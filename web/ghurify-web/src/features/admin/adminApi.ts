@@ -103,8 +103,6 @@ export const adminApi = {
 
   approvePayout: (id: number) => apiPost<void>(`/api/v1/admin/payouts/${id}/approve`),
 
-  audit: (signal?: AbortSignal) => apiGet<AuditEntry[]>('/api/v1/admin/audit', withSignal(signal)),
-
   users: (search: string, status: UserStatus | '', page: number, signal?: AbortSignal) =>
     apiGet<AdminUserPage>(
       `/api/v1/admin/users?search=${encodeURIComponent(search)}&page=${page}${status ? `&status=${status}` : ''}`,

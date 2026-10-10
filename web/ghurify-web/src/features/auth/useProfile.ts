@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiError } from '@/api/client';
 import { useAuthStore } from './authStore';
 import { uploadToStorage } from '@/features/feed/feedApi';
-import { prepareImage } from '@/lib/images';
+import { imageProblem, maxAvatarBytes, maxPhotoBytes, prepareImage } from '@/lib/images';
 import {
   profileApi,
   type StartVerificationRequest,
@@ -12,6 +13,18 @@ import {
 /** The user id is in every key, so one person's profile is never served to the next. */
 function useUserKey(): number | 'anonymous' {
   return useAuthStore((state) => state.user?.id ?? 'anonymous');
+}
+
+/**
+ * Refuses a photo the API would refuse anyway, with the API's own code, before anything is
+ * sent. The screen then names the real reason — the wrong format, too large a file — rather
+ * than reporting a failed request.
+ */
+function rejectUnusable(photo: File, maxBytes: number): void {
+  const problem = imageProblem(photo, maxBytes);
+  if (problem) {
+    throw new ApiError('The photo cannot be uploaded', 400, undefined, problem);
+  }
 }
 
 export function useMyProfile() {
@@ -98,6 +111,7 @@ export function useUploadDocument() {
       onProgress?: (fraction: number) => void;
     }) => {
       const photo = await prepareImage(file, { maxSide: 2000 });
+      rejectUnusable(photo, maxPhotoBytes);
       const ticket = await profileApi.startDocumentUpload(kind, photo.type, photo.size);
       await uploadToStorage(ticket.uploadUrl, photo, onProgress ?? (() => undefined));
       return profileApi.completeDocumentUpload(Number(ticket.id));
@@ -124,6 +138,7 @@ export function useUploadAvatar() {
   return useMutation({
     mutationFn: async (file: File) => {
       const photo = await prepareImage(file, { maxSide: 512, square: true });
+      rejectUnusable(photo, maxAvatarBytes);
       const ticket = await profileApi.startAvatarUpload(photo.type, photo.size);
       await uploadToStorage(ticket.uploadUrl, photo, () => undefined);
       await profileApi.completeAvatarUpload(ticket.id);

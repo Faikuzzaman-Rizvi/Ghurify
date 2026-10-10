@@ -31,8 +31,8 @@ CREATE TABLE [Main].[Visit]
     CONSTRAINT [FK_Visit_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Visit_Destination] FOREIGN KEY ([DestinationId]) REFERENCES [Main].[Destination] ([Id]),
     CONSTRAINT [FK_Visit_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
-    CONSTRAINT [CK_Visit_Source] CHECK ([Source] BETWEEN 1 AND 2),
-    CONSTRAINT [CK_Visit_Division] CHECK ([Division] IS NULL OR [Division] BETWEEN 1 AND 8),
+    CONSTRAINT [CK_Visit_Source] CHECK ([Source] >= 1 AND [Source] <= 2),
+    CONSTRAINT [CK_Visit_Division] CHECK ([Division] IS NULL OR [Division] >= 1 AND [Division] <= 8),
     -- Either a Ghurify destination, or a named place with its own point and division.
     CONSTRAINT [CK_Visit_Place] CHECK ([DestinationId] IS NOT NULL
                                        OR ([PlaceName] IS NOT NULL AND [Location] IS NOT NULL AND [Division] IS NOT NULL)),

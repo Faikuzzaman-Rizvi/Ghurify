@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { Crown, Lock, Pencil, Plus, ShieldCheck, Trash2, Users } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
-import { cardClass, inputClass, primaryButtonClass, secondaryButtonClass } from '@/components/Field';
+import {
+  cardClass,
+  inputClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from '@/components/Field';
 import { Dialog } from '@/components/Dialog';
 import { EmptyState, ErrorState } from '@/components/States';
 import { errorText } from '@/lib/errors';
@@ -17,6 +22,7 @@ import {
 } from './adminApi';
 import { permissionLabel, permissionGroupLabel } from './adminLabels';
 import { useStepUp } from './useStepUp';
+import { AdminPageHeader } from './AdminUi';
 
 /**
  * The roles screen: what each job on the admin desk may do, and how to invent a new one.
@@ -47,19 +53,18 @@ export function StaffRolesPage() {
   });
 
   return (
-    <div className="flex flex-col gap-5">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-            {t('admin.roles.title')}
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-deep/70">{t('admin.roles.lead')}</p>
-        </div>
-        <button type="button" onClick={() => setEditing('new')} className={primaryButtonClass}>
-          <Plus aria-hidden="true" className="h-4 w-4" />
-          {t('admin.roles.create')}
-        </button>
-      </header>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow={t('admin.groups.system')}
+        title={t('admin.roles.title')}
+        description={t('admin.roles.lead')}
+        actions={
+          <button type="button" onClick={() => setEditing('new')} className={primaryButtonClass}>
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            {t('admin.roles.create')}
+          </button>
+        }
+      />
 
       {roles.isPending && (
         <div role="status" className="h-64 animate-pulse rounded-2xl bg-hill/10">
@@ -251,7 +256,9 @@ function RoleEditor({
 
   const save = useMutation({
     mutationFn: (command: SaveStaffRoleCommand) =>
-      role ? adminApi.updateStaffRole(asNumber(role.id), command) : adminApi.createStaffRole(command),
+      role
+        ? adminApi.updateStaffRole(asNumber(role.id), command)
+        : adminApi.createStaffRole(command),
     onSuccess: onSaved,
   });
 
@@ -376,9 +383,7 @@ function RoleEditor({
                                 </span>
                               )}
                               {!allowed && (
-                                <span className="ml-1.5 text-xs">
-                                  {t('admin.roles.notYours')}
-                                </span>
+                                <span className="ml-1.5 text-xs">{t('admin.roles.notYours')}</span>
                               )}
                             </span>
                           </label>

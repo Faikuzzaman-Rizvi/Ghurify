@@ -18,7 +18,7 @@ CREATE TABLE [Main].[UserRole]
     CONSTRAINT [PK_UserRole] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_UserRole_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_UserRole_User_GrantedById] FOREIGN KEY ([GrantedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_UserRole_Role] CHECK ([Role] BETWEEN 2 AND 10)
+    CONSTRAINT [CK_UserRole_Role] CHECK ([Role] >= 2 AND [Role] <= 10)
 );
 GO
 

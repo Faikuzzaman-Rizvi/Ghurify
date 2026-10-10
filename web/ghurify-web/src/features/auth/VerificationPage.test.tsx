@@ -6,6 +6,7 @@ import { VerificationPage } from './VerificationPage';
 import { useAuthStore } from './authStore';
 import i18n from '@/i18n';
 import { renderScreen } from '@/test/render';
+import { chooseOption } from '@/test/chooseOption';
 import { requests, stubApi, stubResponse } from '@/test/fetchStub';
 
 // The browser upload goes straight to storage (XHR) and the canvas resize needs a real browser;
@@ -14,6 +15,9 @@ vi.mock('@/features/feed/feedApi', () => ({ uploadToStorage: vi.fn(() => Promise
 vi.mock('@/lib/images', () => ({
   prepareImage: (file: File) => Promise.resolve(file),
   acceptedImageTypes: 'image/jpeg,image/png,image/webp',
+  maxAvatarBytes: 3 * 1024 * 1024,
+  maxPhotoBytes: 10 * 1024 * 1024,
+  imageProblem: () => null,
 }));
 
 const profile = {
@@ -119,6 +123,34 @@ describe('VerificationPage', () => {
     expect(requests(fetchMock).some((request) => request.method === 'POST')).toBe(false);
   });
 
+  it('keeps letters out of the national ID number', async () => {
+    const user = userEvent.setup();
+    stubApi([
+      [/\/api\/v1\/me\/profile$/, profile],
+      [/\/api\/v1\/me\/verification\/documents$/, []],
+    ]);
+
+    renderScreen(<VerificationPage />);
+    const field = await screen.findByLabelText('National ID number');
+    await user.type(field, '12wert34');
+
+    expect(field).toHaveValue('1234');
+  });
+
+  it('turns the form off until the profile has a name and a gender', async () => {
+    stubApi([
+      [/\/api\/v1\/me\/profile$/, { ...profile, displayName: null, gender: null }],
+      [/\/api\/v1\/me\/verification\/documents$/, []],
+    ]);
+
+    renderScreen(<VerificationPage />);
+
+    expect(await screen.findByText(/Add your full name and gender first/)).toBeInTheDocument();
+    expect(screen.getByLabelText('National ID number')).toBeDisabled();
+    expect(screen.getByLabelText('Which document will you show?')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Check my ID' })).toBeDisabled();
+  });
+
   it('asks for the passport photo page instead when a passport is chosen', async () => {
     const user = userEvent.setup();
     stubApi([
@@ -127,7 +159,11 @@ describe('VerificationPage', () => {
     ]);
 
     renderScreen(<VerificationPage />);
-    await user.selectOptions(await screen.findByLabelText('ID document'), 'Passport');
+    await chooseOption(
+      user,
+      await screen.findByLabelText('Which document will you show?'),
+      'Passport',
+    );
 
     expect(screen.getByLabelText('Passport number')).toBeInTheDocument();
     expect(screen.getByText('Passport photo page')).toBeInTheDocument();

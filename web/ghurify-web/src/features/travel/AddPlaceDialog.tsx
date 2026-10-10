@@ -14,9 +14,10 @@ import {
   TextAreaField,
   TextField,
 } from '@/components/Field';
+import { showToast } from '@/components/ui/toastStore';
 import { useDestinations } from '@/features/trips/useTrips';
 import { errorText } from '@/lib/errors';
-import { toLanguage, todayInDhaka } from '@/lib/format';
+import { formatCount, toLanguage, todayInDhaka } from '@/lib/format';
 import { toLatLng } from '@/components/ui/mapProjection';
 import { districtAt, districtBySlug } from './districts';
 import { PhotoPicker } from './PhotoPicker';
@@ -117,6 +118,14 @@ export function AddPlaceDialog({
   const pinDistrict = point ? districtAt(point[0], point[1]) : null;
   const message = (key: string | undefined) => (key ? t(`travel.add.errors.${key}`) : undefined);
 
+  /** What the place is called, for the confirmation: the destination's name, or the typed one. */
+  function chosenName(form: PlaceForm): string {
+    if (form.mode === 'pin') return form.placeName.trim();
+    const destination = (destinations ?? []).find((item) => item.slug === form.destinationSlug);
+    if (!destination) return '';
+    return language === 'bn' ? destination.nameBn : destination.name;
+  }
+
   const submit = handleSubmit((form) => {
     setSubmitted(true);
     // The photos are already uploaded: they go with the place by id, all or nothing.
@@ -143,7 +152,23 @@ export function AddPlaceDialog({
             note: form.note.trim() || null,
             ...withPhotos,
           },
-      { onSuccess: (created) => onAdded(Number(created.id)) },
+      {
+        onSuccess: (created) => {
+          // Say what happened, and say it only once the server has stored it: the map behind
+          // the dialog may not have the new pin in view.
+          const place = chosenName(form);
+          showToast(
+            photos.mediaIds.length > 0
+              ? t('travel.add.addedWithPhotos', {
+                  place,
+                  count: photos.mediaIds.length,
+                  n: formatCount(photos.mediaIds.length, language),
+                })
+              : t('travel.add.added', { place }),
+          );
+          onAdded(Number(created.id));
+        },
+      },
     );
   });
 
@@ -171,19 +196,28 @@ export function AddPlaceDialog({
         </fieldset>
 
         {mode === 'destination' ? (
-          <SelectField
-            id="visit-destination"
-            label={t('travel.add.destinationLabel')}
-            error={message(errors.destinationSlug?.message)}
-            {...register('destinationSlug')}
-          >
-            <option value="">{t('travel.add.choose')}</option>
-            {(destinations ?? []).map((item) => (
-              <option key={item.slug} value={item.slug}>
-                {language === 'bn' ? item.nameBn : item.name}
-              </option>
-            ))}
-          </SelectField>
+          <Controller
+            control={control}
+            name="destinationSlug"
+            render={({ field }) => (
+              <SelectField
+                id="visit-destination"
+                placeholder
+                label={t('travel.add.destinationLabel')}
+                error={message(errors.destinationSlug?.message)}
+                value={field.value}
+                onChange={(event) => field.onChange(event.target.value)}
+                onBlur={field.onBlur}
+              >
+                <option value="">{t('travel.add.choose')}</option>
+                {(destinations ?? []).map((item) => (
+                  <option key={item.slug} value={item.slug}>
+                    {language === 'bn' ? item.nameBn : item.name}
+                  </option>
+                ))}
+              </SelectField>
+            )}
+          />
         ) : (
           <>
             <TextField
@@ -194,19 +228,29 @@ export function AddPlaceDialog({
               error={message(errors.placeName?.message)}
               {...register('placeName')}
             />
-            <SelectField
-              id="visit-division"
-              label={t('travel.add.division')}
-              error={message(errors.division?.message)}
-              {...register('division')}
-            >
-              <option value="">{t('travel.add.choose')}</option>
-              {divisions.map((division) => (
-                <option key={division} value={division}>
-                  {t(`division.${division}`)}
-                </option>
-              ))}
-            </SelectField>
+            {/* Controlled, so a pin dropped on the map shows its division here at once. */}
+            <Controller
+              control={control}
+              name="division"
+              render={({ field }) => (
+                <SelectField
+                  id="visit-division"
+                  placeholder
+                  label={t('travel.add.division')}
+                  error={message(errors.division?.message)}
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  <option value="">{t('travel.add.choose')}</option>
+                  {divisions.map((division) => (
+                    <option key={division} value={division}>
+                      {t(`division.${division}`)}
+                    </option>
+                  ))}
+                </SelectField>
+              )}
+            />
             <div className="flex flex-col gap-1.5">
               <p className="text-sm font-semibold text-deep">{t('travel.add.pin')}</p>
               <PinPicker

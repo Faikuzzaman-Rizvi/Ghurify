@@ -59,9 +59,27 @@ export const feedApi = {
 };
 
 /**
+ * Why an upload straight to storage failed, as a code the screen has a translation for. The
+ * status tells them apart: storage answered and refused (the link ran out, the file is bigger
+ * than the link allows), or it never answered at all. Guessing "check your connection" at a
+ * 403 sends people to look at the wrong thing.
+ */
+function uploadFailure(status: number): ApiError {
+  const code =
+    status === 0
+      ? 'upload_offline'
+      : status === 403 || status === 401
+        ? 'upload_link_expired'
+        : status === 413
+          ? 'media_too_large'
+          : 'upload_rejected';
+  return new ApiError(`Upload failed (${status || 'no answer'})`, status, undefined, code);
+}
+
+/**
  * Uploads a file straight to storage with the link the API gave, reporting progress. A plain XHR,
- * because fetch cannot report upload progress. A failure is an ApiError with code upload_failed,
- * so the screen can say the photo did not get through rather than something vaguer.
+ * because fetch cannot report upload progress. A failure is an ApiError carrying why, so the
+ * screen can name the reason rather than say something vaguer.
  */
 export function uploadToStorage(
   url: string,
@@ -76,11 +94,13 @@ export function uploadToStorage(
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(event.loaded / event.total);
     };
-    const failed = () => new ApiError('Upload failed', request.status, undefined, 'upload_failed');
     request.onload = () =>
-      request.status >= 200 && request.status < 300 ? resolve() : reject(failed());
+      request.status >= 200 && request.status < 300
+        ? resolve()
+        : reject(uploadFailure(request.status));
     // No answer at all: offline, or storage cannot be reached from this network.
-    request.onerror = () => reject(failed());
+    request.onerror = () => reject(uploadFailure(0));
+    request.ontimeout = () => reject(uploadFailure(0));
     request.send(file);
   });
 }

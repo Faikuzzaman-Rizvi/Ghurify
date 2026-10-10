@@ -7,6 +7,7 @@ import { HostTripsPage } from './HostTripsPage';
 import i18n from '@/i18n';
 import { useAuthStore } from '@/features/auth/authStore';
 import { renderScreen } from '@/test/render';
+import { chooseOption } from '@/test/chooseOption';
 import { requests, sampleDestinations, stubApi } from '@/test/fetchStub';
 
 function hostProfile(verifiedLevel: string | null) {
@@ -73,8 +74,7 @@ describe('TripWizardPage', () => {
 
     renderScreen(<TripWizardPage />);
 
-    await screen.findByRole('option', { name: 'Sajek Valley' });
-    await user.selectOptions(screen.getByLabelText('Destination'), 'sajek');
+    await chooseOption(user, screen.getByLabelText('Destination'), 'sajek');
     await user.type(screen.getByLabelText('Trip title'), 'Sajek sunrise weekend');
     await user.type(
       screen.getByLabelText('What the trip is like'),

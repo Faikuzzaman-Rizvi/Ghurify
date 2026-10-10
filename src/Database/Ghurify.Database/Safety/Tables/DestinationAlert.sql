@@ -20,7 +20,7 @@ CREATE TABLE [Safety].[DestinationAlert]
     CONSTRAINT [PK_DestinationAlert] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_DestinationAlert_Destination] FOREIGN KEY ([DestinationId]) REFERENCES [Main].[Destination] ([Id]),
     CONSTRAINT [FK_DestinationAlert_User_CreatedById] FOREIGN KEY ([CreatedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_DestinationAlert_Status] CHECK ([Status] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_DestinationAlert_Status] CHECK ([Status] >= 1 AND [Status] <= 3)
 );
 GO
 

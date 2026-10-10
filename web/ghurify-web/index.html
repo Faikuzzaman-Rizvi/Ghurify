@@ -4,20 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#173F2E" />
+    <meta name="color-scheme" content="light" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="description"
-      content="Ghurify: find a trip, join a group and travel safely across Bangladesh."
+      content="GhuriFiri: find a trip, join a group and travel safely across Bangladesh."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      The default theme's fonts, and only those. This URL must stay character-for-character equal
+      to what FontChoices.StylesheetUrl builds for the default body and display families
+      (Barlow and Poppins); FontStylesheetTests fails the build if it drifts.
+
+      Equal matters because the theme is configurable: useAppliedSiteConfig injects the stylesheet
+      for whatever fonts are actually set, and on the default theme — the common case — that URL
+      is this one, so the browser serves it from cache instead of fetching a second stylesheet.
+      This file previously asked for a family the default theme does not use (Baloo Da 2) and an
+      extra Poppins weight, which put four unused font files on the critical path: the webfonts
+      were the slowest thing on the page, and the heading repaints when they land, so they set LCP.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@600;700;800&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Ghurify</title>
+    <title>GhuriFiri</title>
   </head>
   <body>
     <div id="root"></div>

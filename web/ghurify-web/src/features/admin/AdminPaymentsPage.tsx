@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
-import { Search } from 'lucide-react';
+import { Banknote, ChevronRight, Receipt, Undo2 } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
-import { cardClass, inputClass } from '@/components/Field';
+import { inputClass } from '@/components/Field';
 import { Select } from '@/components/ui/Select';
 import { EmptyState, ErrorState } from '@/components/States';
 import { PaymentMethod, PaymentStatusBadge } from '@/features/payments/PaymentParts';
 import { errorText } from '@/lib/errors';
 import { formatCount, formatDateTime, formatMoney, toLanguage } from '@/lib/format';
 import { adminApi, type PaymentStatus } from './adminApi';
+import { AdminPageHeader, AdminPager, AdminSearchBar, ListSkeleton, SummaryTiles } from './AdminUi';
+import { adminPanelClass, adminRowClass } from './adminStyles';
 
 const statuses: readonly (PaymentStatus | '')[] = [
   '',
@@ -25,6 +27,8 @@ const statuses: readonly (PaymentStatus | '')[] = [
 /**
  * Every payment on the platform, for support and disputes: find one by the reference a traveller
  * quotes, the gateway's id, their email or name, or the trip, and open it in full.
+ *
+ * A ledger, so a list: one row per payment, the amounts lined up on the right.
  */
 export function AdminPaymentsPage() {
   const { t, i18n } = useTranslation();
@@ -47,31 +51,25 @@ export function AdminPaymentsPage() {
   const totals = payments.data?.totals;
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-        {t('admin.payments.title')}
-      </h2>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow={t('admin.groups.operations')}
+        title={t('admin.payments.title')}
+        description={t('admin.payments.lead')}
+      />
 
-      <form
-        role="search"
-        className="flex flex-col gap-2 sm:flex-row"
-        onSubmit={(event) => {
-          event.preventDefault();
+      <AdminSearchBar
+        id="payment-search"
+        label={t('admin.payments.search')}
+        placeholder={t('admin.payments.searchHint')}
+        value={draft}
+        onChange={setDraft}
+        onSubmit={() => {
           setParams(draft.trim() ? { q: draft.trim() } : {});
           setPage(1);
         }}
+        submitLabel={t('admin.payments.search')}
       >
-        <label htmlFor="payment-search" className="sr-only">
-          {t('admin.payments.search')}
-        </label>
-        <input
-          id="payment-search"
-          type="search"
-          value={draft}
-          placeholder={t('admin.payments.searchHint')}
-          onChange={(event) => setDraft(event.target.value)}
-          className={`${inputClass} flex-1`}
-        />
         <label htmlFor="payment-status" className="sr-only">
           {t('admin.payments.status')}
         </label>
@@ -89,31 +87,44 @@ export function AdminPaymentsPage() {
           }))}
           buttonClassName={`${inputClass} cursor-pointer`}
         />
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-hill px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-deep"
-        >
-          <Search aria-hidden="true" className="h-4 w-4" />
-          {t('admin.payments.search')}
-        </button>
-      </form>
+      </AdminSearchBar>
 
       {totals && (
-        <p className="text-sm text-deep/70">
-          {t('admin.payments.totals', {
-            count: asNumber(totals.count),
-            formatted: formatCount(totals.count, language),
-            paid: money(totals.paid),
-            refunded: money(totals.refunded),
-          })}
-        </p>
+        <>
+          <SummaryTiles
+            items={[
+              {
+                label: t('admin.payments.stats.count'),
+                value: formatCount(totals.count, language),
+                icon: Receipt,
+              },
+              {
+                label: t('admin.payments.stats.paid'),
+                value: money(totals.paid),
+                icon: Banknote,
+                tone: 'good',
+              },
+              {
+                label: t('admin.payments.stats.refunded'),
+                value: money(totals.refunded),
+                icon: Undo2,
+                tone: 'info',
+              },
+            ]}
+          />
+          {/* The same figures as one sentence, for anyone reading the page top to bottom. */}
+          <p className="sr-only">
+            {t('admin.payments.totals', {
+              count: asNumber(totals.count),
+              formatted: formatCount(totals.count, language),
+              paid: money(totals.paid),
+              refunded: money(totals.refunded),
+            })}
+          </p>
+        </>
       )}
 
-      {payments.isPending && (
-        <div role="status" className="h-40 animate-pulse rounded-2xl bg-hill/10">
-          <span className="sr-only">{t('common.loading')}</span>
-        </div>
-      )}
+      {payments.isPending && <ListSkeleton />}
       {payments.isError && (
         <ErrorState
           message={errorText(payments.error, t)}
@@ -123,26 +134,32 @@ export function AdminPaymentsPage() {
       {payments.data?.items.length === 0 && <EmptyState title={t('admin.payments.empty')} />}
 
       {payments.data && payments.data.items.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className={adminPanelClass}>
           {payments.data.items.map((payment) => (
             <li
               key={String(payment.id)}
-              className={`${cardClass} flex flex-wrap items-center justify-between gap-3 p-4!`}
+              className={`${adminRowClass} flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 transition hover:bg-mist/50 sm:px-6`}
             >
-              <div className="min-w-0">
+              <span
+                aria-hidden="true"
+                className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mist text-hill sm:flex"
+              >
+                <Receipt className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-2">
                   <Link
                     to={`/admin/payments/${asNumber(payment.id)}`}
-                    className="font-semibold text-deep hover:underline"
+                    className="font-semibold text-deep underline-offset-4 hover:text-hill hover:underline"
                   >
                     #{asNumber(payment.id)} · {payment.tripTitle}
                   </Link>
                   <PaymentStatusBadge status={payment.status} />
                 </p>
-                <p className="text-sm text-deep/70">
+                <p className="mt-0.5 text-sm text-deep/65">
                   <Link
                     to={`/admin/users/${asNumber(payment.travellerId)}`}
-                    className="text-hill underline"
+                    className="font-medium text-hill underline-offset-4 hover:underline"
                   >
                     {payment.travellerName ?? t('admin.noName')}
                   </Link>{' '}
@@ -153,13 +170,13 @@ export function AdminPaymentsPage() {
                     last4={payment.accountLast4}
                   />
                 </p>
-                <p className="break-all font-mono text-xs text-deep/60">
+                <p className="mt-1 break-all font-mono text-xs text-deep/50">
                   {payment.transactionRef}
                   {payment.providerTxnId ? ` · ${payment.providerTxnId}` : ''}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="font-display text-lg font-bold text-hill">
+              <div className="ml-auto text-right">
+                <p className="font-display text-lg font-semibold text-deep">
                   {money(payment.paidAmount ?? payment.total)}
                 </p>
                 {asNumber(payment.refunded) > 0 && (
@@ -168,31 +185,20 @@ export function AdminPaymentsPage() {
                   </p>
                 )}
               </div>
+              <Link
+                to={`/admin/payments/${asNumber(payment.id)}`}
+                aria-hidden="true"
+                tabIndex={-1}
+                className="hidden text-deep/30 transition hover:text-hill sm:block"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Link>
             </li>
           ))}
         </ul>
       )}
 
-      {total > pageSize && (
-        <nav className="flex justify-between" aria-label={t('common.pagination')}>
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage((current) => current - 1)}
-            className="inline-flex items-center gap-1 rounded-full border border-hill/15 bg-white px-4 py-2 text-sm font-semibold text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-40"
-          >
-            ← {t('common.previous')}
-          </button>
-          <button
-            type="button"
-            disabled={page * pageSize >= total}
-            onClick={() => setPage((current) => current + 1)}
-            className="inline-flex items-center gap-1 rounded-full border border-hill/15 bg-white px-4 py-2 text-sm font-semibold text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-40"
-          >
-            {t('common.next')} →
-          </button>
-        </nav>
-      )}
+      <AdminPager page={page} pageSize={pageSize} total={total} onPage={setPage} />
     </div>
   );
 }

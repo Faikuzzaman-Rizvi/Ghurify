@@ -27,8 +27,8 @@ CREATE TABLE [Pay].[EscrowLedger]
     CONSTRAINT [PK_EscrowLedger] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_EscrowLedger_Booking] FOREIGN KEY ([BookingId]) REFERENCES [Pay].[Booking] ([Id]),
     CONSTRAINT [FK_EscrowLedger_Payment] FOREIGN KEY ([PaymentId]) REFERENCES [Pay].[Payment] ([Id]),
-    CONSTRAINT [CK_EscrowLedger_EntryType] CHECK ([EntryType] BETWEEN 1 AND 3),
-    CONSTRAINT [CK_EscrowLedger_Counterparty] CHECK ([Counterparty] BETWEEN 1 AND 3),
+    CONSTRAINT [CK_EscrowLedger_EntryType] CHECK ([EntryType] >= 1 AND [EntryType] <= 3),
+    CONSTRAINT [CK_EscrowLedger_Counterparty] CHECK ([Counterparty] >= 1 AND [Counterparty] <= 3),
     CONSTRAINT [CK_EscrowLedger_Amount] CHECK ([Amount] > 0)
 );
 GO

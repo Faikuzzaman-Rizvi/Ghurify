@@ -174,7 +174,7 @@ describe('the site configuration', () => {
 
     renderScreen(<Logo />);
 
-    // The header is never briefly blank: it reads Ghurify until the API answers.
-    expect(screen.getByText('Ghurify')).toBeInTheDocument();
+    // The header is never briefly blank: it reads GhuriFiri until the API answers.
+    expect(screen.getByText('GhuriFiri')).toBeInTheDocument();
   });
 });

@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
-import { RefreshCw, Search } from 'lucide-react';
+import { RefreshCw, Wallet } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
-import { cardClass, inputClass, secondaryButtonClass } from '@/components/Field';
+import { cardClass, secondaryButtonClass } from '@/components/Field';
 import { ErrorState } from '@/components/States';
 import { errorText } from '@/lib/errors';
 import { formatDate, formatMoney, toLanguage } from '@/lib/format';
 import { adminApi, type AdminBookingDetail } from './adminApi';
+import { AdminPageHeader, AdminSearchBar, ListSkeleton } from './AdminUi';
 
 /**
  * Answers "where is my money?": find a booking by its number or the payment reference the
@@ -34,21 +35,23 @@ export function BookingLookupPage() {
   });
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-          {t('admin.bookings.title')}
-        </h2>
-        <button
-          type="button"
-          className={secondaryButtonClass}
-          disabled={retry.isPending}
-          onClick={() => retry.mutate()}
-        >
-          <RefreshCw aria-hidden="true" className="h-4 w-4" />
-          {t('admin.bookings.retryRefunds')}
-        </button>
-      </header>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow={t('admin.groups.operations')}
+        title={t('admin.bookings.title')}
+        description={t('admin.bookings.lead')}
+        actions={
+          <button
+            type="button"
+            className={secondaryButtonClass}
+            disabled={retry.isPending}
+            onClick={() => retry.mutate()}
+          >
+            <RefreshCw aria-hidden="true" className="h-4 w-4" />
+            {t('admin.bookings.retryRefunds')}
+          </button>
+        }
+      />
       {retry.isSuccess && (
         <p role="status" className="text-sm text-hill">
           {t('admin.bookings.retried', { count: asNumber(retry.data.count) })}
@@ -60,39 +63,33 @@ export function BookingLookupPage() {
         </p>
       )}
 
-      <form
-        role="search"
-        className="flex flex-col gap-2 sm:flex-row"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setParams(draft.trim() ? { q: draft.trim() } : {});
-        }}
-      >
-        <label htmlFor="booking-lookup" className="sr-only">
-          {t('admin.bookings.lookup')}
-        </label>
-        <input
-          id="booking-lookup"
-          type="search"
-          value={draft}
-          placeholder={t('admin.bookings.lookupHint')}
-          onChange={(event) => setDraft(event.target.value)}
-          className={`${inputClass} flex-1`}
-        />
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-hill px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-deep"
-        >
-          <Search aria-hidden="true" className="h-4 w-4" />
-          {t('admin.bookings.lookup')}
-        </button>
-      </form>
+      <AdminSearchBar
+        id="booking-lookup"
+        label={t('admin.bookings.lookup')}
+        placeholder={t('admin.bookings.lookupHint')}
+        value={draft}
+        onChange={setDraft}
+        onSubmit={() => setParams(draft.trim() ? { q: draft.trim() } : {})}
+        submitLabel={t('admin.bookings.lookup')}
+      />
 
-      {booking.isFetching && (
-        <div role="status" className="h-40 animate-pulse rounded-2xl bg-hill/10">
-          <span className="sr-only">{t('common.loading')}</span>
+      {/* Before the first search: say what this page answers, instead of an empty canvas. */}
+      {query === '' && (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-hill/15 bg-white/70 px-6 py-14 text-center">
+          <span
+            aria-hidden="true"
+            className="flex h-16 w-16 items-center justify-center rounded-2xl bg-mist text-hill"
+          >
+            <Wallet className="h-8 w-8" />
+          </span>
+          <p className="font-display text-lg font-semibold text-deep">
+            {t('admin.bookings.startTitle')}
+          </p>
+          <p className="max-w-md text-sm text-deep/65">{t('admin.bookings.startHint')}</p>
         </div>
       )}
+
+      {booking.isFetching && <ListSkeleton rows={3} />}
       {booking.isError && (
         <ErrorState message={errorText(booking.error, t)} onRetry={() => void booking.refetch()} />
       )}

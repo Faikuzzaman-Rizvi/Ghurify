@@ -29,8 +29,8 @@ CREATE TABLE [Social].[Media]
     CONSTRAINT [FK_Media_Post] FOREIGN KEY ([PostId]) REFERENCES [Social].[Post] ([Id]),
     CONSTRAINT [FK_Media_Visit] FOREIGN KEY ([VisitId]) REFERENCES [Main].[Visit] ([Id]),
     CONSTRAINT [CK_Media_PostOrVisit] CHECK ([PostId] IS NULL OR [VisitId] IS NULL),
-    CONSTRAINT [CK_Media_Kind] CHECK ([Kind] BETWEEN 1 AND 2),
-    CONSTRAINT [CK_Media_Status] CHECK ([Status] BETWEEN 1 AND 4)
+    CONSTRAINT [CK_Media_Kind] CHECK ([Kind] >= 1 AND [Kind] <= 2),
+    CONSTRAINT [CK_Media_Status] CHECK ([Status] >= 1 AND [Status] <= 4)
 );
 GO
 

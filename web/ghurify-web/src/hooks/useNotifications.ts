@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/api/client';
 import type { components } from '@/api/schema';
-import { createHubConnection, runHubConnection } from '@/api/realtime';
 import { useAuthStore } from '@/features/auth/authStore';
 
 export type NotificationItem = components['schemas']['NotificationItem'];
@@ -41,17 +40,35 @@ export function useLiveNotifications() {
       return;
     }
 
-    const connection = createHubConnection('/hubs/notify');
+    // The SignalR client is fetched here rather than imported at the top of the file. It is 15 kB
+    // compressed and is only ever used by somebody signed in, so an anonymous visitor reading the
+    // home page no longer downloads it to not use it.
+    let stop: (() => void) | undefined;
+    let cancelled = false;
 
-    // A new notification can mean a new request, an approval, a released seat: refresh the bell
-    // and whatever lists might show the change.
-    connection.on('notification', () => {
-      void queryClient.invalidateQueries({ queryKey: ['me'] });
-      void queryClient.invalidateQueries({ queryKey: ['host'] });
+    void import('@/api/realtime').then(({ createHubConnection, runHubConnection }) => {
+      // Signed out again, or the component unmounted, while the client was downloading.
+      if (cancelled) {
+        return;
+      }
+
+      const connection = createHubConnection('/hubs/notify');
+
+      // A new notification can mean a new request, an approval, a released seat: refresh the bell
+      // and whatever lists might show the change.
+      connection.on('notification', () => {
+        void queryClient.invalidateQueries({ queryKey: ['me'] });
+        void queryClient.invalidateQueries({ queryKey: ['host'] });
+      });
+
+      // Offline or the hub is down: the bell still works from the periodic refetch.
+      stop = runHubConnection(connection);
     });
 
-    // Offline or the hub is down: the bell still works from the periodic refetch.
-    return runHubConnection(connection);
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
   }, [status, queryClient]);
 }
 

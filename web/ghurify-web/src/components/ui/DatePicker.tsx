@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { todayInDhaka, toLanguage } from '@/lib/format';
+import { usePopoverPosition } from './usePopoverPosition';
 
 /**
  * A calendar date picker that replaces the browser's native one (an unstyleable grey popup
@@ -109,6 +110,13 @@ export function DatePicker({
   // The day with keyboard focus inside the calendar; also decides which month is shown.
   const [focused, setFocused] = useState(() => clamp(value || today, min, max));
   const [text, setText] = useState<string | null>(null);
+
+  // Against the window: inside a dialog the calendar then opens upwards rather than over the
+  // buttons at its foot, and it never lengthens whatever is scrolling behind it.
+  const { anchorRef: fieldRef, panelRef: calendarRef } = usePopoverPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >(open, { maxHeight: 440 });
 
   const formats = useMemo(
     () => ({
@@ -257,7 +265,7 @@ export function DatePicker({
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
-      <div className="relative">
+      <div ref={fieldRef} className="relative">
         <input
           id={id}
           type="text"
@@ -308,185 +316,185 @@ export function DatePicker({
         </span>
       </div>
 
-      <div
-        id={dialogId}
-        role="dialog"
-        aria-label={t('datePicker.label')}
-        hidden={!open}
-        className={`absolute left-0 top-full z-50 mt-2 w-full min-w-64 max-w-[min(20rem,calc(100vw-2rem))] rounded-2xl bg-white p-3 sm:p-4 text-left shadow-[0_24px_60px_rgba(15,42,31,0.22)] ring-1 ring-hill/10 ${
-          open ? 'animate-fade-in' : ''
-        }`}
-      >
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => step(-1)}
-            disabled={!canPrev}
-            aria-label={t('datePicker.previous')}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-25"
-          >
-            <ChevronLeft aria-hidden="true" className="h-4.5 w-4.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setView(view === 'days' ? 'months' : view === 'months' ? 'years' : 'days')
-            }
-            aria-live="polite"
-            className="rounded-full px-3 py-1.5 font-display text-[0.95rem] font-semibold text-deep transition hover:bg-mist"
-          >
-            {view === 'days'
-              ? formats.monthYear.format(first)
-              : view === 'months'
-                ? formats.number.format(year)
-                : `${formats.number.format(yearPage)} – ${formats.number.format(yearPage + 11)}`}
-          </button>
-          <button
-            type="button"
-            onClick={() => step(1)}
-            disabled={!canNext}
-            aria-label={t('datePicker.next')}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-25"
-          >
-            <ChevronRight aria-hidden="true" className="h-4.5 w-4.5" />
-          </button>
-        </div>
+      {open && (
+        <div
+          id={dialogId}
+          ref={calendarRef}
+          role="dialog"
+          aria-label={t('datePicker.label')}
+          className="fixed z-50 w-[min(20rem,calc(100vw-2rem))] animate-menu-in overflow-y-auto overscroll-contain rounded-2xl bg-white p-3 text-left shadow-[0_24px_60px_rgba(15,42,31,0.22)] ring-1 ring-hill/10 sm:p-4"
+        >
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => step(-1)}
+              disabled={!canPrev}
+              aria-label={t('datePicker.previous')}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-25"
+            >
+              <ChevronLeft aria-hidden="true" className="h-4.5 w-4.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setView(view === 'days' ? 'months' : view === 'months' ? 'years' : 'days')
+              }
+              aria-live="polite"
+              className="rounded-full px-3 py-1.5 font-display text-[0.95rem] font-semibold text-deep transition hover:bg-mist"
+            >
+              {view === 'days'
+                ? formats.monthYear.format(first)
+                : view === 'months'
+                  ? formats.number.format(year)
+                  : `${formats.number.format(yearPage)} – ${formats.number.format(yearPage + 11)}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => step(1)}
+              disabled={!canNext}
+              aria-label={t('datePicker.next')}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-25"
+            >
+              <ChevronRight aria-hidden="true" className="h-4.5 w-4.5" />
+            </button>
+          </div>
 
-        {view === 'days' && (
-          <div ref={gridRef} onKeyDown={onGridKeyDown}>
-            <div className="mb-1 grid grid-cols-7" aria-hidden="true">
-              {weekdays.map((weekday, index) => (
-                <span
-                  key={index}
-                  className={`py-1 text-center text-xs font-semibold ${
-                    index === 5 || index === 6 ? 'text-ochre' : 'text-deep/45'
-                  }`}
-                >
-                  {weekday}
-                </span>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-y-1">
-              {days.map((day) => {
-                const [, dayMonth, dayNumber] = parts(day);
-                const inMonth = dayMonth === monthIndex;
-                const selected = day === value;
-                const isToday = day === today;
-                const disabled = outOfRange(day);
-                const inRange = rangeLow && rangeHigh && day > rangeLow && day < rangeHigh;
-                const rangeEnd = rangeWith && day === rangeWith && value;
-                return (
-                  <div
-                    key={day}
-                    className={`flex justify-center ${inRange ? 'bg-hill/10' : ''} ${
-                      rangeLow === day && rangeHigh !== day ? 'rounded-l-full bg-hill/10' : ''
-                    } ${rangeHigh === day && rangeLow !== day ? 'rounded-r-full bg-hill/10' : ''}`}
+          {view === 'days' && (
+            <div ref={gridRef} onKeyDown={onGridKeyDown}>
+              <div className="mb-1 grid grid-cols-7" aria-hidden="true">
+                {weekdays.map((weekday, index) => (
+                  <span
+                    key={index}
+                    className={`py-1 text-center text-xs font-semibold ${
+                      index === 5 || index === 6 ? 'text-ochre' : 'text-deep/45'
+                    }`}
                   >
-                    <button
-                      type="button"
-                      data-day={day}
-                      tabIndex={day === focused ? 0 : -1}
-                      disabled={disabled}
-                      aria-label={formats.full.format(asDate(day))}
-                      aria-pressed={selected}
-                      aria-current={isToday ? 'date' : undefined}
-                      onClick={() => choose(day)}
-                      className={`relative flex aspect-square w-full max-w-9 items-center justify-center rounded-full text-sm transition ${
-                        selected
-                          ? 'bg-hill font-semibold text-white shadow-[0_6px_14px_rgba(36,92,67,0.35)]'
-                          : rangeEnd
-                            ? 'bg-hill/80 font-semibold text-white'
-                            : disabled
-                              ? 'cursor-not-allowed text-deep/20'
-                              : inMonth
-                                ? 'text-deep hover:bg-mist'
-                                : 'text-deep/30 hover:bg-mist'
-                      } ${isToday && !selected ? 'font-semibold text-hill ring-1 ring-turmeric ring-inset' : ''}`}
+                    {weekday}
+                  </span>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-y-1">
+                {days.map((day) => {
+                  const [, dayMonth, dayNumber] = parts(day);
+                  const inMonth = dayMonth === monthIndex;
+                  const selected = day === value;
+                  const isToday = day === today;
+                  const disabled = outOfRange(day);
+                  const inRange = rangeLow && rangeHigh && day > rangeLow && day < rangeHigh;
+                  const rangeEnd = rangeWith && day === rangeWith && value;
+                  return (
+                    <div
+                      key={day}
+                      className={`flex justify-center ${inRange ? 'bg-hill/10' : ''} ${
+                        rangeLow === day && rangeHigh !== day ? 'rounded-l-full bg-hill/10' : ''
+                      } ${rangeHigh === day && rangeLow !== day ? 'rounded-r-full bg-hill/10' : ''}`}
                     >
-                      {formats.number.format(dayNumber)}
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        data-day={day}
+                        tabIndex={day === focused ? 0 : -1}
+                        disabled={disabled}
+                        aria-label={formats.full.format(asDate(day))}
+                        aria-pressed={selected}
+                        aria-current={isToday ? 'date' : undefined}
+                        onClick={() => choose(day)}
+                        className={`relative flex aspect-square w-full max-w-9 items-center justify-center rounded-full text-sm transition ${
+                          selected
+                            ? 'bg-hill font-semibold text-white shadow-[0_6px_14px_rgba(36,92,67,0.35)]'
+                            : rangeEnd
+                              ? 'bg-hill/80 font-semibold text-white'
+                              : disabled
+                                ? 'cursor-not-allowed text-deep/20'
+                                : inMonth
+                                  ? 'text-deep hover:bg-mist'
+                                  : 'text-deep/30 hover:bg-mist'
+                        } ${isToday && !selected ? 'font-semibold text-hill ring-1 ring-turmeric ring-inset' : ''}`}
+                      >
+                        {formats.number.format(dayNumber)}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {view === 'months' && (
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 12 }, (_, index) => {
+                const start = toIso(year, index, 1);
+                const end = addDays(toIso(year, index + 1, 1), -1);
+                const disabled =
+                  (min !== undefined && end < min) || (max !== undefined && start > max);
+                const current = index === monthIndex;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => {
+                      setFocused(
+                        clamp(toIso(year, index, Math.min(parts(focused)[2], 28)), min, max),
+                      );
+                      setView('days');
+                    }}
+                    className={`rounded-xl py-3 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-25 ${
+                      current ? 'bg-hill text-white' : 'text-deep hover:bg-mist'
+                    }`}
+                  >
+                    {formats.month.format(new Date(Date.UTC(year, index, 1)))}
+                  </button>
                 );
               })}
             </div>
-          </div>
-        )}
+          )}
 
-        {view === 'months' && (
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: 12 }, (_, index) => {
-              const start = toIso(year, index, 1);
-              const end = addDays(toIso(year, index + 1, 1), -1);
-              const disabled =
-                (min !== undefined && end < min) || (max !== undefined && start > max);
-              const current = index === monthIndex;
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => {
-                    setFocused(
-                      clamp(toIso(year, index, Math.min(parts(focused)[2], 28)), min, max),
-                    );
-                    setView('days');
-                  }}
-                  className={`rounded-xl py-3 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-25 ${
-                    current ? 'bg-hill text-white' : 'text-deep hover:bg-mist'
-                  }`}
-                >
-                  {formats.month.format(new Date(Date.UTC(year, index, 1)))}
-                </button>
-              );
-            })}
-          </div>
-        )}
+          {view === 'years' && (
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 12 }, (_, index) => {
+                const candidate = yearPage + index;
+                const disabled = candidate < minYear || candidate > maxYear;
+                return (
+                  <button
+                    key={candidate}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => {
+                      setFocused(clamp(toIso(candidate, monthIndex, 1), min, max));
+                      setView('months');
+                    }}
+                    className={`rounded-xl py-3 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-25 ${
+                      candidate === year ? 'bg-hill text-white' : 'text-deep hover:bg-mist'
+                    }`}
+                  >
+                    {formats.number.format(candidate)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-        {view === 'years' && (
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: 12 }, (_, index) => {
-              const candidate = yearPage + index;
-              const disabled = candidate < minYear || candidate > maxYear;
-              return (
-                <button
-                  key={candidate}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => {
-                    setFocused(clamp(toIso(candidate, monthIndex, 1), min, max));
-                    setView('months');
-                  }}
-                  className={`rounded-xl py-3 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-25 ${
-                    candidate === year ? 'bg-hill text-white' : 'text-deep hover:bg-mist'
-                  }`}
-                >
-                  {formats.number.format(candidate)}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        <div className="mt-3 flex items-center justify-between border-t border-hill/10 pt-3">
-          <button
-            type="button"
-            disabled={outOfRange(today)}
-            onClick={() => choose(today)}
-            className="rounded-full px-3 py-1.5 text-sm font-semibold text-hill transition hover:bg-mist disabled:opacity-30"
-          >
-            {t('datePicker.today')}
-          </button>
-          {value && (
+          <div className="mt-3 flex items-center justify-between border-t border-hill/10 pt-3">
             <button
               type="button"
-              onClick={() => choose('')}
-              className="rounded-full px-3 py-1.5 text-sm font-medium text-deep/60 transition hover:bg-mist hover:text-deep"
+              disabled={outOfRange(today)}
+              onClick={() => choose(today)}
+              className="rounded-full px-3 py-1.5 text-sm font-semibold text-hill transition hover:bg-mist disabled:opacity-30"
             >
-              {t('datePicker.clear')}
+              {t('datePicker.today')}
             </button>
-          )}
+            {value && (
+              <button
+                type="button"
+                onClick={() => choose('')}
+                className="rounded-full px-3 py-1.5 text-sm font-medium text-deep/60 transition hover:bg-mist hover:text-deep"
+              >
+                {t('datePicker.clear')}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

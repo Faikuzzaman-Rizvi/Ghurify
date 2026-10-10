@@ -41,8 +41,8 @@ CREATE TABLE [Main].[Trip]
     CONSTRAINT [CK_Trip_Dates] CHECK ([EndDate] >= [StartDate]),
     CONSTRAINT [CK_Trip_Seats] CHECK ([Seats] > 0 AND [SeatsTaken] >= 0 AND [SeatsTaken] <= [Seats]),
     CONSTRAINT [CK_Trip_Price] CHECK ([PricePerPerson] >= 0),
-    CONSTRAINT [CK_Trip_GroupType] CHECK ([GroupType] BETWEEN 1 AND 4),
-    CONSTRAINT [CK_Trip_Status] CHECK ([Status] BETWEEN 1 AND 5),
+    CONSTRAINT [CK_Trip_GroupType] CHECK ([GroupType] >= 1 AND [GroupType] <= 4),
+    CONSTRAINT [CK_Trip_Status] CHECK ([Status] >= 1 AND [Status] <= 5),
     PERIOD FOR SYSTEM_TIME ([SysStartTime], [SysEndTime])
 )
 WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Main].[TripHistory], DATA_CONSISTENCY_CHECK = ON));

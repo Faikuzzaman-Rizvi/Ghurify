@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import i18n from '@/i18n';
 import { useAuthStore } from '@/features/auth/authStore';
 import { renderScreen } from '@/test/render';
+import { chooseOption } from '@/test/chooseOption';
 import { requests, sampleDestinations, stubApi } from '@/test/fetchStub';
 import { districtAt, districtCount, districtsByDivision, placesByDistrict } from './districts';
 import { pdfFromJpeg } from './posterExport';
@@ -210,7 +211,7 @@ describe('travel map', () => {
 
     await user.click(within(dialog).getByText('Somewhere else'));
     await user.type(within(dialog).getByLabelText('Name of the place'), 'Jaflong');
-    await user.selectOptions(within(dialog).getByLabelText('Division'), 'Sylhet');
+    await chooseOption(user, within(dialog).getByLabelText('Division'), 'Sylhet');
     await user.click(within(dialog).getByRole('button', { name: 'pick a spot near Sylhet' }));
     await user.type(within(dialog).getByLabelText('When you went'), '2026-09-20');
     await user.type(within(dialog).getByLabelText('A note (optional)'), 'Stones and clear water');
@@ -244,7 +245,7 @@ describe('travel map', () => {
     const dialog = screen.getByRole('dialog', { name: 'Add a place you have been' });
     await user.click(within(dialog).getByText('Somewhere else'));
     await user.type(within(dialog).getByLabelText('Name of the place'), 'Jaflong');
-    await user.selectOptions(within(dialog).getByLabelText('Division'), 'Sylhet');
+    await chooseOption(user, within(dialog).getByLabelText('Division'), 'Sylhet');
     await user.type(within(dialog).getByLabelText('When you went'), '2026-09-20');
     await user.click(within(dialog).getByRole('button', { name: 'Add to my map' }));
 
@@ -347,7 +348,7 @@ describe('travel map', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Add a place you have been' });
     expect(within(dialog).getByLabelText('Name of the place')).toHaveValue('Bogura');
-    expect(within(dialog).getByLabelText('Division')).toHaveValue('Rajshahi');
+    expect(within(dialog).getByLabelText('Division')).toHaveTextContent('Rajshahi');
     expect(within(dialog).getByText(/The pin is in the middle of Bogura/)).toBeInTheDocument();
     await user.type(within(dialog).getByLabelText('When you went'), '2026-01-15');
     await user.click(within(dialog).getByRole('button', { name: 'Add to my map' }));
@@ -428,7 +429,8 @@ describe('travel photos', () => {
     renderScreen(<TravelMapPage />, { at: '/me/map' });
     await user.click(await screen.findByRole('button', { name: 'Add a place' }));
     const dialog = screen.getByRole('dialog', { name: 'Add a place you have been' });
-    await user.selectOptions(
+    await chooseOption(
+      user,
       within(dialog).getByLabelText('Destination', { exact: true }),
       'sajek',
     );

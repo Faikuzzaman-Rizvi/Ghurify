@@ -52,7 +52,14 @@ public sealed record AdminUserItem(
     UserStatus Status,
     DateTimeOffset Created,
     VerificationLevel? VerifiedLevel,
-    IReadOnlyList<Role> Roles);
+    IReadOnlyList<Role> Roles,
+    /// <summary>
+    /// When their picture was last changed, as Unix seconds, or null when they have none.
+    /// The list carries it so the screen asks for a picture only where there is one, and asks
+    /// for it at a versioned URL the browser can cache. Same meaning as on
+    /// <see cref="AdminUserDetail.AvatarVersion"/>.
+    /// </summary>
+    long? AvatarVersion);
 
 public sealed record AdminUserPage(IReadOnlyList<AdminUserItem> Items, int TotalCount, int Page, int PageSize);
 

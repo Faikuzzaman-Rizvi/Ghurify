@@ -23,7 +23,7 @@ CREATE TABLE [Site].[Setting]
     [UpdatedId]  BIGINT          NULL,
 
     CONSTRAINT [PK_Setting] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [CK_Setting_Key] CHECK ([Key] NOT LIKE '%[^a-z0-9.-]%' COLLATE Latin1_General_CS_AS
+    CONSTRAINT [CK_Setting_Key] CHECK (NOT [Key] LIKE '%[^a-z0-9.-]%' COLLATE Latin1_General_CS_AS
                                        AND LEN([Key]) > 0)
 );
 GO

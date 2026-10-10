@@ -13,8 +13,8 @@ namespace Ghurify.UnitTests.Identity;
 public sealed class AccountEmailTemplateTests
 {
     [Theory]
-    [InlineData(OtpPurpose.SignUp, "is your Ghurify confirmation code", "Confirmation code")]
-    [InlineData(OtpPurpose.PasswordReset, "is your Ghurify password reset code", "Reset code")]
+    [InlineData(OtpPurpose.SignUp, "is your GhuriFiri confirmation code", "Confirmation code")]
+    [InlineData(OtpPurpose.PasswordReset, "is your GhuriFiri password reset code", "Reset code")]
     public void ForCode_PutsTheCodeInTheSubjectAndBothBodies(OtpPurpose purpose, string subject, string label)
     {
         var email = AccountEmailTemplate.ForCode("482913", purpose, expiryMinutes: 5, year: 2026);
@@ -41,9 +41,9 @@ public sealed class AccountEmailTemplateTests
         var email = AccountEmailTemplate.ForCode("482913", OtpPurpose.SignUp, expiryMinutes: 5, year: 2026);
 
         Assert.Contains("lang=\"bn\"", email.Html, StringComparison.Ordinal);
-        Assert.Contains("ঘুরিফাইতে স্বাগতম", email.Html, StringComparison.Ordinal);
+        Assert.Contains("ঘুরিফিরিতে স্বাগতম", email.Html, StringComparison.Ordinal);
         Assert.Contains("never ask for this code", email.Html, StringComparison.Ordinal);
-        Assert.Contains("ঘুরিফাইতে স্বাগতম", email.Text, StringComparison.Ordinal);
+        Assert.Contains("ঘুরিফিরিতে স্বাগতম", email.Text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -56,8 +56,8 @@ public sealed class AccountEmailTemplateTests
     }
 
     [Theory]
-    [InlineData(AccountNotice.PasswordChanged, "Your Ghurify password was changed")]
-    [InlineData(AccountNotice.AlreadyRegistered, "You already have a Ghurify account")]
+    [InlineData(AccountNotice.PasswordChanged, "Your GhuriFiri password was changed")]
+    [InlineData(AccountNotice.AlreadyRegistered, "You already have a GhuriFiri account")]
     public void ForNotice_HasNoTravelPass(AccountNotice notice, string subject)
     {
         var email = AccountEmailTemplate.ForNotice(notice, year: 2026);
@@ -65,7 +65,7 @@ public sealed class AccountEmailTemplateTests
         Assert.Equal(subject, email.Subject);
         Assert.DoesNotContain("Travel pass", email.Html, StringComparison.Ordinal);
         Assert.Contains("পাসওয়ার্ড ভুলে গেছি", email.Html, StringComparison.Ordinal);
-        Assert.Contains("ঘুরিফাই", email.Text, StringComparison.Ordinal);
+        Assert.Contains("ঘুরিফিরি", email.Text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -88,6 +88,6 @@ public sealed class AccountEmailTemplateTests
     {
         var email = AccountEmailTemplate.ForNotice(AccountNotice.PasswordChanged, year: 2031);
 
-        Assert.Contains("&copy; 2031 Ghurify", email.Html, StringComparison.Ordinal);
+        Assert.Contains("&copy; 2031 GhuriFiri", email.Html, StringComparison.Ordinal);
     }
 }

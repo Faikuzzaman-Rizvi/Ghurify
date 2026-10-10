@@ -95,6 +95,32 @@ to its own origin and local development needs no CORS exception.
 > connection strings come from `.env` locally and Key Vault / App Service settings when
 > deployed. `appsettings*.json` is never published (`CopyToPublishDirectory=Never`).
 
+### Showing the site to a phone, or to someone else entirely
+
+```powershell
+.\Serve-Site.ps1                 # reachable from any device on the same Wi-Fi
+.\Serve-Site.ps1 -Ngrok          # ...and from a public URL as well
+.\Serve-Site.ps1 -SkipWebBuild   # backend-only change: reuse the existing web build
+```
+
+It builds the web app, hands it to the API and runs the two from **one origin** (port 5199 by
+default), then prints the three addresses — this machine, the Wi-Fi, and the tunnel. One origin is
+what makes another device work: there is no cross-origin call to add to the CORS list each time
+the address changes, the sign-in cookie is first-party so a reload keeps you signed in, and
+SignalR needs no second host. It also points the payment gateway's return URL at the address the
+visitor is actually using.
+
+Two things to know:
+
+- **Windows Firewall** blocks the port on a first run. The script prints the one-line
+  `New-NetFirewallRule` command to allow it.
+- This is a hosting mode, not how Ghurify deploys. Deployed, the web app is an Azure Static Web
+  App on its own domain and the API is API-only (`docs/RUNBOOK.md`); `Hosting:ServeWebApp` is off
+  everywhere unless this script turns it on.
+
+For the dev server instead (hot reload, but two origins), `npm run dev` already listens on every
+interface; set `GHURIFY_ALLOWED_HOSTS` for a hostname Vite does not already allow.
+
 ## Deploy order
 
 Every environment, every release, in this order. Nothing else is supported.

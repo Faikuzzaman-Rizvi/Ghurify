@@ -5,7 +5,7 @@ namespace Ghurify.Domain.Site;
 /// </summary>
 /// <param name="Default">
 /// What the site uses when nothing has been saved. These are the values that used to be
-/// hard-coded in the app, so an untouched database renders exactly the Ghurify the code shipped
+/// hard-coded in the app, so an untouched database renders exactly the GhuriFiri the code shipped
 /// with, and "reset" always has somewhere to go back to.
 /// </param>
 /// <param name="MaxLength">
@@ -39,21 +39,21 @@ public static class SiteSettingsCatalog
     public static readonly IReadOnlyList<SettingDefinition> All =
     [
         // --- Who the site is. The defaults are what the app shipped with. ---
-        new(SiteSettingKeys.Name, SettingGroup.Identity, SettingKind.Text, "Ghurify", Required: true, MaxLength: 40),
-        new(SiteSettingKeys.NameBn, SettingGroup.Identity, SettingKind.Text, "ঘুরিফাই", Required: true, MaxLength: 40),
+        new(SiteSettingKeys.Name, SettingGroup.Identity, SettingKind.Text, "GhuriFiri", Required: true, MaxLength: 40),
+        new(SiteSettingKeys.NameBn, SettingGroup.Identity, SettingKind.Text, "ঘুরিফিরি", Required: true, MaxLength: 40),
         new(SiteSettingKeys.Tagline, SettingGroup.Identity, SettingKind.Text, "Travel together, safely", MaxLength: 80),
         new(SiteSettingKeys.TaglineBn, SettingGroup.Identity, SettingKind.Text, "একসাথে ঘুরুন, নিরাপদে", MaxLength: 80),
         new(
             SiteSettingKeys.Description,
             SettingGroup.Identity,
             SettingKind.LongText,
-            "Ghurify: find a trip, join a group and travel safely across Bangladesh.",
+            "GhuriFiri: find a trip, join a group and travel safely across Bangladesh.",
             MaxLength: 200),
         new(
             SiteSettingKeys.DescriptionBn,
             SettingGroup.Identity,
             SettingKind.LongText,
-            "ঘুরিফাই: ট্রিপ খুঁজুন, দলে যোগ দিন আর সারা বাংলাদেশ ঘুরুন নিরাপদে।",
+            "ঘুরিফিরি: ট্রিপ খুঁজুন, দলে যোগ দিন আর সারা বাংলাদেশ ঘুরুন নিরাপদে।",
             MaxLength: 200),
 
         // --- How to reach the company. Empty by default: better absent than invented. ---

@@ -19,7 +19,7 @@ CREATE TABLE [Main].[TripCostItem]
 
     CONSTRAINT [PK_TripCostItem] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_TripCostItem_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
-    CONSTRAINT [CK_TripCostItem_Category] CHECK ([Category] BETWEEN 1 AND 6),
+    CONSTRAINT [CK_TripCostItem_Category] CHECK ([Category] >= 1 AND [Category] <= 6),
     CONSTRAINT [CK_TripCostItem_Amount] CHECK ([Amount] >= 0)
 );
 GO

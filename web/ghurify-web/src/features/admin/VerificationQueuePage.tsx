@@ -8,8 +8,16 @@ import { EmptyState, ErrorState } from '@/components/States';
 import { cardClass, dangerButtonClass, inputClass, primaryButtonClass } from '@/components/Field';
 import { errorText } from '@/lib/errors';
 import { adminApi, type VerificationQueueItem } from './adminApi';
+import { AdminPageHeader, FilterChips } from './AdminUi';
+import type { Tone } from './adminStyles';
 
 const statuses = ['Pending', 'Approved', 'Rejected'] as const;
+
+const statusTone: Record<(typeof statuses)[number], Tone> = {
+  Pending: 'warn',
+  Approved: 'good',
+  Rejected: 'bad',
+};
 
 /** Identity checks waiting for a person, oldest first. Approve, or reject with a reason. */
 export function VerificationQueuePage() {
@@ -26,36 +34,27 @@ export function VerificationQueuePage() {
   const pageSize = queue.data ? asNumber(queue.data.pageSize) : 25;
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-          {t('admin.verifications.title')}
-        </h2>
-        <div
-          role="group"
-          aria-label={t('admin.verifications.filter')}
-          className="flex gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-hill/10"
-        >
-          {statuses.map((option) => (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={status === option}
-              onClick={() => {
-                setStatus(option);
-                setPage(1);
-              }}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-                status === option
-                  ? 'bg-hill text-white shadow-sm'
-                  : 'text-deep/70 hover:bg-mist hover:text-deep'
-              }`}
-            >
-              {t(`verification.status.${option}`)}
-            </button>
-          ))}
-        </div>
-      </header>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow={t('admin.groups.trust')}
+        title={t('admin.verifications.title')}
+        description={t('admin.verifications.lead')}
+        actions={
+          <FilterChips
+            label={t('admin.verifications.filter')}
+            value={status}
+            onChange={(option) => {
+              setStatus(option);
+              setPage(1);
+            }}
+            options={statuses.map((option) => ({
+              value: option,
+              label: t(`verification.status.${option}`),
+              tone: statusTone[option],
+            }))}
+          />
+        }
+      />
 
       {queue.isPending && (
         <div role="status" className="h-40 animate-pulse rounded-2xl bg-hill/10">

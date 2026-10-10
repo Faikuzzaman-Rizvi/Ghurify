@@ -585,15 +585,17 @@ function SummaryStrip({ summary, districts }: { summary: TravelSummary; district
       {stats.map(({ icon: Icon, value, label }, index) => (
         <div
           key={label}
-          className={`rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/15 backdrop-blur ${
+          className={`rounded-2xl bg-night/55 px-3 py-3 ring-1 ring-white/25 backdrop-blur-sm ${
             index === 0 ? 'max-sm:col-span-2' : ''
           }`}
         >
-          <dt className="flex items-center gap-1.5 text-xs text-white/75">
-            <Icon aria-hidden="true" className="h-3.5 w-3.5 text-dusk" />
-            {label}
+          {/* The longest label ("Days on trips") has to wrap inside a fifth of the row
+              rather than run past its edge, so the icon keeps its width and the words break. */}
+          <dt className="flex items-start gap-1.5 text-xs leading-tight text-white/90">
+            <Icon aria-hidden="true" className="mt-px h-3.5 w-3.5 shrink-0 text-dusk" />
+            <span className="min-w-0">{label}</span>
           </dt>
-          <dd className="mt-0.5 font-display text-2xl font-bold text-white">{value}</dd>
+          <dd className="mt-1 font-display text-2xl font-bold leading-none text-white">{value}</dd>
         </div>
       ))}
     </dl>

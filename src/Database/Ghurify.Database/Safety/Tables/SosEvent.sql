@@ -29,8 +29,8 @@ CREATE TABLE [Safety].[SosEvent]
     CONSTRAINT [FK_SosEvent_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [FK_SosEvent_User_AcknowledgedById] FOREIGN KEY ([AcknowledgedById]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_SosEvent_User_ResolvedById] FOREIGN KEY ([ResolvedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_SosEvent_Status] CHECK ([Status] BETWEEN 1 AND 3),
-    CONSTRAINT [CK_SosEvent_Position] CHECK ([Latitude] BETWEEN -90 AND 90 AND [Longitude] BETWEEN -180 AND 180)
+    CONSTRAINT [CK_SosEvent_Status] CHECK ([Status] >= 1 AND [Status] <= 3),
+    CONSTRAINT [CK_SosEvent_Position] CHECK ([Latitude] >= -90 AND [Latitude] <= 90 AND [Longitude] >= -180 AND [Longitude] <= 180)
 );
 GO
 

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { Bell } from 'lucide-react';
 import { asNumber } from '@/api/client';
 import { formatCount, toLanguage } from '@/lib/format';
@@ -38,15 +38,48 @@ function parse(data: string | null | undefined): Record<string, unknown> {
   }
 }
 
-/** The bell in the header: unread count, and the latest notifications in a panel. */
+/**
+ * The bell in the header: unread count, and the latest notifications in a panel. Like the
+ * account menu beside it, the panel closes on navigation, an outside click and Escape, rather
+ * than staying open over every page that follows.
+ */
 export function NotificationBell() {
   const { t, i18n } = useTranslation();
   const language = toLanguage(i18n.language);
   const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const { data } = useNotifications();
   const markRead = useMarkNotificationsRead();
   const unread = data ? asNumber(data.unreadCount) : 0;
   const items = data?.items ?? [];
+
+  // Close on navigation (reset while rendering, not in an effect), including a move the panel
+  // itself did not start.
+  const { key: locationKey } = useLocation();
+  const [seenLocation, setSeenLocation] = useState(locationKey);
+  if (seenLocation !== locationKey) {
+    setSeenLocation(locationKey);
+    setOpen(false);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointer(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false);
+    }
+
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
 
   function toggle() {
     const next = !open;
@@ -58,11 +91,12 @@ export function NotificationBell() {
   }
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
+        aria-controls={panelId}
         aria-label={t('notifications.label', { count: unread, n: formatCount(unread, language) })}
         className="relative rounded-full p-2 text-current transition hover:bg-current/10"
       >
@@ -75,7 +109,10 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] rounded-2xl bg-white p-2 text-deep shadow-xl ring-1 ring-hill/10">
+        <div
+          id={panelId}
+          className="absolute right-0 z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] animate-menu-in rounded-2xl bg-white p-2 text-deep shadow-xl ring-1 ring-hill/10"
+        >
           <p className="px-3 py-2 text-sm font-bold text-deep">{t('notifications.title')}</p>
           {items.length === 0 ? (
             <p className="px-3 pb-3 text-sm text-deep/60">{t('notifications.empty')}</p>

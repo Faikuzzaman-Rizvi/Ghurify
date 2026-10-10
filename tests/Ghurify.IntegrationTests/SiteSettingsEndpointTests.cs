@@ -36,7 +36,7 @@ public sealed class SiteSettingsEndpointTests(SqlServerFixture database)
         Assert.NotNull(config);
         // The defaults are the values that used to be hard-coded, so an untouched database
         // renders exactly the site the code shipped with.
-        Assert.Equal("Ghurify", config.Identity.Name);
+        Assert.Equal("GhuriFiri", config.Identity.Name);
         Assert.Equal("#245c43", config.Theme.Colours["hill"]);
         Assert.Equal("Barlow", config.Theme.BodyFont);
         // Nothing uploaded, so the configuration points at the app's own files.
@@ -93,7 +93,7 @@ public sealed class SiteSettingsEndpointTests(SqlServerFixture database)
             var config = await anonymous.GetFromJsonAsync<Config>("/api/v1/site/config", TestData.Json, Token);
             Assert.Equal("Bhromon", config!.Identity.Name);
             // The Bangla name was not touched, so it stays on its default.
-            Assert.Equal("ঘুরিফাই", config.Identity.NameBn);
+            Assert.Equal("ঘুরিফিরি", config.Identity.NameBn);
             Assert.Equal("hello@bhromon.test", config.Contact.Email);
             Assert.Equal("facebook", Assert.Single(config.Social).Platform);
 
@@ -142,7 +142,7 @@ public sealed class SiteSettingsEndpointTests(SqlServerFixture database)
             Assert.Equal(HttpStatusCode.OK, reset.StatusCode);
 
             var config = await client.GetFromJsonAsync<Config>("/api/v1/site/config", TestData.Json, Token);
-            Assert.Equal("Ghurify", config!.Identity.Name);
+            Assert.Equal("GhuriFiri", config!.Identity.Name);
 
             // The row is gone rather than holding a copy of the default, which is what keeps
             // "is this customised?" answerable.

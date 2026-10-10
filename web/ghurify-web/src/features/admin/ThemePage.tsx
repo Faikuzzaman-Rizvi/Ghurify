@@ -8,6 +8,7 @@ import { errorText } from '@/lib/errors';
 import { contrast, contrastProblems } from './contrast';
 import { SettingField } from './SettingField';
 import { useSettingsForm } from './useSettingsForm';
+import { AdminPageHeader } from './AdminUi';
 
 const groups = ['Theme'] as const;
 
@@ -64,12 +65,11 @@ export function ThemePage() {
         form.submit();
       }}
     >
-      <header>
-        <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-          {t('admin.theme.title')}
-        </h2>
-        <p className="mt-1 max-w-2xl text-sm text-deep/70">{t('admin.theme.lead')}</p>
-      </header>
+      <AdminPageHeader
+        eyebrow={t('admin.groups.site')}
+        title={t('admin.theme.title')}
+        description={t('admin.theme.lead')}
+      />
 
       {readOnly && (
         <p className="rounded-xl bg-turmeric/10 px-4 py-3 text-sm font-medium text-ochre">
@@ -116,9 +116,7 @@ export function ThemePage() {
                   key={setting.key}
                   setting={setting}
                   value={form.valueOf(setting)}
-                  fonts={
-                    setting.key.endsWith('display') ? data.displayFonts : data.bodyFonts
-                  }
+                  fonts={setting.key.endsWith('display') ? data.displayFonts : data.bodyFonts}
                   disabled={!form.editable(setting)}
                   onChange={(value) => form.set(setting.key, value)}
                   onReset={() => form.reset(setting)}

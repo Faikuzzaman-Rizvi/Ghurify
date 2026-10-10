@@ -99,12 +99,12 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
         Assert.Equal(HttpStatusCode.NoContent, suspended.StatusCode);
 
         // No filter is what the page asks for first; it once failed with a 500.
-        var everything = await adminClient.GetFromJsonAsync<List<AuditItem>>("/api/v1/admin/audit", TestData.Json, Token);
-        var forPerson = await adminClient.GetFromJsonAsync<List<AuditItem>>(
+        var everything = await adminClient.GetFromJsonAsync<AuditItemPage>("/api/v1/admin/audit", TestData.Json, Token);
+        var forPerson = await adminClient.GetFromJsonAsync<AuditItemPage>(
             $"/api/v1/admin/audit?entityType=User&entityId={person.Id}", TestData.Json, Token);
 
-        Assert.Contains(everything!, entry => entry.Action == "user.suspended" && entry.EntityId == person.Id);
-        var only = Assert.Single(forPerson!);
+        Assert.Contains(everything!.Entries, entry => entry.Action == "user.suspended" && entry.EntityId == person.Id);
+        var only = Assert.Single(forPerson!.Entries);
         Assert.Equal("user.suspended", only.Action);
 
         using var moderatorClient = TestData.ClientFor(api, moderator);
@@ -300,6 +300,12 @@ public sealed class AdminPortalEndpointTests(SqlServerFixture database)
     }
 
     private sealed record AuditItem(long Id, string Action, string EntityType, long EntityId);
+
+    /// <summary>
+    /// The shape the endpoint actually returns (<c>AuditPage</c>): the log is paged, because the
+    /// desk's first view of it is "everything" and that grows without limit.
+    /// </summary>
+    private sealed record AuditItemPage(List<AuditItem> Entries, int Total, int Page, int PageSize);
 
     private sealed record UserPage(List<UserItem> Items, int TotalCount);
 

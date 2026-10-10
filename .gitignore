@@ -40,3 +40,7 @@ TestResults/
 
 # Empty solution file Visual Studio recreates alongside Ghurify.sln
 Ghurify.slnx
+
+# The built web app, copied in by Serve-Site.ps1 for single-origin LAN / tunnel hosting.
+# A build artifact: the deployed web app is an Azure Static Web App (docs/RUNBOOK.md).
+src/Ghurify.Api/wwwroot/

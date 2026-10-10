@@ -66,7 +66,10 @@ public static class InfrastructureServiceCollectionExtensions
                 + "would not reach anyone. Configure a real SMTP server outside Development.")
             .ValidateOnStart();
 
-        services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+        services.AddSingleton<SqlConnectionFactory>();
+        services.AddSingleton<IDbConnectionFactory>(provider => provider.GetRequiredService<SqlConnectionFactory>());
+        // Fills the pool while the host starts, so the first visitor does not wait for it.
+        services.AddHostedService<ConnectionPoolWarmUp>();
         services.AddSingleton<IClock, SystemClock>();
         services.AddScoped<IDatabaseHealthProbe, DatabaseHealthProbe>();
         services.AddSingleton<IStorageHealthProbe, StorageHealthProbe>();

@@ -127,6 +127,48 @@ describe('SiteHeader', () => {
     expect(screen.getAllByRole('link', { name: /Sign in/ }).length).toBeGreaterThan(0);
   });
 
+  it('closes the notifications panel on an outside click and on navigation', async () => {
+    const user = userEvent.setup();
+    stubApi([
+      [/\/api\/v1\/me\/profile$/, profile({ avatarVersion: null })],
+      [
+        /\/api\/v1\/me\/notifications$/,
+        {
+          items: [
+            {
+              id: 5,
+              kind: 'post.removed',
+              data: null,
+              isRead: false,
+              created: '2026-10-08T06:00:00Z',
+            },
+          ],
+          unreadCount: 1,
+        },
+      ],
+    ]);
+    signedIn();
+
+    renderScreen(
+      <>
+        <SiteHeader />
+        <p>Page behind the panel</p>
+      </>,
+    );
+
+    const bell = await screen.findByRole('button', { name: /notification/i });
+    await user.click(bell);
+    expect(bell).toHaveAttribute('aria-expanded', 'true');
+
+    // A click anywhere else puts it away, rather than leaving it over the next page.
+    await user.click(screen.getByText('Page behind the panel'));
+    expect(bell).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(bell);
+    await user.keyboard('{Escape}');
+    expect(bell).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('puts the signed-in destinations in the account menu, not sign-in', async () => {
     const user = userEvent.setup();
     useAuthStore.setState({

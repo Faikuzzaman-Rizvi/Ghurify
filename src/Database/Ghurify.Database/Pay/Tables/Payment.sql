@@ -54,9 +54,9 @@ CREATE TABLE [Pay].[Payment]
     CONSTRAINT [FK_Payment_Booking] FOREIGN KEY ([BookingId]) REFERENCES [Pay].[Booking] ([Id]),
     CONSTRAINT [FK_Payment_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [CK_Payment_Amounts] CHECK ([Amount] >= 0 AND [Fee] >= 0 AND [Total] = [Amount] + [Fee]),
-    CONSTRAINT [CK_Payment_Status] CHECK ([Status] BETWEEN 1 AND 5),
-    CONSTRAINT [CK_Payment_MethodType] CHECK ([MethodType] IS NULL OR [MethodType] BETWEEN 1 AND 4),
-    CONSTRAINT [CK_Payment_AccountLast4] CHECK ([AccountLast4] IS NULL OR [AccountLast4] NOT LIKE '%[^0-9]%')
+    CONSTRAINT [CK_Payment_Status] CHECK ([Status] >= 1 AND [Status] <= 5),
+    CONSTRAINT [CK_Payment_MethodType] CHECK ([MethodType] IS NULL OR [MethodType] >= 1 AND [MethodType] <= 4),
+    CONSTRAINT [CK_Payment_AccountLast4] CHECK ([AccountLast4] IS NULL OR NOT [AccountLast4] LIKE '%[^0-9]%')
 );
 GO
 

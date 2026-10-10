@@ -206,6 +206,13 @@ public sealed class StaffRoleRepository(IDbConnectionFactory connectionFactory) 
     private static DateTimeOffset? Utc(DateTime? value) =>
         value is null ? null : new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc));
 
+    /// <summary>
+    /// The columns of <c>Main.QueryStaffRoles</c>' first result set, in the order it selects them.
+    /// Dapper matches a record's constructor to the result set positionally, so a parameter out of
+    /// order is not mapped by name: it fails the whole read with "a parameterless default
+    /// constructor or one matching signature ... is required". Keep this list and the procedure's
+    /// SELECT in the same order. <c>MemberCount</c> is computed, so it comes last in both.
+    /// </summary>
     private sealed record RoleRow(
         long Id,
         string Key,
@@ -215,8 +222,8 @@ public sealed class StaffRoleRepository(IDbConnectionFactory connectionFactory) 
         string? DescriptionBn,
         bool IsSystem,
         bool IsSuperAdmin,
-        int MemberCount,
-        DateTime Created);
+        DateTime Created,
+        int MemberCount);
 
     private sealed record RolePermissionRow(long StaffRoleId, string Permission);
 

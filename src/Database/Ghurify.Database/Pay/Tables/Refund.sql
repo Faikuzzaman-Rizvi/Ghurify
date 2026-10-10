@@ -31,8 +31,8 @@ CREATE TABLE [Pay].[Refund]
     CONSTRAINT [FK_Refund_Booking] FOREIGN KEY ([BookingId]) REFERENCES [Pay].[Booking] ([Id]),
     CONSTRAINT [FK_Refund_Payment] FOREIGN KEY ([PaymentId]) REFERENCES [Pay].[Payment] ([Id]),
     CONSTRAINT [CK_Refund_Amount] CHECK ([Amount] > 0 AND [Shortfall] >= 0),
-    CONSTRAINT [CK_Refund_Reason] CHECK ([Reason] BETWEEN 1 AND 7),
-    CONSTRAINT [CK_Refund_Status] CHECK ([Status] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_Refund_Reason] CHECK ([Reason] >= 1 AND [Reason] <= 7),
+    CONSTRAINT [CK_Refund_Status] CHECK ([Status] >= 1 AND [Status] <= 3)
 );
 GO
 

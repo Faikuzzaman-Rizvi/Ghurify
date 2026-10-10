@@ -5,11 +5,19 @@ import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
-import { cardClass, inputClass, primaryButtonClass, secondaryButtonClass } from '@/components/Field';
+import {
+  cardClass,
+  inputClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from '@/components/Field';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { EmptyState, ErrorState } from '@/components/States';
 import { errorText } from '@/lib/errors';
 import { adminApi, type AuditEntry, type AuditFilter } from './adminApi';
+import { AdminPageHeader } from './AdminUi';
+import { adminPanelClass } from './adminStyles';
 
 const entityTypes = [
   '',
@@ -48,7 +56,14 @@ const areas = [
   'emergency_point.',
 ] as const;
 
-const empty: AuditFilter = { actorId: '', action: '', entityType: '', entityId: '', from: '', to: '' };
+const empty: AuditFilter = {
+  actorId: '',
+  action: '',
+  entityType: '',
+  entityId: '',
+  from: '',
+  to: '',
+};
 
 /** Who did what, when, and what changed. Filtered by person, area, record or date. */
 export function AuditLogPage() {
@@ -78,13 +93,12 @@ export function AuditLogPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <header>
-        <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-          {t('admin.audit.title')}
-        </h2>
-        <p className="mt-1 max-w-2xl text-sm text-deep/70">{t('admin.audit.lead')}</p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow={t('admin.groups.system')}
+        title={t('admin.audit.title')}
+        description={t('admin.audit.lead')}
+      />
 
       <form
         className={`${cardClass} grid gap-3 sm:grid-cols-2 lg:grid-cols-3`}
@@ -146,22 +160,26 @@ export function AuditLogPage() {
         </Labelled>
 
         <Labelled id="audit-from" label={t('admin.audit.from')}>
-          <input
+          <DatePicker
             id="audit-from"
-            type="date"
             value={draft.from}
-            onChange={(event) => set('from', event.target.value)}
-            className={inputClass}
+            onChange={(value) => set('from', value)}
+            max={draft.to || undefined}
+            rangeWith={draft.to || undefined}
+            inputClassName={inputClass}
+            clearable
           />
         </Labelled>
 
         <Labelled id="audit-to" label={t('admin.audit.to')}>
-          <input
+          <DatePicker
             id="audit-to"
-            type="date"
             value={draft.to}
-            onChange={(event) => set('to', event.target.value)}
-            className={inputClass}
+            onChange={(value) => set('to', value)}
+            min={draft.from || undefined}
+            rangeWith={draft.from || undefined}
+            inputClassName={inputClass}
+            clearable
           />
         </Labelled>
 
@@ -200,7 +218,7 @@ export function AuditLogPage() {
 
       {entries.data && entries.data.entries.length > 0 && (
         <>
-          <ol className={`${cardClass} divide-y divide-hill/10 p-0!`}>
+          <ol className={`${adminPanelClass} divide-y divide-hill/8`}>
             {entries.data.entries.map((entry) => (
               <Entry key={String(entry.id)} entry={entry} when={when} />
             ))}
@@ -268,9 +286,7 @@ function Entry({ entry, when }: { entry: AuditEntry; when: (iso: string) => stri
                 {change.from ?? t('admin.audit.nothing')}
               </span>
               <ArrowRight aria-hidden="true" className="h-3 w-3 text-deep/40" />
-              <span className="font-medium text-deep">
-                {change.to ?? t('admin.audit.nothing')}
-              </span>
+              <span className="font-medium text-deep">{change.to ?? t('admin.audit.nothing')}</span>
             </li>
           ))}
         </ul>

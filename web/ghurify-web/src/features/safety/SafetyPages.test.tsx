@@ -7,6 +7,7 @@ import { TripSafetyPage } from './TripSafetyPage';
 import i18n from '@/i18n';
 import { useAuthStore } from '@/features/auth/authStore';
 import { renderScreen } from '@/test/render';
+import { chooseOption } from '@/test/chooseOption';
 import { requests, sampleTripDetail, stubApi } from '@/test/fetchStub';
 
 const checkIn = {
@@ -149,7 +150,7 @@ describe('Trip safety', () => {
 
     renderScreen(<ReportDialog kind="User" targetId={30} open onClose={() => undefined} />);
 
-    await user.selectOptions(screen.getByLabelText('Reason'), 'Fraud');
+    await chooseOption(user, screen.getByLabelText('Reason'), 'Fraud');
     await user.type(screen.getByLabelText('Details'), 'Asked for money outside Ghurify.');
     await user.click(screen.getByRole('button', { name: 'Send' }));
 

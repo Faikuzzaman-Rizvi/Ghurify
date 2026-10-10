@@ -42,6 +42,7 @@ import {
 import { EmptyState, ErrorState } from '@/components/States';
 import { PageBanner } from '@/components/ui/PageBanner';
 import { Photo } from '@/components/ui/Photo';
+import { Select } from '@/components/ui/Select';
 import { useMyProfile } from '@/features/auth/useProfile';
 import { errorText } from '@/lib/errors';
 import {
@@ -401,7 +402,12 @@ function TripWizard({
               <CostsStep register={register} control={control} errors={errors} total={total} />
             )}
             {step === 'itinerary' && (
-              <ItineraryStep register={register} errors={errors} days={days.fields} />
+              <ItineraryStep
+                register={register}
+                control={control}
+                errors={errors}
+                days={days.fields}
+              />
             )}
             {step === 'review' && (
               <ReviewStep
@@ -569,36 +575,53 @@ function BasicsStep({ register, control, errors }: StepProps & { control: Contro
 
   return (
     <div className="grid gap-5 sm:grid-cols-2">
-      <SelectField
-        id="destinationSlug"
-        label={t('wizard.destination')}
-        error={fieldError(errors.destinationSlug?.message)}
-        {...register('destinationSlug')}
-      >
-        <option value="">{t('wizard.chooseDestination')}</option>
-        {(destinations ?? []).map((destination) => (
-          <option
-            key={destination.slug}
-            value={destination.slug}
-            disabled={destination.status === 'Closed'}
+      <Controller
+        control={control}
+        name="destinationSlug"
+        render={({ field }) => (
+          <SelectField
+            id="destinationSlug"
+            placeholder
+            label={t('wizard.destination')}
+            error={fieldError(errors.destinationSlug?.message)}
+            value={field.value}
+            onChange={(event) => field.onChange(event.target.value)}
+            onBlur={field.onBlur}
           >
-            {language === 'bn' ? destination.nameBn : destination.name}
-            {destination.status === 'Closed' ? ` (${t('destination.status.Closed')})` : ''}
-          </option>
-        ))}
-      </SelectField>
-      <SelectField
-        id="groupType"
-        label={t('wizard.groupType')}
-        hint={t('wizard.groupTypeHint')}
-        {...register('groupType')}
-      >
-        {groupTypes.map((groupType) => (
-          <option key={groupType} value={groupType}>
-            {t(`groupType.${groupType}`)}
-          </option>
-        ))}
-      </SelectField>
+            <option value="">{t('wizard.chooseDestination')}</option>
+            {(destinations ?? []).map((destination) => (
+              <option
+                key={destination.slug}
+                value={destination.slug}
+                disabled={destination.status === 'Closed'}
+              >
+                {language === 'bn' ? destination.nameBn : destination.name}
+                {destination.status === 'Closed' ? ` (${t('destination.status.Closed')})` : ''}
+              </option>
+            ))}
+          </SelectField>
+        )}
+      />
+      <Controller
+        control={control}
+        name="groupType"
+        render={({ field }) => (
+          <SelectField
+            id="groupType"
+            label={t('wizard.groupType')}
+            hint={t('wizard.groupTypeHint')}
+            value={field.value}
+            onChange={(event) => field.onChange(event.target.value)}
+            onBlur={field.onBlur}
+          >
+            {groupTypes.map((groupType) => (
+              <option key={groupType} value={groupType}>
+                {t(`groupType.${groupType}`)}
+              </option>
+            ))}
+          </SelectField>
+        )}
+      />
       <div className="sm:col-span-2">
         <TextField
           id="title"
@@ -699,17 +722,23 @@ function CostsStep({
               >
                 {t('wizard.category')}
               </label>
-              <select
-                id={`cost-${index}-category`}
-                className={`${inputClass} cursor-pointer`}
-                {...register(`costItems.${index}.category`)}
-              >
-                {costCategories.map((category: CostCategory) => (
-                  <option key={category} value={category}>
-                    {t(`cost.${category}`)}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name={`costItems.${index}.category`}
+                render={({ field: category }) => (
+                  <Select
+                    id={`cost-${index}-category`}
+                    value={category.value}
+                    onChange={category.onChange}
+                    onBlur={category.onBlur}
+                    options={costCategories.map((option: CostCategory) => ({
+                      value: option,
+                      label: t(`cost.${option}`),
+                    }))}
+                    buttonClassName={`${inputClass} cursor-pointer`}
+                  />
+                )}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <label
@@ -786,9 +815,10 @@ function CostsStep({
 
 function ItineraryStep({
   register,
+  control,
   errors,
   days,
-}: StepProps & { days: { id: string; dayNo: number }[] }) {
+}: StepProps & { control: Control<TripForm>; days: { id: string; dayNo: number }[] }) {
   const { t, i18n } = useTranslation();
   const language = toLanguage(i18n.language);
   const fieldError = useFieldError();
@@ -817,17 +847,25 @@ function ItineraryStep({
               error={fieldError(errors.itinerary?.[index]?.title?.message)}
               {...register(`itinerary.${index}.title`)}
             />
-            <SelectField
-              id={`day-${index}-difficulty`}
-              label={t('wizard.difficulty')}
-              {...register(`itinerary.${index}.difficulty`)}
-            >
-              {difficulties.map((difficulty: Difficulty) => (
-                <option key={difficulty} value={difficulty}>
-                  {t(`difficulty.${difficulty}`)}
-                </option>
-              ))}
-            </SelectField>
+            <Controller
+              control={control}
+              name={`itinerary.${index}.difficulty`}
+              render={({ field }) => (
+                <SelectField
+                  id={`day-${index}-difficulty`}
+                  label={t('wizard.difficulty')}
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  {difficulties.map((difficulty: Difficulty) => (
+                    <option key={difficulty} value={difficulty}>
+                      {t(`difficulty.${difficulty}`)}
+                    </option>
+                  ))}
+                </SelectField>
+              )}
+            />
             <div className="sm:col-span-2">
               <TextAreaField
                 id={`day-${index}-details`}

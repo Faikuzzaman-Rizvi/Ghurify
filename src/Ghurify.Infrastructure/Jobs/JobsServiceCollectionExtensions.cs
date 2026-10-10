@@ -53,7 +53,12 @@ public static class JobsServiceCollectionExtensions
             return services;
         }
 
-        var connectionString = configuration[$"{DatabaseOptions.SectionName}:ConnectionString"];
+        // The same pooling settings the repositories use, so the scheduler's own polling
+        // connections are pooled and time out like every other connection rather than taking
+        // SqlClient's 15-second default and a 10-second retry pause.
+        var databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>()
+            ?? new DatabaseOptions();
+        var connectionString = SqlConnectionFactory.Normalize(databaseOptions);
 
         services.AddHangfire(hangfire => hangfire
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -66,6 +71,13 @@ public static class JobsServiceCollectionExtensions
                     SchemaName = "HangFire",
                     PrepareSchemaIfNecessary = true,
                     QueuePollInterval = TimeSpan.FromSeconds(5),
+                    // Hangfire's recommended SQL Server settings. Without DisableGlobalLocks the
+                    // scheduler serializes its own work behind one application lock, which shows
+                    // up as queue latency and as blocking against the rest of the database.
+                    DisableGlobalLocks = true,
+                    UseRecommendedIsolationLevel = true,
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
                 }));
 
         if (options.RunServer)

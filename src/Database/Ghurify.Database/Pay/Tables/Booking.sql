@@ -31,7 +31,7 @@ CREATE TABLE [Pay].[Booking]
     CONSTRAINT [FK_Booking_User] FOREIGN KEY ([UserId]) REFERENCES [Main].[User] ([Id]),
     CONSTRAINT [FK_Booking_JoinRequest] FOREIGN KEY ([JoinRequestId]) REFERENCES [Main].[JoinRequest] ([Id]),
     CONSTRAINT [CK_Booking_Amount] CHECK ([Amount] >= 0),
-    CONSTRAINT [CK_Booking_Status] CHECK ([Status] BETWEEN 1 AND 4),
+    CONSTRAINT [CK_Booking_Status] CHECK ([Status] >= 1 AND [Status] <= 4),
     PERIOD FOR SYSTEM_TIME ([SysStartTime], [SysEndTime])
 )
 WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Pay].[BookingHistory], DATA_CONSISTENCY_CHECK = ON));

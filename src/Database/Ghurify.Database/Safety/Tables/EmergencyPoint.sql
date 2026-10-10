@@ -24,7 +24,7 @@ CREATE TABLE [Safety].[EmergencyPoint]
     CONSTRAINT [PK_EmergencyPoint] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_EmergencyPoint_Destination] FOREIGN KEY ([DestinationId]) REFERENCES [Main].[Destination] ([Id]),
     CONSTRAINT [FK_EmergencyPoint_User_CheckedById] FOREIGN KEY ([CheckedById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_EmergencyPoint_Kind] CHECK ([Kind] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_EmergencyPoint_Kind] CHECK ([Kind] >= 1 AND [Kind] <= 3)
 );
 GO
 

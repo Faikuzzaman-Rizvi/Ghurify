@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Search } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
 import { Avatar } from '@/components/Avatar';
-import { cardClass, inputClass } from '@/components/Field';
+import { inputClass } from '@/components/Field';
 import { Select } from '@/components/ui/Select';
 import { EmptyState, ErrorState } from '@/components/States';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { errorText } from '@/lib/errors';
 import { adminApi, type UserStatus } from './adminApi';
-import { statusBadge } from './adminLabels';
+import { AdminPageHeader, AdminPager, AdminSearchBar, ListSkeleton, StatusPill } from './AdminUi';
+import { adminPanelClass, adminRowClass, type Tone } from './adminStyles';
 
 const statuses: readonly (UserStatus | '')[] = [
   '',
@@ -22,7 +23,17 @@ const statuses: readonly (UserStatus | '')[] = [
   'PendingEmail',
 ];
 
-/** Find anyone by email, phone or name, and open their record. */
+const statusTone: Record<UserStatus, Tone> = {
+  Active: 'good',
+  Suspended: 'bad',
+  Deactivated: 'neutral',
+  PendingEmail: 'warn',
+};
+
+/**
+ * Find anyone by email, phone or name, and open their record. A list rather than cards: the
+ * desk scans down it for one person, and a row keeps every name in the same place.
+ */
 export function UsersPage() {
   const { t } = useTranslation();
   const [draft, setDraft] = useState('');
@@ -40,37 +51,31 @@ export function UsersPage() {
   const pageSize = users.data ? asNumber(users.data.pageSize) : 25;
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="font-display text-2xl font-semibold text-deep sm:text-[1.75rem]">
-        {t('admin.users.title')}
-      </h2>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow={t('admin.groups.operations')}
+        title={t('admin.users.title')}
+        description={t('admin.users.lead')}
+      />
 
-      <form
-        role="search"
-        className="flex flex-col gap-2 sm:flex-row"
-        onSubmit={(event) => {
-          event.preventDefault();
+      <AdminSearchBar
+        id="user-search"
+        label={t('admin.users.search')}
+        placeholder={t('admin.users.searchHint')}
+        value={draft}
+        onChange={setDraft}
+        onSubmit={() => {
           setSearch(draft.trim());
           setPage(1);
         }}
+        submitLabel={t('admin.users.search')}
       >
-        <label htmlFor="user-search" className="sr-only">
-          {t('admin.users.search')}
-        </label>
-        <input
-          id="user-search"
-          type="search"
-          value={draft}
-          placeholder={t('admin.users.searchHint')}
-          onChange={(event) => setDraft(event.target.value)}
-          className={`${inputClass} flex-1`}
-        />
         <label htmlFor="user-status" className="sr-only">
           {t('admin.users.status')}
         </label>
         <Select
           id="user-status"
-          className="sm:w-48"
+          className="sm:w-52"
           value={status}
           onChange={(value) => {
             setStatus(value as UserStatus | '');
@@ -82,72 +87,54 @@ export function UsersPage() {
           }))}
           buttonClassName={`${inputClass} cursor-pointer`}
         />
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-hill px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-deep"
-        >
-          <Search aria-hidden="true" className="h-4 w-4" />
-          {t('admin.users.search')}
-        </button>
-      </form>
+      </AdminSearchBar>
 
-      {users.isPending && (
-        <div role="status" className="h-40 animate-pulse rounded-2xl bg-hill/10">
-          <span className="sr-only">{t('common.loading')}</span>
-        </div>
-      )}
+      {users.isPending && <ListSkeleton />}
       {users.isError && (
         <ErrorState message={errorText(users.error, t)} onRetry={() => void users.refetch()} />
       )}
       {users.data?.items.length === 0 && <EmptyState title={t('admin.users.empty')} />}
 
       {users.data && users.data.items.length > 0 && (
-        <ul className={`${cardClass} divide-y divide-hill/10 p-0!`}>
+        <ul className={adminPanelClass}>
           {users.data.items.map((user) => (
-            <li key={String(user.id)}>
+            <li key={String(user.id)} className={adminRowClass}>
               <Link
                 to={`/admin/users/${asNumber(user.id)}`}
-                className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-mist sm:px-6"
+                className="group flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3.5 transition hover:bg-mist/70 focus-visible:bg-mist focus-visible:outline-none sm:px-6"
               >
-                <Avatar userId={asNumber(user.id)} name={user.displayName} size="sm" />
+                {/* The version comes with the row, so a person with no picture costs no request
+                    at all and a person with one is asked for at a URL the browser can cache.
+                    Left out, every row here asked the avatar endpoint on every visit. */}
+                <Avatar
+                  userId={asNumber(user.id)}
+                  name={user.displayName}
+                  version={user.avatarVersion}
+                  size="md"
+                />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-deep">
+                  <p className="truncate font-semibold text-deep group-hover:text-hill">
                     {user.displayName ?? t('admin.noName')}
                   </p>
                   <p className="truncate text-sm text-deep/60">{user.email}</p>
                 </div>
-                <VerificationBadge level={user.verifiedLevel} />
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadge[user.status]}`}
-                >
-                  {t(`admin.users.statuses.${user.status}`)}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <VerificationBadge level={user.verifiedLevel} />
+                  <StatusPill tone={statusTone[user.status]}>
+                    {t(`admin.users.statuses.${user.status}`)}
+                  </StatusPill>
+                </div>
+                <ChevronRight
+                  aria-hidden="true"
+                  className="hidden h-5 w-5 text-deep/30 transition group-hover:translate-x-0.5 group-hover:text-hill sm:block"
+                />
               </Link>
             </li>
           ))}
         </ul>
       )}
 
-      {total > pageSize && (
-        <nav className="flex justify-between" aria-label={t('common.pagination')}>
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage((current) => current - 1)}
-            className="inline-flex items-center gap-1 rounded-full border border-hill/15 bg-white px-4 py-2 text-sm font-semibold text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-40"
-          >
-            ← {t('common.previous')}
-          </button>
-          <button
-            type="button"
-            disabled={page * pageSize >= total}
-            onClick={() => setPage((current) => current + 1)}
-            className="inline-flex items-center gap-1 rounded-full border border-hill/15 bg-white px-4 py-2 text-sm font-semibold text-deep transition hover:bg-mist disabled:pointer-events-none disabled:opacity-40"
-          >
-            {t('common.next')} →
-          </button>
-        </nav>
-      )}
+      <AdminPager page={page} pageSize={pageSize} total={total} onPage={setPage} />
     </div>
   );
 }

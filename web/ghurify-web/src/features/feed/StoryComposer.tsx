@@ -5,6 +5,7 @@ import { ImagePlus, MapPin, ShieldCheck } from 'lucide-react';
 
 import { asNumber } from '@/api/client';
 import { cardClass, inputClass, primaryButtonClass } from '@/components/Field';
+import { Select } from '@/components/ui/Select';
 import { useAuthStore } from '@/features/auth/authStore';
 import { useDestinations } from '@/features/trips/useTrips';
 import { errorText } from '@/lib/errors';
@@ -137,19 +138,19 @@ export function StoryComposer({ initialDestination = '' }: { initialDestination?
             <MapPin aria-hidden="true" className="h-3.5 w-3.5 text-ochre" />
             {t('feed.composer.destination')}
           </label>
-          <select
+          <Select
             id="story-destination"
-            className={`${inputClass} cursor-pointer py-2.5`}
             value={destination}
-            onChange={(event) => setDestination(event.target.value)}
-          >
-            <option value="">{t('feed.composer.noDestination')}</option>
-            {(destinations ?? []).map((item) => (
-              <option key={item.slug} value={item.slug}>
-                {language === 'bn' ? item.nameBn : item.name}
-              </option>
-            ))}
-          </select>
+            onChange={setDestination}
+            options={[
+              { value: '', label: t('feed.composer.noDestination') },
+              ...(destinations ?? []).map((item) => ({
+                value: item.slug,
+                label: language === 'bn' ? item.nameBn : item.name,
+              })),
+            ]}
+            buttonClassName={`${inputClass} cursor-pointer py-2.5`}
+          />
         </div>
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-hill/20 px-4 py-2.5 text-sm font-semibold text-deep transition focus-within:ring-2 focus-within:ring-turmeric hover:bg-mist">
           <ImagePlus aria-hidden="true" className="h-4 w-4 text-hill" />

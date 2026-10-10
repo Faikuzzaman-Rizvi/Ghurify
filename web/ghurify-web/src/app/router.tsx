@@ -1,70 +1,37 @@
-import { useEffect } from 'react';
-import { createBrowserRouter, Outlet, useLocation } from 'react-router';
+import { useEffect, type ReactElement } from 'react';
+import { createBrowserRouter, Outlet, useLocation, type RouteObject } from 'react-router';
 // The DOM build of the provider: it can render a navigation synchronously (flushSync), which
 // signing out relies on to leave a protected page before it notices the session has ended.
 import { RouterProvider } from 'react-router/dom';
-import { CreditsPage } from './CreditsPage';
 import { HomePage } from './HomePage';
 import { NotFoundPage } from './NotFoundPage';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteBackdrop } from '@/components/ui/SiteBackdrop';
+import { Toasts } from '@/components/ui/Toasts';
 import { PageLoading } from '@/components/States';
 import { GuidedTour } from '@/components/tour/GuidedTour';
 import { useIsOverHero } from '@/components/ui/headerStore';
 import { hasSeenTour, useTourStore } from '@/components/tour/tourStore';
-import { LoginPage } from '@/features/auth/LoginPage';
-import { RegisterPage } from '@/features/auth/RegisterPage';
-import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
-import { AccountPage } from '@/features/auth/AccountPage';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { RoleRoute } from '@/features/auth/RoleRoute';
-import { VerificationPage } from '@/features/auth/VerificationPage';
 import { isStaff } from '@/features/auth/profileApi';
 import { permissions } from '@/features/admin/permissions';
 import { PermissionRoute } from '@/features/admin/PermissionRoute';
-import { StaffMembersPage } from '@/features/admin/StaffMembersPage';
-import { StaffRolesPage } from '@/features/admin/StaffRolesPage';
-import { BrandingPage } from '@/features/admin/BrandingPage';
-import { ThemePage } from '@/features/admin/ThemePage';
-import { AdminLayout } from '@/features/admin/AdminLayout';
-import { VerificationQueuePage } from '@/features/admin/VerificationQueuePage';
-import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage';
-import { DestinationAlertsPage } from '@/features/admin/DestinationAlertsPage';
-import { PayoutQueuePage } from '@/features/admin/PayoutQueuePage';
-import { ReportsQueuePage } from '@/features/admin/ReportsQueuePage';
-import { SosBoardPage } from '@/features/admin/SosBoardPage';
-import { UsersPage } from '@/features/admin/UsersPage';
-import { UserDetailPage } from '@/features/admin/UserDetailPage';
-import { AdminTripsPage } from '@/features/admin/AdminTripsPage';
-import { BookingLookupPage } from '@/features/admin/BookingLookupPage';
-import { AdminPaymentsPage } from '@/features/admin/AdminPaymentsPage';
-import { AdminPaymentDetailPage } from '@/features/admin/AdminPaymentDetailPage';
-import { EmergencyPointsPage } from '@/features/admin/EmergencyPointsPage';
-import { AuditLogPage } from '@/features/admin/AuditLogPage';
-import { StoriesModerationPage } from '@/features/admin/StoriesModerationPage';
-import { TripSafetyPage } from '@/features/safety/TripSafetyPage';
 import { useSilentRefresh } from '@/features/auth/useSilentRefresh';
 import { useForgetOnSignOut } from '@/features/auth/useForgetOnSignOut';
 import { useLiveNotifications } from '@/hooks/useNotifications';
+import { useAuthStore } from '@/features/auth/authStore';
+import { useMyProfile } from '@/features/auth/useProfile';
+import {
+  prefetchLikelyRoutes,
+  registerRoute,
+  watchLinksForPrefetch,
+} from './routePrefetch';
 import { useAppliedSiteConfig } from '@/features/site/useSiteConfig';
 import { ExplorePage } from '@/features/trips/ExplorePage';
 import { TripDetailPage } from '@/features/trips/TripDetailPage';
-import { HostTripsPage } from '@/features/trips/HostTripsPage';
-import { ManageRequestsPage } from '@/features/bookings/ManageRequestsPage';
-import { MyTripsPage } from '@/features/bookings/MyTripsPage';
-import { CheckoutPage } from '@/features/payments/CheckoutPage';
-import { HostPayoutsPage } from '@/features/payments/HostPayoutsPage';
-import { PaymentHistoryPage } from '@/features/payments/PaymentHistoryPage';
-import { PaymentReceiptPage } from '@/features/payments/PaymentReceiptPage';
-import { ReceivedPaymentsPage } from '@/features/payments/ReceivedPaymentsPage';
-import { ChatPage } from '@/features/chat/ChatPage';
-import { FeedPage } from '@/features/feed/FeedPage';
-import { PublicProfilePage } from '@/features/feed/PublicProfilePage';
-import { ReviewPage } from '@/features/feed/ReviewPage';
-import { PaymentResultPage } from '@/features/payments/PaymentResultPage';
-import { SandboxPaymentPage } from '@/features/payments/SandboxPaymentPage';
-import { TripWizardPage } from '@/features/trips/TripWizardPage';
+import type { Profile } from '@/features/auth/profileApi';
 
 /**
  * The root of every route, the site's and the admin portal's alike. The session is restored from
@@ -76,10 +43,17 @@ function RootLayout() {
   useForgetOnSignOut();
   useScrollOnNavigate();
   useLiveNotifications();
+  useRoutePrefetching();
   // The site's own name, colours and icons, applied to the document. Here rather than in each
   // frame, so moving between the site and the admin portal does not reapply them.
   useAppliedSiteConfig();
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      {/* One place for the short confirmations, so the site and the portal share it. */}
+      <Toasts />
+    </>
+  );
 }
 
 /** The public site's frame: header, footer and the guided tour. */
@@ -122,6 +96,36 @@ function useScrollOnNavigate() {
   }, [pathname, hash]);
 }
 
+/**
+ * Fetches a screen's code before it is opened: when a link to it is hovered, focused or touched,
+ * and — once the browser is idle — for the screens this reader is most likely to open next.
+ *
+ * Without this, opening a screen meant downloading its chunk and only then fetching its data,
+ * two round trips in a row. See routePrefetch.ts.
+ */
+function useRoutePrefetching() {
+  const status = useAuthStore((state) => state.status);
+  const { data: profile } = useMyProfile();
+
+  useEffect(watchLinksForPrefetch, []);
+
+  useEffect(() => {
+    if (status !== 'authenticated') {
+      // Nobody is signed in: the sign-in screen is the one thing worth having ready.
+      prefetchLikelyRoutes(['/login']);
+      return;
+    }
+
+    // What a signed-in traveller reaches for, and the portal's front door for staff — whose
+    // next click is almost always a portal screen, and who are on a desk rather than mobile data.
+    prefetchLikelyRoutes(
+      profile && isStaff(profile)
+        ? ['/admin', '/me/trips', '/account']
+        : ['/me/trips', '/account'],
+    );
+  }, [status, profile]);
+}
+
 /** Offers the tour once, on a first visit to the home page. */
 function useFirstVisitTour() {
   const { pathname } = useLocation();
@@ -138,6 +142,78 @@ function useFirstVisitTour() {
   }, [pathname, start]);
 }
 
+// --- Routes that fetch their screen the first time somebody opens it ---------------------------
+//
+// Only what an anonymous visitor browses is in the first download: the home page, the trip
+// search, a trip's own page and the two sign-in screens. Everything behind a sign-in, and the
+// whole admin portal, arrives when it is first opened. A traveller who never opens the portal
+// never downloads it, which is what it was costing everybody before.
+//
+// Each helper mirrors the guard the screen had when it was imported eagerly, so what a route
+// allows has not changed: only when its code is fetched has.
+
+/** A screen behind a sign-in. */
+function guarded(path: string, load: () => Promise<ReactElement>): RouteObject {
+  registerRoute(path, load);
+  return {
+    path,
+    hydrateFallbackElement: <PageLoading />,
+    lazy: async () => ({ element: <ProtectedRoute>{await load()}</ProtectedRoute> }),
+  };
+}
+
+/** A screen behind a platform role. */
+function byRole(
+  path: string,
+  allow: (profile: Profile) => boolean,
+  load: () => Promise<ReactElement>,
+): RouteObject {
+  registerRoute(path, load);
+  return {
+    path,
+    hydrateFallbackElement: <PageLoading />,
+    lazy: async () => ({ element: <RoleRoute allow={allow}>{await load()}</RoleRoute> }),
+  };
+}
+
+/** A screen behind one host role, which is most of the hosting side. */
+const byHost = (path: string, load: () => Promise<ReactElement>) =>
+  byRole(path, (profile) => profile.roles.includes('Host'), load);
+
+/**
+ * The portal's frame. Every screen inside it needs this too, so prefetching one without the
+ * other would still leave a download in the way of the first portal navigation.
+ */
+const adminShell = () => import('@/features/admin/AdminLayout');
+
+/** An admin-portal screen behind one permission. */
+function byPermission(
+  route: { path: string } | { index: true },
+  needs: string,
+  load: () => Promise<ReactElement>,
+): RouteObject {
+  // The frame and the screen together, because opening a portal screen needs both. The index
+  // route has no path of its own: it answers at "/admin", registered with the layout below.
+  const pattern = 'path' in route ? `/admin/${route.path}` : '/admin';
+  registerRoute(pattern, () => Promise.all([adminShell(), load()]));
+
+  return {
+    ...route,
+    hydrateFallbackElement: <PageLoading />,
+    lazy: async () => ({ element: <PermissionRoute needs={needs}>{await load()}</PermissionRoute> }),
+  };
+}
+
+/** A public screen with no guard. */
+function open(path: string, load: () => Promise<ReactElement>): RouteObject {
+  registerRoute(path, load);
+  return {
+    path,
+    hydrateFallbackElement: <PageLoading />,
+    lazy: async () => ({ element: await load() }),
+  };
+}
+
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
@@ -146,347 +222,221 @@ const router = createBrowserRouter([
         element: <SiteShell />,
         children: [
           { path: '/', element: <HomePage /> },
-          { path: '/credits', element: <CreditsPage /> },
           { path: '/trips', element: <ExplorePage /> },
           { path: '/trips/:id', element: <TripDetailPage /> },
-          {
-            path: '/destinations/:slug',
-            // Loaded on demand: it is the only screen with a map, and Leaflet is most of the
-            // bundle. Everyone else never downloads it. Opened directly, the page waits for that
-            // download inside the site's frame.
-            hydrateFallbackElement: <PageLoading />,
-            lazy: async () => ({
-              Component: (await import('@/features/trips/DestinationPage')).DestinationPage,
-            }),
-          },
-          { path: '/login', element: <LoginPage /> },
-          { path: '/register', element: <RegisterPage /> },
-          { path: '/forgot-password', element: <ForgotPasswordPage /> },
-          {
-            path: '/account',
-            element: (
-              <ProtectedRoute>
-                <AccountPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/account/verify',
-            element: (
-              <ProtectedRoute>
-                <VerificationPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/host/trips',
-            element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-                <HostTripsPage />
-              </RoleRoute>
-            ),
-          },
-          {
-            path: '/host/trips/new',
-            element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-                <TripWizardPage />
-              </RoleRoute>
-            ),
-          },
-          {
-            path: '/host/trips/:id/edit',
-            element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-                <TripWizardPage />
-              </RoleRoute>
-            ),
-          },
-          {
-            path: '/host/trips/:id/requests',
-            element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-                <ManageRequestsPage />
-              </RoleRoute>
-            ),
-          },
-          {
-            path: '/me/map',
-            // Loaded on demand with Leaflet, like the destination page.
-            hydrateFallbackElement: <PageLoading />,
-            lazy: async () => {
-              const { TravelMapPage } = await import('@/features/travel/TravelMapPage');
-              return {
-                element: (
-                  <ProtectedRoute>
-                    <TravelMapPage />
-                  </ProtectedRoute>
-                ),
-              };
-            },
-          },
-          {
-            path: '/me/trips',
-            element: (
-              <ProtectedRoute>
-                <MyTripsPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/bookings/:id/checkout',
-            element: (
-              <ProtectedRoute>
-                <CheckoutPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/payments/sandbox',
-            element: (
-              <ProtectedRoute>
-                <SandboxPaymentPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/payments/result',
-            element: (
-              <ProtectedRoute>
-                <PaymentResultPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/trips/:id/chat',
-            element: (
-              <ProtectedRoute>
-                <ChatPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/host/payouts',
-            element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-                <HostPayoutsPage />
-              </RoleRoute>
-            ),
-          },
-          {
-            path: '/host/payments',
-            element: (
-              <RoleRoute allow={(profile) => profile.roles.includes('Host')}>
-                <ReceivedPaymentsPage />
-              </RoleRoute>
-            ),
-          },
-          {
-            path: '/me/payments',
-            element: (
-              <ProtectedRoute>
-                <PaymentHistoryPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/me/payments/:id',
-            element: (
-              <ProtectedRoute>
-                <PaymentReceiptPage />
-              </ProtectedRoute>
-            ),
-          },
-          { path: '/feed', element: <FeedPage /> },
-          { path: '/users/:id', element: <PublicProfilePage /> },
-          {
-            path: '/trips/:id/safety',
-            element: (
-              <ProtectedRoute>
-                <TripSafetyPage />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: '/trips/:id/review',
-            element: (
-              <ProtectedRoute>
-                <ReviewPage />
-              </ProtectedRoute>
-            ),
-          },
+          // Fetched on demand, like the rest: between them they pull React Hook Form and the Zod
+          // schemas (38 kB compressed), which the home page and the trip search have no use for.
+          open('/login', async () => {
+            const { LoginPage } = await import('@/features/auth/LoginPage');
+            return <LoginPage />;
+          }),
+          open('/register', async () => {
+            const { RegisterPage } = await import('@/features/auth/RegisterPage');
+            return <RegisterPage />;
+          }),
+          open('/credits', async () => {
+            const { CreditsPage: Page } = await import('./CreditsPage');
+            return <Page />;
+          }),
+          open('/forgot-password', async () => {
+            const { ForgotPasswordPage } = await import('@/features/auth/ForgotPasswordPage');
+            return <ForgotPasswordPage />;
+          }),
+          // Loaded on demand: it is the only public screen with a map, and Leaflet is most of the
+          // bundle. Everyone else never downloads it. Opened directly, the page waits for that
+          // download inside the site's frame; followed from a link, it is already there.
+          open('/destinations/:slug', async () => {
+            const { DestinationPage } = await import('@/features/trips/DestinationPage');
+            return <DestinationPage />;
+          }),
+          guarded('/account', async () => {
+            const { AccountPage } = await import('@/features/auth/AccountPage');
+            return <AccountPage />;
+          }),
+          guarded('/account/verify', async () => {
+            const { VerificationPage } = await import('@/features/auth/VerificationPage');
+            return <VerificationPage />;
+          }),
+          byHost('/host/trips', async () => {
+            const { HostTripsPage } = await import('@/features/trips/HostTripsPage');
+            return <HostTripsPage />;
+          }),
+          byHost('/host/trips/new', async () => {
+            const { TripWizardPage } = await import('@/features/trips/TripWizardPage');
+            return <TripWizardPage />;
+          }),
+          byHost('/host/trips/:id/edit', async () => {
+            const { TripWizardPage } = await import('@/features/trips/TripWizardPage');
+            return <TripWizardPage />;
+          }),
+          byHost('/host/trips/:id/requests', async () => {
+            const { ManageRequestsPage } = await import('@/features/bookings/ManageRequestsPage');
+            return <ManageRequestsPage />;
+          }),
+          byHost('/host/payouts', async () => {
+            const { HostPayoutsPage } = await import('@/features/payments/HostPayoutsPage');
+            return <HostPayoutsPage />;
+          }),
+          byHost('/host/payments', async () => {
+            const { ReceivedPaymentsPage } = await import(
+              '@/features/payments/ReceivedPaymentsPage'
+            );
+            return <ReceivedPaymentsPage />;
+          }),
+          // Loaded on demand with Leaflet, like the destination page.
+          guarded('/me/map', async () => {
+            const { TravelMapPage } = await import('@/features/travel/TravelMapPage');
+            return <TravelMapPage />;
+          }),
+          guarded('/me/trips', async () => {
+            const { MyTripsPage } = await import('@/features/bookings/MyTripsPage');
+            return <MyTripsPage />;
+          }),
+          guarded('/me/payments', async () => {
+            const { PaymentHistoryPage } = await import('@/features/payments/PaymentHistoryPage');
+            return <PaymentHistoryPage />;
+          }),
+          guarded('/me/payments/:id', async () => {
+            const { PaymentReceiptPage } = await import('@/features/payments/PaymentReceiptPage');
+            return <PaymentReceiptPage />;
+          }),
+          guarded('/bookings/:id/checkout', async () => {
+            const { CheckoutPage } = await import('@/features/payments/CheckoutPage');
+            return <CheckoutPage />;
+          }),
+          guarded('/payments/sandbox', async () => {
+            const { SandboxPaymentPage } = await import('@/features/payments/SandboxPaymentPage');
+            return <SandboxPaymentPage />;
+          }),
+          guarded('/payments/result', async () => {
+            const { PaymentResultPage } = await import('@/features/payments/PaymentResultPage');
+            return <PaymentResultPage />;
+          }),
+          guarded('/trips/:id/chat', async () => {
+            const { ChatPage } = await import('@/features/chat/ChatPage');
+            return <ChatPage />;
+          }),
+          guarded('/trips/:id/safety', async () => {
+            const { TripSafetyPage } = await import('@/features/safety/TripSafetyPage');
+            return <TripSafetyPage />;
+          }),
+          guarded('/trips/:id/review', async () => {
+            const { ReviewPage } = await import('@/features/feed/ReviewPage');
+            return <ReviewPage />;
+          }),
+          open('/feed', async () => {
+            const { FeedPage } = await import('@/features/feed/FeedPage');
+            return <FeedPage />;
+          }),
+          open('/users/:id', async () => {
+            const { PublicProfilePage } = await import('@/features/feed/PublicProfilePage');
+            return <PublicProfilePage />;
+          }),
           { path: '*', element: <NotFoundPage /> },
         ],
       },
       {
-        // The admin portal has its own frame (sidebar and top bar), not the public header and footer.
+        // The admin portal has its own frame (sidebar and top bar), not the public header and
+        // footer. The frame itself is fetched with the first portal screen somebody opens.
         path: '/admin',
-        element: (
-          <RoleRoute allow={(profile) => isStaff(profile)}>
-            <AdminLayout />
-          </RoleRoute>
-        ),
+        hydrateFallbackElement: <PageLoading />,
+        lazy: async () => {
+          const { AdminLayout } = await adminShell();
+          return {
+            element: (
+              <RoleRoute allow={(profile) => isStaff(profile)}>
+                <AdminLayout />
+              </RoleRoute>
+            ),
+          };
+        },
         children: [
-          {
-            index: true,
-            element: (
-              <PermissionRoute needs={permissions.dashboardView}>
-                <AdminDashboardPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'verifications',
-            element: (
-              <PermissionRoute needs={permissions.usersVerify}>
-                <VerificationQueuePage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'reports',
-            element: (
-              <PermissionRoute needs={permissions.moderationReportsView}>
-                <ReportsQueuePage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'stories',
-            element: (
-              <PermissionRoute needs={permissions.moderationContentManage}>
-                <StoriesModerationPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'disputes',
-            element: (
-              <PermissionRoute needs={permissions.moderationDisputes}>
-                <ReportsQueuePage disputes />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'destinations',
-            element: (
-              <PermissionRoute needs={permissions.safetyDestinationsStatus}>
-                <DestinationAlertsPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'sos',
-            element: (
-              <PermissionRoute needs={permissions.safetySosView}>
-                <SosBoardPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'payouts',
-            element: (
-              <PermissionRoute needs={permissions.payoutsView}>
-                <PayoutQueuePage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'users',
-            element: (
-              <PermissionRoute needs={permissions.usersView}>
-                <UsersPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'users/:id',
-            element: (
-              <PermissionRoute needs={permissions.usersView}>
-                <UserDetailPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'trips',
-            element: (
-              <PermissionRoute needs={permissions.tripsView}>
-                <AdminTripsPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'bookings',
-            element: (
-              <PermissionRoute needs={permissions.bookingsView}>
-                <BookingLookupPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'payments',
-            element: (
-              <PermissionRoute needs={permissions.paymentsView}>
-                <AdminPaymentsPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'payments/:id',
-            element: (
-              <PermissionRoute needs={permissions.paymentsView}>
-                <AdminPaymentDetailPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'emergency-points',
-            element: (
-              <PermissionRoute needs={permissions.safetyPointsManage}>
-                <EmergencyPointsPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'branding',
-            element: (
-              <PermissionRoute needs={permissions.settingsBranding}>
-                <BrandingPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'theme',
-            element: (
-              <PermissionRoute needs={permissions.settingsTheme}>
-                <ThemePage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'staff',
-            element: (
-              <PermissionRoute needs={permissions.staffView}>
-                <StaffMembersPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'roles',
-            element: (
-              <PermissionRoute needs={permissions.staffView}>
-                <StaffRolesPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: 'audit',
-            element: (
-              <PermissionRoute needs={permissions.auditView}>
-                <AuditLogPage />
-              </PermissionRoute>
-            ),
-          },
+          byPermission({ index: true }, permissions.dashboardView, async () => {
+            const { AdminDashboardPage } = await import('@/features/admin/AdminDashboardPage');
+            return <AdminDashboardPage />;
+          }),
+          byPermission({ path: 'verifications' }, permissions.usersVerify, async () => {
+            const { VerificationQueuePage } = await import(
+              '@/features/admin/VerificationQueuePage'
+            );
+            return <VerificationQueuePage />;
+          }),
+          byPermission({ path: 'reports' }, permissions.moderationReportsView, async () => {
+            const { ReportsQueuePage } = await import('@/features/admin/ReportsQueuePage');
+            return <ReportsQueuePage />;
+          }),
+          byPermission({ path: 'stories' }, permissions.moderationContentManage, async () => {
+            const { StoriesModerationPage } = await import(
+              '@/features/admin/StoriesModerationPage'
+            );
+            return <StoriesModerationPage />;
+          }),
+          byPermission({ path: 'disputes' }, permissions.moderationDisputes, async () => {
+            const { ReportsQueuePage } = await import('@/features/admin/ReportsQueuePage');
+            return <ReportsQueuePage disputes />;
+          }),
+          byPermission({ path: 'destinations' }, permissions.safetyDestinationsStatus, async () => {
+            const { DestinationAlertsPage } = await import('@/features/admin/DestinationAlertsPage');
+            return <DestinationAlertsPage />;
+          }),
+          byPermission({ path: 'sos' }, permissions.safetySosView, async () => {
+            const { SosBoardPage } = await import('@/features/admin/SosBoardPage');
+            return <SosBoardPage />;
+          }),
+          byPermission({ path: 'payouts' }, permissions.payoutsView, async () => {
+            const { PayoutQueuePage } = await import('@/features/admin/PayoutQueuePage');
+            return <PayoutQueuePage />;
+          }),
+          byPermission({ path: 'users' }, permissions.usersView, async () => {
+            const { UsersPage } = await import('@/features/admin/UsersPage');
+            return <UsersPage />;
+          }),
+          byPermission({ path: 'users/:id' }, permissions.usersView, async () => {
+            const { UserDetailPage } = await import('@/features/admin/UserDetailPage');
+            return <UserDetailPage />;
+          }),
+          byPermission({ path: 'trips' }, permissions.tripsView, async () => {
+            const { AdminTripsPage } = await import('@/features/admin/AdminTripsPage');
+            return <AdminTripsPage />;
+          }),
+          byPermission({ path: 'bookings' }, permissions.bookingsView, async () => {
+            const { BookingLookupPage } = await import('@/features/admin/BookingLookupPage');
+            return <BookingLookupPage />;
+          }),
+          byPermission({ path: 'payments' }, permissions.paymentsView, async () => {
+            const { AdminPaymentsPage } = await import('@/features/admin/AdminPaymentsPage');
+            return <AdminPaymentsPage />;
+          }),
+          byPermission({ path: 'payments/:id' }, permissions.paymentsView, async () => {
+            const { AdminPaymentDetailPage } = await import(
+              '@/features/admin/AdminPaymentDetailPage'
+            );
+            return <AdminPaymentDetailPage />;
+          }),
+          byPermission({ path: 'emergency-points' }, permissions.safetyPointsManage, async () => {
+            const { EmergencyPointsPage } = await import('@/features/admin/EmergencyPointsPage');
+            return <EmergencyPointsPage />;
+          }),
+          byPermission({ path: 'branding' }, permissions.settingsBranding, async () => {
+            const { BrandingPage } = await import('@/features/admin/BrandingPage');
+            return <BrandingPage />;
+          }),
+          byPermission({ path: 'theme' }, permissions.settingsTheme, async () => {
+            const { ThemePage } = await import('@/features/admin/ThemePage');
+            return <ThemePage />;
+          }),
+          byPermission({ path: 'staff' }, permissions.staffView, async () => {
+            const { StaffMembersPage } = await import('@/features/admin/StaffMembersPage');
+            return <StaffMembersPage />;
+          }),
+          byPermission({ path: 'roles' }, permissions.staffView, async () => {
+            const { StaffRolesPage } = await import('@/features/admin/StaffRolesPage');
+            return <StaffRolesPage />;
+          }),
+          byPermission({ path: 'audit' }, permissions.auditView, async () => {
+            const { AuditLogPage } = await import('@/features/admin/AuditLogPage');
+            return <AuditLogPage />;
+          }),
         ],
       },
     ],

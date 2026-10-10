@@ -75,9 +75,9 @@ public sealed class RaiseSosHandler(
     private static string SosText(SosBoardItem sos)
     {
         var map = string.Create(CultureInfo.InvariantCulture, $"https://maps.google.com/?q={sos.Latitude},{sos.Longitude}");
-        var name = sos.UserName ?? "A Ghurify traveller";
-        return $"Ghurify SOS: {name} needs help on \"{sos.TripTitle}\". {map} Call 999. "
-            + $"ঘুরিফাই SOS: {name} বিপদে আছেন। অবস্থান: {map} জরুরি সাহায্যের জন্য ৯৯৯-এ ফোন করুন।";
+        var name = sos.UserName ?? "A GhuriFiri traveller";
+        return $"GhuriFiri SOS: {name} needs help on \"{sos.TripTitle}\". {map} Call 999. "
+            + $"ঘুরিফিরি SOS: {name} বিপদে আছেন। অবস্থান: {map} জরুরি সাহায্যের জন্য ৯৯৯-এ ফোন করুন।";
     }
 
     private async Task<bool> TrySendAsync(PhoneNumber to, string text, long sosId, CancellationToken cancellationToken)

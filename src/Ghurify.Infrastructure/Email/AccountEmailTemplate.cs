@@ -11,7 +11,7 @@ public sealed record AccountEmail(string Subject, string Html, string Text);
 
 /// <summary>
 /// The look of every account email: the confirmation and reset codes, and the notices. It is the
-/// website on paper: a deep green header with the Ghurify mark, a photo of the hills, a white
+/// website on paper: a deep green header with the GhuriFiri mark, a photo of the hills, a white
 /// card, the code as a travel pass, and the three safety promises along the bottom.
 ///
 /// Mail clients are not browsers, so the HTML is deliberately old-fashioned: nested tables,
@@ -55,31 +55,31 @@ public static class AccountEmailTemplate
         var reset = purpose == OtpPurpose.PasswordReset;
 
         var subject = reset
-            ? $"{code} is your Ghurify password reset code"
-            : $"{code} is your Ghurify confirmation code";
+            ? $"{code} is your GhuriFiri password reset code"
+            : $"{code} is your GhuriFiri confirmation code";
 
         var english = reset
             ? new Copy(
                 Eyebrow: "Password reset",
                 Heading: "Let's get you back on the trail",
-                Lead: "Enter this code in Ghurify to choose a new password.",
+                Lead: "Enter this code in GhuriFiri to choose a new password.",
                 Ignore: "If you did not ask to reset your password, ignore this email: your password has not changed.")
             : new Copy(
                 Eyebrow: "Confirm your email",
                 Heading: "Your next journey starts here",
-                Lead: "Welcome to Ghurify! Enter this code to finish creating your account.",
+                Lead: "Welcome to GhuriFiri! Enter this code to finish creating your account.",
                 Ignore: "If you did not sign up, ignore this email and no account will be created.");
 
         var bangla = reset
             ? new Copy(
                 Eyebrow: "পাসওয়ার্ড রিসেট",
                 Heading: "চলুন, আবার পথে ফেরা যাক",
-                Lead: "নতুন পাসওয়ার্ড বেছে নিতে ঘুরিফাইতে এই কোডটি দিন।",
+                Lead: "নতুন পাসওয়ার্ড বেছে নিতে ঘুরিফিরিতে এই কোডটি দিন।",
                 Ignore: "আপনি পাসওয়ার্ড রিসেট করতে না চাইলে এই ইমেইলটি উপেক্ষা করুন: আপনার পাসওয়ার্ড বদলায়নি।")
             : new Copy(
                 Eyebrow: "ইমেইল নিশ্চিত করুন",
                 Heading: "আপনার পরের ভ্রমণ শুরু এখান থেকেই",
-                Lead: "ঘুরিফাইতে স্বাগতম! অ্যাকাউন্ট তৈরি শেষ করতে এই কোডটি দিন।",
+                Lead: "ঘুরিফিরিতে স্বাগতম! অ্যাকাউন্ট তৈরি শেষ করতে এই কোডটি দিন।",
                 Ignore: "আপনি সাইন আপ না করে থাকলে এই ইমেইলটি উপেক্ষা করুন, কোনো অ্যাকাউন্ট তৈরি হবে না।");
 
         var ticket = new Ticket(
@@ -92,10 +92,10 @@ public static class AccountEmailTemplate
         var text = PlainText(
             reset
                 ? $"Your password reset code is: {code}\n\nIt expires in {expiryMinutes} minutes and can be used once.\nIf you did not ask to reset your password, ignore this email: your password has not changed."
-                : $"Welcome to Ghurify! Your confirmation code is: {code}\n\nEnter it to finish creating your account. It expires in {expiryMinutes} minutes.\nIf you did not sign up, ignore this email and no account will be created.",
+                : $"Welcome to GhuriFiri! Your confirmation code is: {code}\n\nEnter it to finish creating your account. It expires in {expiryMinutes} minutes.\nIf you did not sign up, ignore this email and no account will be created.",
             reset
                 ? $"আপনার পাসওয়ার্ড রিসেট কোড: {code}\n\nকোডটি {expiryMinutes} মিনিট পরে মেয়াদ শেষ হবে এবং একবারই ব্যবহার করা যাবে।\nআপনি পাসওয়ার্ড রিসেট করতে না চাইলে এই ইমেইলটি উপেক্ষা করুন: আপনার পাসওয়ার্ড বদলায়নি।"
-                : $"ঘুরিফাইতে স্বাগতম! আপনার নিশ্চিতকরণ কোড: {code}\n\nঅ্যাকাউন্ট তৈরি শেষ করতে কোডটি দিন। এটি {expiryMinutes} মিনিট পরে মেয়াদ শেষ হবে।\nআপনি সাইন আপ না করে থাকলে এই ইমেইলটি উপেক্ষা করুন, কোনো অ্যাকাউন্ট তৈরি হবে না।");
+                : $"ঘুরিফিরিতে স্বাগতম! আপনার নিশ্চিতকরণ কোড: {code}\n\nঅ্যাকাউন্ট তৈরি শেষ করতে কোডটি দিন। এটি {expiryMinutes} মিনিট পরে মেয়াদ শেষ হবে।\nআপনি সাইন আপ না করে থাকলে এই ইমেইলটি উপেক্ষা করুন, কোনো অ্যাকাউন্ট তৈরি হবে না।");
 
         var preheader = reset
             ? $"Your reset code is valid for {expiryMinutes} minutes. Never share it."
@@ -109,30 +109,30 @@ public static class AccountEmailTemplate
     {
         var changed = notice == AccountNotice.PasswordChanged;
 
-        var subject = changed ? "Your Ghurify password was changed" : "You already have a Ghurify account";
+        var subject = changed ? "Your GhuriFiri password was changed" : "You already have a GhuriFiri account";
 
         var english = changed
             ? new Copy(
                 Eyebrow: "Security notice",
                 Heading: "Your password was changed",
-                Lead: "The password for your Ghurify account was just changed, and every device was signed out. If this was you, there is nothing to do.",
+                Lead: "The password for your GhuriFiri account was just changed, and every device was signed out. If this was you, there is nothing to do.",
                 Ignore: null)
             : new Copy(
                 Eyebrow: "Account notice",
                 Heading: "You already have an account",
-                Lead: "Someone tried to create a Ghurify account with this email address, which already has one. If it was you, just sign in.",
+                Lead: "Someone tried to create a GhuriFiri account with this email address, which already has one. If it was you, just sign in.",
                 Ignore: "If it was not you, you can ignore this email: nothing has changed.");
 
         var bangla = changed
             ? new Copy(
                 Eyebrow: "নিরাপত্তা নোটিশ",
                 Heading: "আপনার পাসওয়ার্ড বদলানো হয়েছে",
-                Lead: "আপনার ঘুরিফাই অ্যাকাউন্টের পাসওয়ার্ড এইমাত্র বদলানো হয়েছে এবং সব ডিভাইস থেকে সাইন আউট করা হয়েছে। এটি আপনি করে থাকলে কিছু করতে হবে না।",
+                Lead: "আপনার ঘুরিফিরি অ্যাকাউন্টের পাসওয়ার্ড এইমাত্র বদলানো হয়েছে এবং সব ডিভাইস থেকে সাইন আউট করা হয়েছে। এটি আপনি করে থাকলে কিছু করতে হবে না।",
                 Ignore: null)
             : new Copy(
                 Eyebrow: "অ্যাকাউন্ট নোটিশ",
                 Heading: "আপনার অ্যাকাউন্ট আগে থেকেই আছে",
-                Lead: "কেউ এই ইমেইল ঠিকানা দিয়ে ঘুরিফাই অ্যাকাউন্ট খোলার চেষ্টা করেছেন, কিন্তু এই ঠিকানায় আগেই অ্যাকাউন্ট আছে। এটি আপনি হলে সাইন ইন করুন।",
+                Lead: "কেউ এই ইমেইল ঠিকানা দিয়ে ঘুরিফিরি অ্যাকাউন্ট খোলার চেষ্টা করেছেন, কিন্তু এই ঠিকানায় আগেই অ্যাকাউন্ট আছে। এটি আপনি হলে সাইন ইন করুন।",
                 Ignore: "আপনি না হলে এই ইমেইলটি উপেক্ষা করুন: কিছুই বদলায়নি।");
 
         var callout = changed
@@ -147,11 +147,11 @@ public static class AccountEmailTemplate
 
         var text = PlainText(
             changed
-                ? "The password for your Ghurify account was just changed, and every device was signed out.\nIf this was you, there is nothing to do. If it was not, reset your password now with \"Forgot password\" and contact support."
-                : "Someone tried to create a Ghurify account with this email address, which already has one.\nIf it was you, just sign in. If you forgot your password, use \"Forgot password\" on the sign-in page.\nIf it was not you, you can ignore this email: nothing has changed.",
+                ? "The password for your GhuriFiri account was just changed, and every device was signed out.\nIf this was you, there is nothing to do. If it was not, reset your password now with \"Forgot password\" and contact support."
+                : "Someone tried to create a GhuriFiri account with this email address, which already has one.\nIf it was you, just sign in. If you forgot your password, use \"Forgot password\" on the sign-in page.\nIf it was not you, you can ignore this email: nothing has changed.",
             changed
-                ? "আপনার ঘুরিফাই অ্যাকাউন্টের পাসওয়ার্ড এইমাত্র বদলানো হয়েছে এবং সব ডিভাইস থেকে সাইন আউট করা হয়েছে।\nএটি আপনি করে থাকলে কিছু করতে হবে না। না করে থাকলে এখনই \"পাসওয়ার্ড ভুলে গেছি\" দিয়ে পাসওয়ার্ড রিসেট করুন এবং সাপোর্টে যোগাযোগ করুন।"
-                : "কেউ এই ইমেইল ঠিকানা দিয়ে ঘুরিফাই অ্যাকাউন্ট খোলার চেষ্টা করেছেন, কিন্তু এই ঠিকানায় আগেই অ্যাকাউন্ট আছে।\nএটি আপনি হলে সাইন ইন করুন। পাসওয়ার্ড ভুলে গেলে সাইন ইন পেজে \"পাসওয়ার্ড ভুলে গেছি\" ব্যবহার করুন।\nআপনি না হলে এই ইমেইলটি উপেক্ষা করুন: কিছুই বদলায়নি।");
+                ? "আপনার ঘুরিফিরি অ্যাকাউন্টের পাসওয়ার্ড এইমাত্র বদলানো হয়েছে এবং সব ডিভাইস থেকে সাইন আউট করা হয়েছে।\nএটি আপনি করে থাকলে কিছু করতে হবে না। না করে থাকলে এখনই \"পাসওয়ার্ড ভুলে গেছি\" দিয়ে পাসওয়ার্ড রিসেট করুন এবং সাপোর্টে যোগাযোগ করুন।"
+                : "কেউ এই ইমেইল ঠিকানা দিয়ে ঘুরিফিরি অ্যাকাউন্ট খোলার চেষ্টা করেছেন, কিন্তু এই ঠিকানায় আগেই অ্যাকাউন্ট আছে।\nএটি আপনি হলে সাইন ইন করুন। পাসওয়ার্ড ভুলে গেলে সাইন ইন পেজে \"পাসওয়ার্ড ভুলে গেছি\" ব্যবহার করুন।\nআপনি না হলে এই ইমেইলটি উপেক্ষা করুন: কিছুই বদলায়নি।");
 
         var preheader = changed
             ? "Every device was signed out. If this wasn't you, reset your password now."
@@ -166,7 +166,7 @@ public static class AccountEmailTemplate
         ?? throw new InvalidOperationException($"The email image {asset.FileName} is not embedded in the assembly.");
 
     private static string PlainText(string english, string bangla) =>
-        $"Ghurify\n\n{english}\n\n---\n\nঘুরিফাই\n\n{bangla}\n";
+        $"GhuriFiri\n\n{english}\n\n---\n\nঘুরিফিরি\n\n{bangla}\n";
 
     private static string Html(
         string subject, string preheader, Copy english, Copy bangla, Ticket? ticket, Callout? notice, int year)
@@ -213,7 +213,7 @@ public static class AccountEmailTemplate
                 <td style="vertical-align:middle;">
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
                     <td style="vertical-align:middle;padding-right:10px;"><img src="cid:logo@ghurify" width="40" height="40" alt="" style="display:block;width:40px;height:40px;border-radius:12px;"></td>
-                    <td style="vertical-align:middle;font-family:{{DisplayFont}};font-size:24px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;">Ghurify</td>
+                    <td style="vertical-align:middle;font-family:{{DisplayFont}};font-size:24px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;">GhuriFiri</td>
                   </tr></table>
                 </td>
                 <td class="tagline" align="right" style="vertical-align:middle;font-family:{{BodyFont}};font-size:13px;line-height:18px;color:{{Dusk}};">
@@ -242,8 +242,8 @@ public static class AccountEmailTemplate
         {
             AppendTicket(html, ticket);
             AppendCallout(html, new Callout(
-                "Ghurify will never ask for this code by phone, chat or email. Don't share it with anyone, not even a host or guide.",
-                "ঘুরিফাই কখনো ফোন, চ্যাট বা ইমেইলে এই কোড চাইবে না। কাউকে দেবেন না, হোস্ট বা গাইডকেও না।",
+                "GhuriFiri will never ask for this code by phone, chat or email. Don't share it with anyone, not even a host or guide.",
+                "ঘুরিফিরি কখনো ফোন, চ্যাট বা ইমেইলে এই কোড চাইবে না। কাউকে দেবেন না, হোস্ট বা গাইডকেও না।",
                 Warning: false));
         }
 
@@ -264,7 +264,7 @@ public static class AccountEmailTemplate
                 """);
         }
         html.Append(CultureInfo.InvariantCulture, $$"""
-              <p style="margin:0;font-size:15px;line-height:22px;color:{{Deep}};">Happy travels,<br><strong style="font-family:{{DisplayFont}};color:{{Hill}};">The Ghurify team</strong> <span lang="bn" style="font-family:{{BanglaFont}};color:{{Muted}};">&middot; ঘুরিফাই টিম</span></p>
+              <p style="margin:0;font-size:15px;line-height:22px;color:{{Deep}};">Happy travels,<br><strong style="font-family:{{DisplayFont}};color:{{Hill}};">The GhuriFiri team</strong> <span lang="bn" style="font-family:{{BanglaFont}};color:{{Muted}};">&middot; ঘুরিফিরি টিম</span></p>
             </td></tr>
             """);
 
@@ -272,11 +272,11 @@ public static class AccountEmailTemplate
 
         html.Append(CultureInfo.InvariantCulture, $$"""
             <tr><td class="pad" align="center" style="padding:24px 40px 8px 40px;font-family:{{BodyFont}};font-size:12px;line-height:19px;color:{{Muted}};">
-              You're receiving this because this address was used on Ghurify. Account emails keep your account safe, so there is no unsubscribe.<br>
-              <span lang="bn" style="font-family:{{BanglaFont}};">এই ঠিকানাটি ঘুরিফাইতে ব্যবহার করা হয়েছে বলে আপনি এই ইমেইল পাচ্ছেন।</span>
+              You're receiving this because this address was used on GhuriFiri. Account emails keep your account safe, so there is no unsubscribe.<br>
+              <span lang="bn" style="font-family:{{BanglaFont}};">এই ঠিকানাটি ঘুরিফিরিতে ব্যবহার করা হয়েছে বলে আপনি এই ইমেইল পাচ্ছেন।</span>
             </td></tr>
             <tr><td class="pad" align="center" style="padding:8px 40px 0 40px;font-family:{{BodyFont}};font-size:12px;line-height:19px;color:{{Muted}};">
-              &copy; {{year}} Ghurify. Made for travellers in Bangladesh.
+              &copy; {{year}} GhuriFiri. Made for travellers in Bangladesh.
             </td></tr>
             </table>
             </td></tr>

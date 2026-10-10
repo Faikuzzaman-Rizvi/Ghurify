@@ -24,8 +24,16 @@ BEGIN
               WHERE [v].[UserId] = [u].[Id] AND [v].[Status] = 2 AND [v].[Archived] = 0) AS [VerifiedLevel],
              (SELECT STRING_AGG(CAST([r].[Role] AS VARCHAR (3)), ',') FROM [Main].[UserRole] AS [r]
               WHERE [r].[UserId] = [u].[Id] AND [r].[Archived] = 0) AS [Roles],
+             -- A version only while there is a picture: a removed one keeps its timestamp.
+             -- The list carries this so the screen knows, per row, whether there is a picture at
+             -- all and what version it is. Without it every row asked the avatar endpoint, which
+             -- is one request and one query per person just to be told "no picture" — and only
+             -- cacheable for a minute, so it happened again on the next visit. Same shape as
+             -- QueryStaffMembers and GetAdminUser.
+             IIF([p].[AvatarBlob] IS NULL, NULL, [p].[AvatarUpdatedOn]) AS [AvatarUpdatedOn],
              COUNT(1) OVER () AS [TotalCount]
-    FROM     [Main].[User] AS [u]
+    FROM      [Main].[User]        AS [u]
+    LEFT JOIN [Main].[UserProfile] AS [p] ON [p].[UserId] = [u].[Id] AND [p].[Archived] = 0
     WHERE    [u].[Archived] = 0
       AND    (@Status IS NULL OR [u].[Status] = @Status)
       AND    (@Role IS NULL OR EXISTS (SELECT 1 FROM [Main].[UserRole] AS [r]

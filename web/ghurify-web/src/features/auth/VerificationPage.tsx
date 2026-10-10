@@ -102,6 +102,7 @@ export function VerificationPage() {
 
   const level = useWatch({ control, name: 'level' });
   const idType = useWatch({ control, name: 'idType' });
+  const idNumberField = register('idNumber');
 
   const needed = useMemo<VerificationDocumentKind[]>(
     () => [...idPhotos[idType], ...(level === 'NidSelfie' ? (['Selfie'] as const) : [])],
@@ -135,7 +136,10 @@ export function VerificationPage() {
   });
 
   const result = start.data;
-  const missingProfile = profile && (!profile.displayName || !profile.gender);
+  // Nothing here can be sent without a name and a gender: the server refuses the check with
+  // profile_incomplete. Say so once, and turn the form off until the profile is filled in,
+  // rather than let somebody type an ID number and a date of birth for nothing.
+  const missingProfile = Boolean(profile && (!profile.displayName || !profile.gender));
 
   return (
     <>
@@ -216,46 +220,83 @@ export function VerificationPage() {
               </p>
             )}
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <SelectField id="level" label={t('verification.level')} {...register('level')}>
-                <option value="Nid">{t('verification.levels.Nid')}</option>
-                <option value="NidSelfie">{t('verification.levels.NidSelfie')}</option>
-              </SelectField>
-              <SelectField id="idType" label={t('verification.idType')} {...register('idType')}>
-                {idTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {t(`verification.idTypes.${type}`)}
-                  </option>
-                ))}
-              </SelectField>
-              <TextField
-                id="idNumber"
-                inputMode={idType === 'Nid' ? 'numeric' : 'text'}
-                autoComplete="off"
-                label={t(`verification.number.${idType}`)}
-                hint={t(`verification.numberHint.${idType}`)}
-                error={errors.idNumber ? t(`verification.numberInvalid.${idType}`) : undefined}
-                {...register('idNumber')}
-              />
-              <Controller
-                control={control}
-                name="dateOfBirth"
-                render={({ field }) => (
-                  <DateField
-                    id="dateOfBirth"
-                    max={todayInDhaka()}
-                    placeholder={t('datePicker.dobPlaceholder')}
-                    label={t('verification.dob')}
-                    error={errors.dateOfBirth ? t('verification.dobInvalid') : undefined}
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                  />
-                )}
-              />
-            </div>
+            <fieldset disabled={missingProfile} className="min-w-0 border-0 p-0">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Controller
+                  control={control}
+                  name="level"
+                  render={({ field }) => (
+                    <SelectField
+                      id="level"
+                      label={t('verification.level')}
+                      hint={t('verification.levelHint')}
+                      value={field.value}
+                      onChange={(event) => field.onChange(event.target.value)}
+                      onBlur={field.onBlur}
+                    >
+                      <option value="Nid">{t('verification.levelOptions.Nid')}</option>
+                      <option value="NidSelfie">{t('verification.levelOptions.NidSelfie')}</option>
+                    </SelectField>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="idType"
+                  render={({ field }) => (
+                    <SelectField
+                      id="idType"
+                      label={t('verification.idType')}
+                      hint={t('verification.idTypeHint')}
+                      value={field.value}
+                      onChange={(event) => field.onChange(event.target.value)}
+                      onBlur={field.onBlur}
+                    >
+                      {idTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {t(`verification.idTypes.${type}`)}
+                        </option>
+                      ))}
+                    </SelectField>
+                  )}
+                />
+                <TextField
+                  id="idNumber"
+                  inputMode={idType === 'Nid' ? 'numeric' : 'text'}
+                  // A national ID number is digits only, so letters never reach the field.
+                  pattern={idType === 'Nid' ? '[0-9 -]*' : undefined}
+                  autoComplete="off"
+                  label={t(`verification.number.${idType}`)}
+                  hint={t(`verification.numberHint.${idType}`)}
+                  error={errors.idNumber ? t(`verification.numberInvalid.${idType}`) : undefined}
+                  {...idNumberField}
+                  onChange={(event) => {
+                    if (idType === 'Nid') {
+                      const digitsOnly = event.target.value.replace(/[^\d\s-]/g, '');
+                      if (digitsOnly !== event.target.value) event.target.value = digitsOnly;
+                    }
+                    void idNumberField.onChange(event);
+                  }}
+                />
+                <Controller
+                  control={control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <DateField
+                      id="dateOfBirth"
+                      max={todayInDhaka()}
+                      placeholder={t('datePicker.dobPlaceholder')}
+                      label={t('verification.dob')}
+                      error={errors.dateOfBirth ? t('verification.dobInvalid') : undefined}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  )}
+                />
+              </div>
+            </fieldset>
 
-            <fieldset className="flex flex-col gap-3">
+            <fieldset disabled={missingProfile} className="flex flex-col gap-3">
               <legend className="mb-1 font-semibold text-deep">
                 {t('verification.photos.title')}
               </legend>
@@ -276,7 +317,7 @@ export function VerificationPage() {
             <button
               type="submit"
               className={`${primaryButtonClass} self-start`}
-              disabled={start.isPending || missing.length > 0}
+              disabled={start.isPending || missing.length > 0 || missingProfile}
             >
               <ShieldCheck aria-hidden="true" className="h-4 w-4" />
               {start.isPending ? t('verification.checking') : t('verification.submit')}

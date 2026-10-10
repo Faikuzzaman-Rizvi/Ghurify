@@ -22,7 +22,7 @@ CREATE TABLE [Safety].[CheckIn]
     CONSTRAINT [PK_CheckIn] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_CheckIn_Trip] FOREIGN KEY ([TripId]) REFERENCES [Main].[Trip] ([Id]),
     CONSTRAINT [FK_CheckIn_User_CheckedInById] FOREIGN KEY ([CheckedInById]) REFERENCES [Main].[User] ([Id]),
-    CONSTRAINT [CK_CheckIn_Status] CHECK ([Status] BETWEEN 1 AND 3)
+    CONSTRAINT [CK_CheckIn_Status] CHECK ([Status] >= 1 AND [Status] <= 3)
 );
 GO
 
